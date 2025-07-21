@@ -1,0 +1,19 @@
+# node_modules (berat banget)
+node_modules/
+
+# next build files
+.next/
+out/
+
+# log files
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+
+# environment file
+.env
+.env.local
+
+# Mac / VSCode stuff
+.DS_Store
+.vscode/

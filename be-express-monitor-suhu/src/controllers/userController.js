@@ -39,7 +39,7 @@ export const createNewUser = async (req, res) => {
      if (!validation.success) {
   return res.status(400).json({
     status: status.BAD_REQUEST,
-    message: "Validaifsi gagal",
+    message: "Validasi gagal",
     datetime: datetime(),
     errors: validation.error.errors.map((err) => ({
       field: err.path[0],

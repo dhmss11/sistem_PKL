@@ -34,7 +34,7 @@ export const fetchAllGudang = async (req, res) => {
 
 export const createGudang = async (req, res) => {
     try {
-        const allowedJenis = ['Baku', 'Mentah', 'Transit'];
+        const allowedJenis = ['baku', 'mentah', 'transit'];
 
         if (!allowedJenis.includes(req.body.jenis)) {
             return res.status(400).json({
@@ -88,7 +88,7 @@ export const createGudang = async (req, res) => {
 
 export const updateGudang = async (req, res) => {
     try {
-        const allowedJenis = ['Baku', 'Mentah', 'Transit'];
+        const allowedJenis = ['baku', 'mentah', 'transit'];
 
         if (!allowedJenis.includes(req.body.jenis)) {
             return res.status(400).json({

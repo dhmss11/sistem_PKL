@@ -9,12 +9,13 @@
     "lint:fix": "eslint . --fix",
     "migrate:make": "npx knex migrate:make",
     "migrate:up": "knex migrate:up",
-    "migrate:latest": "knex migrate:latest"
+    "migrate:latest": "knex migrate:latest",
+    "start": "node server.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
+  "description": "please make sure install the dependencies before running the project or else it won't work",
   "dependencies": {
     "bcrypt": "^5.1.1",
     "cors": "^2.8.5",

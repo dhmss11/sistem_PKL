@@ -253,3 +253,4 @@ const handleDelete = async (user) => {
 };
 
 export default UserPage;
+

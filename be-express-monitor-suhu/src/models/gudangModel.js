@@ -45,5 +45,4 @@ export const removeGudang = async (id) =>
  * Ambil semua nama gudang berdasarkan jenis
  * @param {string} jenis
  */
-export const getGudangByJenis = async (jenis) =>
-  db('nama_gudang').where({ jenis }).select('*');
+

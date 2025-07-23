@@ -52,6 +52,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/master-produk", masterProdukRouters);
 app.use("/api/nama-gudang",masterGudang);
+app.use('/api/jenis-gudang', jenisGudangRoutes);
 //app.use("/api/monitor-suhu", monitorSuhuRouter);
 
 export default app;

@@ -6,3 +6,5 @@ export const countGudangByJenis = () => {
     .count('* as jumlah')
     .groupBy('jenis');
 };
+
+

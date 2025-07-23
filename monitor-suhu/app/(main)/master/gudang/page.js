@@ -48,7 +48,7 @@ const GudangPage = () => {
   };
 
   const handleChange = (e) => {
-    const { name, value } = e.target || e; // support dropdown event
+    const { name, value } = e.target || e; 
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 

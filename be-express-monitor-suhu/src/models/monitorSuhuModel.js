@@ -85,3 +85,5 @@ export const removeMonitorSuhu = async ({ id }) => {
   await db("monitor_suhu").where({ id }).delete();
   return db("monitor_suhu").where({ id }).first();
 };
+
+

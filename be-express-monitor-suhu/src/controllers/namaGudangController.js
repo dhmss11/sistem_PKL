@@ -4,7 +4,6 @@ import {
     GetAllGudang,
     getGudangByID,
     removeGudang,
-    getGudangByJenis
 } from '../models/gudangModel.js';
 
 import { updateGudangSchema, addGudangSchema } from '../schemas/masterGudangSchema.js';
@@ -184,20 +183,23 @@ export const destroyGudang = async (req, res) => {
 
 export const fetchGudangByJenis = async (req, res) => {
   const { jenis } = req.params;
-
   try {
-    const data = await db('nama_gudang').where({ jenis }).select('*');
+    const data = await db('nama_gudang')
+      .count('* as jumlah')
+      .where('jenis', jenis)
+      .first();
+
     return res.json({
-      status: 'SUKSES',
-      message: 'Data gudang berhasil diambil berdasarkan jenis',
+      status: status.SUKSES,
+      message: `Jumlah gudang jenis ${jenis} berhasil diambil`,
       datetime: datetime(),
-      gudang: data,
+      jumlah: data.jumlah,
     });
-  } catch (error) {
-    return res.status(400).json({
-      status: 'GAGAL',
-      message: 'Gagal mengambil jumlah gudang',
-      error: error.message,
+  } catch (err) {
+    console.error('Error getGudangByJenis:', err);
+    return res.status(500).json({
+      status: status.GAGAL,
+      message: 'Terjadi kesalahan saat mengambil jumlah gudang',
       datetime: datetime(),
     });
   }

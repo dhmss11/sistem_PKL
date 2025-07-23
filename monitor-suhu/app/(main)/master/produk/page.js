@@ -7,6 +7,7 @@ import { Column } from 'primereact/column';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
 import { InputNumber } from 'primereact/inputnumber';
+import { Dropdown } from 'primereact/dropdown';
 import ToastNotifier from '@/app/components/ToastNotifier';
 
 
@@ -38,6 +39,21 @@ const ProdukPage = () => {
         kategori: '',
         satuan: ''
     });
+
+    const satuanOptions = [
+    { label: 'Kg', value: 'Kg' },
+    { label: 'Pcs', value: 'Pcs' },
+    { label: 'Liter', value: 'Liter' },
+    { label: 'Unit', value: 'Unit' }
+];
+
+const kategoriOptions = [
+  { label: 'Makanan', value: 'Makanan' },
+  { label: 'Minuman', value: 'Minuman' },
+  { label: 'Elektronik', value: 'Elektronik' },
+  { label: 'Alat Tulis', value: 'Alat Tulis' },
+  { label: 'Sembako', value: 'Sembako' }
+];
 
     const fetchProduk = async () => {
         setIsLoading(true);
@@ -287,24 +303,29 @@ const handleSubmit = async (data) => {
                     </div>
                     <div className="mb-3">
                         <label htmlFor="kategori">Kategori</label>
-                        <InputText
+                        <Dropdown
                             id="kategori"
                             name="kategori"
                             value={form.kategori}
-                            onChange={handleChange}
+                            options={kategoriOptions}
+                            onChange={(e) => setForm((prev) => ({ ...prev, kategori: e.value }))}
+                            placeholder="Pilih Kategori"
                             className="w-full mt-2"
                         />
                     </div>
-                    <div className="mb-3">
+                                    <div className="mb-3">
                         <label htmlFor="satuan">Satuan</label>
-                        <InputText
+                        <Dropdown
                             id="satuan"
                             name="satuan"
                             value={form.satuan}
-                            onChange={handleChange}
+                            options={satuanOptions}
+                            onChange={(e) => setForm((prev) => ({ ...prev, satuan: e.value }))}
+                            placeholder="Pilih satuan"
                             className="w-full mt-2"
                         />
                     </div>
+
 
                     <div className="flex justify-end">
                         <Button type="submit" label="Submit" severity="success" icon="pi pi-save" />

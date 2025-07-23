@@ -75,7 +75,7 @@ const fetchJumlah = async () => {
               icon="pi pi-search"
               size="small"
               onClick={() => {
-                window.location.href = `/master/nama-gudang?jenis=${row.nama}`;
+               window.location.href = `/master/gudang?jenis=${row.nama}`;
               }}
             />
           )}

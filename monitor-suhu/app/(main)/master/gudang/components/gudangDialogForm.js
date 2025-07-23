@@ -26,7 +26,7 @@ export default function JenisGudangDropdown({ value, onChange, placeholder = 'Pi
         if (json.data?.status === '00') {
           const mapped = json.data.jenis.map((j) => ({
             label: j.nama,
-            value: j.nama, // atau j.id jika ingin pakai ID
+            value: j.nama, 
           }));
           setOptions(mapped);
         }
@@ -52,3 +52,4 @@ export default function JenisGudangDropdown({ value, onChange, placeholder = 'Pi
     />
   );
 }
+

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Button } from 'primereact/button';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
@@ -8,6 +9,7 @@ import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
 import { Dropdown } from 'primereact/dropdown';
 import ToastNotifier from '@/app/components/ToastNotifier';
+import { useRouter } from 'next/router';
 
 const JENIS_OPTIONS = [
   { label: 'Baku', value: 'baku' },
@@ -17,6 +19,9 @@ const JENIS_OPTIONS = [
 
 const GudangPage = () => {
   const toastRef = useRef(null);
+  const searchParams = useSearchParams();
+  const jenisQuery = searchParams.get('jenis');
+
   const [gudang, setGudang] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [dialogMode, setDialogMode] = useState(null);
@@ -25,19 +30,31 @@ const GudangPage = () => {
     jenis: '',
     nama: '',
     alamat: '',
-    keterangan: ''
+    keterangan: '',
   });
 
+  const [isLocked, setIsLocked] = useState(false);
+
+  useEffect(() => {
+    
+    if (!jenisQuery) {
+      setIsLocked(true);
+      toastRef.current?.showToast('99', 'Halaman dikunci, tidak ada jenis gudang');
+    } else {
+      setIsLocked(false);
+      fetchGudang();
+    }
+  }, [jenisQuery]);
   const fetchGudang = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch('/api/gudang');
+      const res = await fetch(`/api/gudang/detail/${encodeURIComponent(jenisQuery)}`);
       const json = await res.json();
 
-      if (json.data.status === '00') {
+      if (json.data?.status === '00') {
         setGudang(json.data.gudang);
       } else {
-        toastRef.current?.showToast(json.data.status, json.data.message);
+        toastRef.current?.showToast(json.data?.status ?? '99', json.data?.message ?? 'Gagal memuat data');
       }
     } catch (err) {
       console.error('Fetch error:', err);
@@ -47,63 +64,55 @@ const GudangPage = () => {
     }
   };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target || e; 
+    const handleChange = (e) => {
+    const { name, value } = e.target || e;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (data) => {
     setIsLoading(true);
-    let res;
-
     try {
-      if (dialogMode === 'add') {
-        res = await fetch('/api/gudang', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data),
-        });
-      } else if (dialogMode === 'edit' && selectedGudang) {
-        res = await fetch(`/api/gudang/${selectedGudang.id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data),
-        });
-      }
+      const url = dialogMode === 'add'
+        ? '/api/gudang'
+        : `/api/gudang/${selectedGudang.id}`;
 
-      if (!res) throw new Error('Tidak ada respons dari server');
-      if (!res.ok) {
-        const errBody = await res.json().catch(() => ({}));
-        throw new Error(errBody.message || `HTTP ${res.status}`);
-      }
+      const method = dialogMode === 'add' ? 'POST' : 'PUT';
+
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
 
       const json = await res.json();
-      toastRef.current?.showToast(json.data?.status ?? '00', json.data?.message);
+      const status = json.data?.status ?? '99';
+      const message = json.data?.message;
 
-      const newRow = json.data?.gudang;
-      if (dialogMode === 'add') {
-        setGudang((prev) => [...prev, newRow]);
-      } else {
+      toastRef.current?.showToast(status, message);
+
+      if (status === '00') {
+        const newRow = json.data?.gudang;
         setGudang((prev) =>
-          prev.map((r) => (r.id === newRow.id ? newRow : r)),
+          dialogMode === 'add'
+            ? [...prev, newRow]
+            : prev.map((r) => (r.id === newRow.id ? newRow : r))
         );
       }
     } catch (err) {
       console.error('Submit error:', err);
-      toastRef.current?.showToast('99', err.message);
+      toastRef.current?.showToast('99', 'Terjadi kesalahan saat menyimpan');
     } finally {
       setIsLoading(false);
-      setForm({ jenis: '', nama: '', alamat: '', keterangan: '' });
-      setDialogMode(null);
-      setSelectedGudang(null);
+      resetForm();
     }
   };
 
   const handleDelete = async (item) => {
-    if (!confirm(`Hapus gudang ${item.nama}?`)) return;
+    if (!confirm(`Hapus gudang "${item.nama}"?`)) return;
     try {
       const res = await fetch(`/api/gudang/${item.id}`, { method: 'DELETE' });
       const json = await res.json();
+
       if (json.status === '00') {
         toastRef.current?.showToast('00', json.message);
         setGudang((prev) => prev.filter((i) => i.id !== item.id));
@@ -115,22 +124,38 @@ const GudangPage = () => {
     }
   };
 
-  useEffect(() => {
-    fetchGudang();
-  }, []);
+  const resetForm = () => {
+    setForm({ jenis: '', nama: '', alamat: '', keterangan: '' });
+    setDialogMode(null);
+    setSelectedGudang(null);
+  };
+
+  if (isLocked) {
+    return (
+      <div className="card text-center">
+        <h3 className="text-xl text-red-600 font-bold mb-3">Halaman Terkunci</h3>
+        <p className="text-gray-600">
+          Anda tidak bisa mengakses halaman ini langsung.
+          Silakan kembali ke halaman <strong>Master Jenis Gudang</strong> dan pilih jenis gudang terlebih dahulu.
+        </p>
+        <ToastNotifier ref={toastRef} />
+      </div>
+    );
+  }
 
   return (
     <div className="card">
-      <h3 className="text-xl font-semibold">Master Nama Gudang</h3>
+      <h3 className="text-xl font-semibold mb-4">
+        Master Nama Gudang (Jenis: {jenisQuery})
+      </h3>
 
-      <div className="flex justify-end my-3">
+      <div className="flex justify-end mb-4">
         <Button
           label="Tambah Gudang"
           icon="pi pi-plus"
-          className="text-sm"
           onClick={() => {
             setDialogMode('add');
-            setForm({ jenis: '', nama: '', alamat: '', keterangan: '' });
+            setForm({ jenis: jenisQuery, nama: '', alamat: '', keterangan: '' });
           }}
         />
       </div>
@@ -150,6 +175,7 @@ const GudangPage = () => {
         <Column field="keterangan" header="Keterangan" />
         <Column
           header="Aksi"
+          style={{ width: '150px' }}
           body={(row) => (
             <div className="flex gap-2">
               <Button
@@ -170,14 +196,13 @@ const GudangPage = () => {
               />
             </div>
           )}
-          style={{ width: '150px' }}
         />
       </DataTable>
 
       <Dialog
         header={dialogMode === 'add' ? 'Tambah Gudang' : 'Edit Gudang'}
         visible={dialogMode !== null}
-        onHide={() => setDialogMode(null)}
+        onHide={resetForm}
         style={{ width: '40rem' }}
       >
         <form
@@ -197,6 +222,7 @@ const GudangPage = () => {
               className="w-full mt-2"
               placeholder="Pilih jenis gudang"
               required
+              disabled={!!jenisQuery} // Lock jika sudah dari query
             />
           </div>
 
@@ -208,8 +234,10 @@ const GudangPage = () => {
               value={form.nama}
               onChange={handleChange}
               className="w-full mt-2"
+              required
             />
           </div>
+
           <div className="mb-3">
             <label htmlFor="alamat">Alamat</label>
             <InputText
@@ -218,8 +246,10 @@ const GudangPage = () => {
               value={form.alamat}
               onChange={handleChange}
               className="w-full mt-2"
+              required
             />
           </div>
+
           <div className="mb-3">
             <label htmlFor="keterangan">Keterangan</label>
             <InputText
@@ -232,7 +262,12 @@ const GudangPage = () => {
           </div>
 
           <div className="flex justify-end">
-            <Button type="submit" label="Submit" severity="success" icon="pi pi-save" />
+            <Button
+              type="submit"
+              label="Simpan"
+              icon="pi pi-save"
+              severity="success"
+            />
           </div>
         </form>
       </Dialog>
@@ -243,5 +278,3 @@ const GudangPage = () => {
 };
 
 export default GudangPage;
-
-

@@ -204,3 +204,27 @@ export const fetchGudangByJenis = async (req, res) => {
     });
   }
 };
+
+export const fetchDetailGudangByJenis = async (req, res) => {
+    const { jenis } = req.params;
+
+    try {
+        const data = await db('nama_gudang')
+            .where('jenis', jenis)
+            .select('*'); 
+
+        return res.json({
+            status: '00',
+            message: `Detail gudang untuk jenis ${jenis} berhasil diambil`,
+            datetime: datetime(),
+            gudang: data
+        });
+    } catch (err) {
+        console.error(' Error saat ambil detail gudang:', err);
+        return res.status(500).json({
+            status: '99',
+            message: 'Gagal mengambil detail gudang berdasarkan jenis',
+            datetime: datetime(),
+        });
+    }
+};

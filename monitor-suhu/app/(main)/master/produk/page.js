@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
@@ -10,7 +9,6 @@ import { InputText } from 'primereact/inputtext';
 import { InputNumber } from 'primereact/inputnumber';
 import { Dropdown } from 'primereact/dropdown';
 import ToastNotifier from '@/app/components/ToastNotifier';
-
 
 
 /**
@@ -29,7 +27,7 @@ const ProdukPage = () => {
     const toastRef = useRef(null);
     const [produk, setProduk] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
-    const [dialogMode, setDialogMode] = useState(null); // 'add' | 'edit'
+    const [dialogMode, setDialogMode] = useState(null); 
     const [selectedProduk, setSelectedProduk] = useState(null);
     const [form, setForm] = useState({
         kode: '',
@@ -45,20 +43,20 @@ const ProdukPage = () => {
     { label: 'Kg', value: 'Kg' },
     { label: 'Pcs', value: 'Pcs' },
     { label: 'Liter', value: 'Liter' },
-    { label: 'Unit', value: 'Unit' }
+    { label: 'Unit', value: 'Unit' },
+    { label: 'Pack/Dus', value :'Pack/Dus'}
 ];
 
 const kategoriOptions = [
   { label: 'Makanan', value: 'Makanan' },
   { label: 'Minuman', value: 'Minuman' },
   { label: 'Elektronik', value: 'Elektronik' },
-  { label: 'Alat Tulis', value: 'Alat Tulis' },
   { label: 'Sembako', value: 'Sembako' }
 ];
 
 const kodeOptions = [
-    {label:'Baku',value:'bku'},
-    {label:'Mentah',value:'mth'}
+    {label:'BKU',value:'bku'},
+    {label:'MTH',value:'mth'}
 ];
     const fetchProduk = async () => {
         setIsLoading(true);
@@ -308,7 +306,7 @@ const handleSubmit = async (data) => {
                         />
                     </div>
                     <div className="mb-3">
-                        <label htmlFor="harga">Harga</label>
+                        <label htmlFor="harga">Harga/Satuan</label>
                         <InputNumber
                             id="harga"
                             name="harga"

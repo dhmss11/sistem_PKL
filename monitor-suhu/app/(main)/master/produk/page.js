@@ -175,8 +175,6 @@ const handleSubmit = async (data) => {
         <div className="card">
             <h3 className="text-xl font-semibold">Master Produk</h3>
             <div className="card">
-                
-            <h3 className="text-xl font-semibold mb-4">Master Produk</h3>
 
             <div className="flex justify-between items-start gap-4">
                 <div className="flex-1">

@@ -35,12 +35,8 @@ const ProdukPage = () => {
     const toastRef = useRef(null);
     const [produk, setProduk] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
-<<<<<<< HEAD
     const [dialogMode, setDialogMode] = useState(null); 
-=======
-    const [dialogMode, setDialogMode] = useState(null);
     const [listGudang, setListGudang] = useState(null);
->>>>>>> 2530523 (NYOOO)
     const [selectedProduk, setSelectedProduk] = useState(null);
     const [form, setForm] = useState({
         kode: '',

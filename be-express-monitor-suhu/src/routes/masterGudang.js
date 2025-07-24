@@ -8,6 +8,7 @@ import {
 } from "../controllers/namaGudangController.js";
 import { fetchDetailGudangByJenis } from '../controllers/namaGudangController.js';
 
+
 const router = Router();
 
 router.get('/', fetchAllGudang);

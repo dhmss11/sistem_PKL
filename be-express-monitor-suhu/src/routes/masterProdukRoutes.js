@@ -5,6 +5,7 @@ import {
   fetchAllProduk,
   fetchProdukById,
   updateProduk,
+  fetchProdukByGudang,
  } from "../controllers/masterProdukController.js";
 
  const router = Router();
@@ -14,6 +15,8 @@ import {
  router.put("/edit/:id" ,updateProduk);
  router.delete("/delete/:id",destroyProduk);
  router.get("/:id",fetchProdukById);
+router.get('/by-gudang/:namaGudang', fetchProdukByGudang);
+
 
  export default router;
 

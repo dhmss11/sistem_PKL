@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { optional, z } from "zod";
 
 export const addProdukSchema = z.object ({
   kode : z
@@ -23,6 +23,11 @@ export const addProdukSchema = z.object ({
     .string()
     .min(1, "Satuan wajib diisi")
     .max(20, "Satuan maksimal 20 karakter"),
+
+  gudang: z 
+  .string()
+  .min(1, "Gudang Wajib diisi")
+  .max(100, "Gudang Wajib diisi"),
 });
 
 export const updateProdukSchema = z.object({
@@ -53,4 +58,9 @@ export const updateProdukSchema = z.object({
     .min(1, "Satuan wajib diisi")
     .max(20, "Satuan maksimal 20 karakter")
     .optional(),
-});
+  gudang: z 
+    .string()
+    .min(1, "Gudang Wajib diisi")
+    .max(20, "Gudang Wajib diisi")
+    .optional(),
+  });

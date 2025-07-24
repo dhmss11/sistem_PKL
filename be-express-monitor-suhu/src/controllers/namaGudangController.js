@@ -13,23 +13,31 @@ import { db } from "../core/config/knex.js";
 
 
 export const fetchAllGudang = async (req, res) => {
-    try {
-        const gudang = await GetAllGudang();
+  try {
+    const gudang = await db("master_gudang").select("id", "nama");
 
-        return res.status(200).json({
-            status: status.SUKSES,
-            message: gudang.length === 0 ? 'Data gudang kosong' : 'Data gudang berhasil diambil',
-            datetime: datetime(),
-            gudang,
-        });
-    } catch (error) {
-        return res.status(500).json({
-            status: status.GAGAL,
-            message: `Gagal mengambil data: ${error.message}`,
-            datetime: datetime(),
-        });
+    if (!gudang || gudang.length === 0) {
+      return res.status(404).json({
+        status: "01",
+        message: "Data gudang kosong",
+        gudang: [],
+      });
     }
+
+    return res.status(200).json({
+      status: "00",
+      message: "Berhasil ambil data gudang",
+      gudang,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: "99",
+      message: "Server error",
+      error: error.message,
+    });
+  }
 };
+
 
 export const createGudang = async (req, res) => {
     try {

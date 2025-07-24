@@ -14,7 +14,7 @@ export const getProdukById = async (id) =>
 /**
  * Create new produk
  **/
-export const addProduk = async ({kode,nomor,nama,stock,harga,kategori,satuan}) => {
+export const addProduk = async ({kode,nomor,nama,stock,harga,kategori,satuan,gudang}) => {
   const [id] = await db("master_produk").insert ({
     kode,
     nomor,
@@ -23,6 +23,7 @@ export const addProduk = async ({kode,nomor,nama,stock,harga,kategori,satuan}) =
     harga,
     kategori,
     satuan,
+    gudang,
   });
   return db ("master_produk").where({id}).first();
 };
@@ -38,8 +39,9 @@ export const editProduk = async ({
   stock,
   harga,
   kategori,
-  satuan
-}) => { await db("master_produk").where({id}).update({kode,nomor,nama,stock,harga,kategori,satuan});
+  satuan,
+  gudang
+}) => { await db("master_produk").where({id}).update({kode,nomor,nama,stock,harga,kategori,satuan,gudang});
 return db ("master_produk").where({id}).first();
 };
 /**

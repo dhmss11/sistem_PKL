@@ -23,11 +23,24 @@ import ToastNotifier from '@/app/components/ToastNotifier';
  * @property {string} satuan
  */
 
+
+const GudangPage = () => {
+    const toastRef = useRef(null);
+    const [gudang, setGudang] = useState([]);
+    const [form, setForm] = useState({ nama: '' });
+    const [dialogVisible, setDialogVisible] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+}
 const ProdukPage = () => {
     const toastRef = useRef(null);
     const [produk, setProduk] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
+<<<<<<< HEAD
     const [dialogMode, setDialogMode] = useState(null); 
+=======
+    const [dialogMode, setDialogMode] = useState(null);
+    const [listGudang, setListGudang] = useState(null);
+>>>>>>> 2530523 (NYOOO)
     const [selectedProduk, setSelectedProduk] = useState(null);
     const [form, setForm] = useState({
         kode: '',
@@ -58,6 +71,49 @@ const kodeOptions = [
     {label:'BKU',value:'bku'},
     {label:'MTH',value:'mth'}
 ];
+
+
+const fetchGudangList = async () => {
+  try {
+    const res = await fetch("/api/gudang");
+    const json = await res.json();
+
+    if (json.status === "00") {
+      const options = json.gudang.map((item) => ({
+        label: item.nama,
+        value: item.nama,
+      }));
+      setListGudang(options);
+    }
+  } catch (error) {
+    console.error("Gagal ambil data gudang:", error);
+  }
+};
+
+
+useEffect(() => {
+  fetchGudangList();
+}, []);
+
+
+const fetchProdukByGudang = async (namaGudang) => {
+    setIsLoading(true);
+    try {
+        const res = await fetch(`/api/produk/by-gudang/${namaGudang}`);
+        const json = await res.json();
+
+        if (json.status === '00') {
+            setProduk(json.produk);
+        } else {
+            toastRef.current?.showToast(json.status, json.message);
+        }
+    } catch (err) {
+        toastRef.current?.showToast('99', 'Gagal memuat produk');
+    } finally {
+        setIsLoading(false);
+    }
+};
+
     const fetchProduk = async () => {
         setIsLoading(true);
         try {
@@ -143,7 +199,8 @@ const handleSubmit = async (data) => {
             stock: 0,
             harga: 0,
             kategori: '',
-            satuan: ''
+            satuan: '',
+            gudang:''
         });
         setDialogMode(null);
         setSelectedProduk(null);
@@ -170,9 +227,11 @@ const handleSubmit = async (data) => {
         }
     };
 
-    useEffect(() => {
-        fetchProduk();
-    }, []);
+  useEffect(() => {
+    fetchGudangList();  
+    fetchProduk();       
+}, []);
+
 
     return (
         <div className="card">
@@ -194,10 +253,27 @@ const handleSubmit = async (data) => {
                         stock: 0,
                         harga: 0,
                         kategori: '',
-                        satuan: ''
+                        satuan: '',
+                        gudang: ''
                     });
                     }}
                 />
+
+                 <div className="mb-4">
+                <label htmlFor="filter-gudang" className="block mb-1">cari Gudang :</label>
+                <Dropdown
+                    id="filter-gudang"
+                    value={form.gudang}
+                    options={listGudang}
+                    onChange={(e) => {
+                    setSelectedGudang(e.value);
+                    fetchProdukByGudang(e.value);
+                    }}
+                    placeholder="Pilih Nama Gudang"
+                    className="w-full sm:w-64"
+                />
+                </div>
+
 
                 </div>
                 <div className="w-52 text-sm text-gray-800 leading-snug text-left">
@@ -224,6 +300,7 @@ const handleSubmit = async (data) => {
                 <Column field="harga" header="Harga" />
                 <Column field="kategori" header="Kategori" />
                 <Column field="satuan" header="Satuan" />
+                <Column field="gudang" header="Gudang" />
                 <Column
                     header="Aksi"
                     body={(row) => (
@@ -340,7 +417,19 @@ const handleSubmit = async (data) => {
                             className="w-full mt-2"
                         />
                     </div>
+                    <div className="mb-3">
+                        <label htmlFor="satuan">Gudang</label>
+                        <Dropdown
+                            id="gudang"
+                            name="gudang"
+                            value={form.gudang}
+                            options={listGudang}
+                            onChange={(e) => setForm((prev) => ({ ...prev, gudang: e.value }))}
+                            placeholder="Pilih Gudang"
+                            className="w-full mt-2"
+                        />
 
+                    </div>
 
                     <div className="flex justify-end">
                         <Button type="submit" label="Submit" severity="success" icon="pi pi-save" />

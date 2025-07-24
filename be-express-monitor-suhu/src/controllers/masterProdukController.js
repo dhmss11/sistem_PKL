@@ -15,6 +15,8 @@ import { datetime, status } from "../utils/general.js";
 import { db } from "../core/config/knex.js";
 
 
+
+
 export const fetchAllProduk = async (req, res) => {
   try {
     const produk = await getAllProduk();
@@ -92,9 +94,9 @@ export const createProduk = async (req, res) => {
       });
     }
 
-    const { kode, nomor, nama, stock, harga, kategori, satuan } = validation.data;
+    const { kode, nomor, nama, stock, harga, kategori, satuan, gudang } = validation.data;
 
-    const produk = await addProduk({ kode, nomor, nama, stock, harga, kategori, satuan });
+    const produk = await addProduk({ kode, nomor, nama, stock, harga, kategori, satuan, gudang });
 
     return res.status(200).json({
       status: status.SUKSES,
@@ -139,7 +141,7 @@ export const updateProduk = async (req, res) => {
       });
     }
 
-    const { kode, nomor, nama, stock, harga, kategori, satuan } = validation.data;
+    const { kode, nomor, nama, stock, harga, kategori, satuan, gudang } = validation.data;
 
     // Ambil data produk lain dengan kode yang sama
 const produkWithSameKode = await db("master_produk")
@@ -156,7 +158,7 @@ if (produkWithSameKode && Number(produkWithSameKode.id) !== Number(id)) {
 }
 
 
-    await editProduk({ id, kode, nomor, nama, stock, harga, kategori, satuan });
+    await editProduk({ id, kode, nomor, nama, stock, harga, kategori, satuan, gudang });
 
     const updated = await getProdukById(id);
 
@@ -205,3 +207,36 @@ export const destroyProduk = async (req, res) => {
     });
   }
 };
+
+
+export const fetchProdukByGudang = async (req, res) => {
+  try {
+    const { namaGudang } = req.params;
+
+    const produk = await db("master_produk").where("gudang", namaGudang);
+
+    if (produk.length === 0) {
+      return res.status(404).json({
+        status: status.NOT_FOUND,
+        message: "Tidak ada produk di gudang ini",
+        datetime: datetime(),
+      });
+    }
+
+    return res.status(200).json({
+      status: status.SUKSES,
+      message: "Data produk berdasarkan gudang berhasil diambil",
+      datetime: datetime(),
+      produk,
+    });
+  } catch (error) {
+    console.error(error.message);
+    return res.status(500).json({
+      status: status.GAGAL,
+      message: `Terjadi kesalahan pada server: ${error.message}`,
+      datetime: datetime(),
+    });
+  }
+};
+
+

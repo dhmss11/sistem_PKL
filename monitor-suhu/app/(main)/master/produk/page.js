@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
@@ -55,6 +56,10 @@ const kategoriOptions = [
   { label: 'Sembako', value: 'Sembako' }
 ];
 
+const kodeOptions = [
+    {label:'Baku',value:'bku'},
+    {label:'Mentah',value:'mth'}
+];
     const fetchProduk = async () => {
         setIsLoading(true);
         try {
@@ -199,7 +204,7 @@ const handleSubmit = async (data) => {
                 </div>
                 <div className="w-52 text-sm text-gray-800 leading-snug text-left">
                 <div><span className="font-bold">NOTE =</span></div>
-                <div>1. BK : BAKU</div>
+                <div>1. BKU : BAKU</div>
                 <div>2. MTH : MENTAH</div>
                 </div>
             </div>
@@ -261,11 +266,13 @@ const handleSubmit = async (data) => {
                 >
                     <div className="mb-3">
                         <label htmlFor="kode">Kode</label>
-                        <InputText
+                        <Dropdown
                             id="kode"
                             name="kode"
                             value={form.kode}
-                            onChange={handleChange}
+                            options={kodeOptions}
+                            onChange={(e) => setForm((prev) => ({ ...prev, kode: e.value }))}
+                            placeholder="Pilih Kode"
                             className="w-full mt-2"
                         />
                     </div>

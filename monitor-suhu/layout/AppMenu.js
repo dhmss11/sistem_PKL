@@ -19,25 +19,20 @@ const AppMenu = () => {
             icon: 'pi pi-fw pi-sitemap',
             items: [
                 {
-                    label: 'Gudang',
-                    icon: 'pi pi-fw pi-building',
-                    to: '/master/gudang'
-                },
-                {
                     label: 'Jenis Gudang',
                     icon: 'pi pi-fw pi-th-large',
                     to: '/master/jenis-gudang'
+                },
+                {
+                    label: 'Gudang',
+                    icon: 'pi pi-fw pi-building',
+                    to: '/master/gudang'
                 },
                 {
                     label: 'Produk',
                     icon: 'pi pi-fw pi-box',
                     to: '/master/produk'
                 },
-                {
-                    label: 'User',
-                    icon: 'pi pi-fw pi-user',
-                    to: '/master/user'
-                }
             ]
         },
         {

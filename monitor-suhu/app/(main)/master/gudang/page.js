@@ -222,7 +222,7 @@ const GudangPage = () => {
               className="w-full mt-2"
               placeholder="Pilih jenis gudang"
               required
-              disabled={!!jenisQuery} // Lock jika sudah dari query
+              disabled={!!jenisQuery} 
             />
           </div>
 

@@ -174,25 +174,37 @@ const handleSubmit = async (data) => {
     return (
         <div className="card">
             <h3 className="text-xl font-semibold">Master Produk</h3>
+            <div className="card">
+                
+            <h3 className="text-xl font-semibold mb-4">Master Produk</h3>
 
-            <div className="flex justify-end my-3">
+            <div className="flex justify-between items-start gap-4">
+                <div className="flex-1">
                 <Button
                     label="Tambah Produk"
                     icon="pi pi-plus"
-                    className="text-sm"
+                    className="text-sm mb-3"
                     onClick={() => {
-                        setDialogMode('add');
-                        setForm({
-                            kode: '',
-                            nomor: '',
-                            nama: '',
-                            stock: 0,
-                            harga: 0,
-                            kategori: '',
-                            satuan: ''
-                        });
+                    setDialogMode('add');
+                    setForm({
+                        kode: '',
+                        nomor: '',
+                        nama: '',
+                        stock: 0,
+                        harga: 0,
+                        kategori: '',
+                        satuan: ''
+                    });
                     }}
                 />
+
+                </div>
+                <div className="w-52 text-sm text-gray-800 leading-snug text-left">
+                <div><span className="font-bold">NOTE =</span></div>
+                <div>1. BK : BAKU</div>
+                <div>2. MTH : MENTAH</div>
+                </div>
+            </div>
             </div>
 
             <DataTable

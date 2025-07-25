@@ -236,3 +236,32 @@ export const fetchDetailGudangByJenis = async (req, res) => {
         });
     }
 };
+
+export const fetchNamaGudangOnly = async (req, res) => {
+  try {
+    const data = await db('nama_gudang').select('nama');
+
+    if (!data || data.length === 0) {
+      return res.status(404).json({
+        status: '01',
+        message: 'Tidak ada nama gudang ditemukan',
+        namaGudang: [],
+      });
+    }
+
+    const namaList = data.map((item) => item.nama);
+
+    return res.status(200).json({
+      status: '00',
+      message: 'Berhasil ambil nama-nama gudang',
+      namaGudang: namaList,
+    });
+  } catch (error) {
+    console.error('Gagal ambil nama gudang:', error);
+    return res.status(500).json({
+      status: '99',
+      message: 'Terjadi kesalahan pada server',
+      error: error.message,
+    });
+  }
+};

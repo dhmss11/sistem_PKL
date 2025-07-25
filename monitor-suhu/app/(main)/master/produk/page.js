@@ -23,14 +23,6 @@ import ToastNotifier from '@/app/components/ToastNotifier';
  * @property {string} satuan
  */
 
-
-const GudangPage = () => {
-    const toastRef = useRef(null);
-    const [gudang, setGudang] = useState([]);
-    const [form, setForm] = useState({ nama: '' });
-    const [dialogVisible, setDialogVisible] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
-}
 const ProdukPage = () => {
     const toastRef = useRef(null);
     const [produk, setProduk] = useState([]);
@@ -70,22 +62,21 @@ const kodeOptions = [
 
 
 const fetchGudangList = async () => {
-  try {
-    const res = await fetch("/api/gudang");
-    const json = await res.json();
+    try {
+        const res = await fetch("/api/gudang/nama");
+        const json = await res.json();
 
-    if (json.status === "00") {
-      const options = json.gudang.map((item) => ({
-        label: item.nama,
-        value: item.nama,
-      }));
-      setListGudang(options);
+        if (json.status === "00") {
+            const options = json.namaGudang.map((nama)=>({
+                label : nama,
+                value :nama,
+            }));
+            setListGudang(options);
+        }
+    }catch (error){
+        console.error("Form Gagal ambil nama gudang")
     }
-  } catch (error) {
-    console.error("Gagal ambil data gudang:", error);
-  }
 };
-
 
 useEffect(() => {
   fetchGudangList();
@@ -223,10 +214,10 @@ const handleSubmit = async (data) => {
         }
     };
 
-  useEffect(() => {
-    fetchGudangList();  
-    fetchProduk();       
-}, []);
+        useEffect(() => {
+            fetchGudangList();  
+            fetchProduk();       
+        }, []);
 
 
     return (
@@ -261,10 +252,7 @@ const handleSubmit = async (data) => {
                     id="filter-gudang"
                     value={form.gudang}
                     options={listGudang}
-                    onChange={(e) => {
-                    setSelectedGudang(e.value);
-                    fetchProdukByGudang(e.value);
-                    }}
+                    onChange={(e) => setProduk({...produk,gudang: e.value})}
                     placeholder="Pilih Nama Gudang"
                     className="w-full sm:w-64"
                 />

@@ -17,6 +17,9 @@ export const API_ENDPOINTS = {
    GET_JUMLAH_GUDANG_PER_JENIS: (jenis) => `${API_URL}/nama-gudang/jenis/${jenis}`,
 
    GET_DETAIL_GUDANG_BY_JENIS: (jenis) => `${API_URL}/nama-gudang/detail/jenis/${jenis}`,
+   
+   GET_NAMA_GUDANG: `${API_URL}/nama-gudang/nama`,
+
 
 
 };

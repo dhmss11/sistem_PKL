@@ -77,7 +77,7 @@ export const fetchProdukById = async (req, res) => {
   }
 };
 
-// Tambah produk baru
+
 export const createProduk = async (req, res) => {
   try {
     const validation = addProdukSchema.safeParse(req.body);
@@ -114,7 +114,7 @@ export const createProduk = async (req, res) => {
   }
 };
 
-// Update produk
+
 export const updateProduk = async (req, res) => {
   try {
     const { id } = req.params;
@@ -208,35 +208,26 @@ export const destroyProduk = async (req, res) => {
   }
 };
 
+export const getProdukByGudang = async (req, res) => {
+  const { gudang } = req.params;
 
-export const fetchProdukByGudang = async (req, res) => {
   try {
-    const { namaGudang } = req.params;
+    const data = await db('master_produk')
+      .select('*')
+      .where('gudang', gudang);
 
-    const produk = await db("master_produk").where("gudang", namaGudang);
-
-    if (produk.length === 0) {
-      return res.status(404).json({
-        status: status.NOT_FOUND,
-        message: "Tidak ada produk di gudang ini",
-        datetime: datetime(),
-      });
-    }
-
-    return res.status(200).json({
+    return res.json({
       status: status.SUKSES,
-      message: "Data produk berdasarkan gudang berhasil diambil",
+      message: `Produk dari gudang '${gudang}' berhasil diambil`,
       datetime: datetime(),
-      produk,
+      produk: data,
     });
-  } catch (error) {
-    console.error(error.message);
+  } catch (err) {
+    console.error('Error getProdukByGudang:', err);
     return res.status(500).json({
       status: status.GAGAL,
-      message: `Terjadi kesalahan pada server: ${error.message}`,
+      message: 'Gagal mengambil produk berdasarkan gudang',
       datetime: datetime(),
     });
   }
 };
-
-

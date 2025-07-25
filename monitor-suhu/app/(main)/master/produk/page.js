@@ -83,23 +83,30 @@ useEffect(() => {
 }, []);
 
 
-const fetchProdukByGudang = async (namaGudang) => {
-    setIsLoading(true);
-    try {
-        const res = await fetch(`/api/produk/by-gudang/${namaGudang}`);
-        const json = await res.json();
-
-        if (json.status === '00') {
-            setProduk(json.produk);
-        } else {
-            toastRef.current?.showToast(json.status, json.message);
+    const fetchProdukByGudang = async (gudang) => {
+        if (!gudang) {
+            console.warn('fetchProdukByGudang dipanggil tanpa gudang');
+            toastRef.current?.showToast('99', 'Gudang tidak boleh kosong');
+            return;
         }
-    } catch (err) {
-        toastRef.current?.showToast('99', 'Gagal memuat produk');
-    } finally {
-        setIsLoading(false);
-    }
-};
+
+        setIsLoading(true);
+        try {
+            const res = await fetch(`/api/produk/gudang/${encodeURIComponent(gudang)}`);
+            const json = await res.json();
+
+            if (json.status === '00') {
+                setProduk(json.produk);
+            } else {
+                toastRef.current?.showToast(json.status, json.message);
+            }
+        } catch (error) {
+            toastRef.current?.showToast('99', 'Gagal memuat produk');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
 
     const fetchProduk = async () => {
         setIsLoading(true);
@@ -252,10 +259,21 @@ const handleSubmit = async (data) => {
                     id="filter-gudang"
                     value={form.gudang}
                     options={listGudang}
-                    onChange={(e) => setProduk({...produk,gudang: e.value})}
-                    placeholder="Pilih Nama Gudang"
-                    className="w-full sm:w-64"
-                />
+                    onChange={(e) => {
+                        const selected = e.value;
+                        setForm((prev) => ({ ...prev, gudang: selected }));
+
+                        if (selected) {
+                            fetchProdukByGudang(selected);
+                        } else {
+                            toastRef.current?.showToast('99', 'Gudang tidak valid');
+                        }
+                        }}
+
+                        placeholder="Pilih Nama Gudang"
+                        className="w-full sm:w-64"
+                    />
+
                 </div>
 
 

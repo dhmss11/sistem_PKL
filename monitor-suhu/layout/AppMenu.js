@@ -29,9 +29,9 @@ const AppMenu = () => {
                     to: '/master/gudang'
                 },
                 {
-                    label: 'Produk',
+                    label: 'Stock',
                     icon: 'pi pi-fw pi-box',
-                    to: '/master/produk'
+                    to: '/master/stock'
                 },
             ]
         },

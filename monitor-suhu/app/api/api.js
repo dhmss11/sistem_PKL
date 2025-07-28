@@ -15,11 +15,13 @@ export const API_ENDPOINTS = {
     DELETEGUDANG: (id) => `${API_URL}/nama-gudang/delete/${id}`,
 
    GET_JUMLAH_GUDANG_PER_JENIS: (jenis) => `${API_URL}/nama-gudang/jenis/${jenis}`,
-
    GET_DETAIL_GUDANG_BY_JENIS: (jenis) => `${API_URL}/nama-gudang/detail/jenis/${jenis}`,
 
    GET_NAMA_GUDANG: `${API_URL}/nama-gudang/nama`,
-
    GET_PRODUK_BY_GUDANG: (gudang) => `${API_URL}/master-produk/gudang/${gudang}`,
 
+   GET_ALL_JENIS_GUDANG : `${API_URL}/golonganstock`,
+   
+   GET_ALL_STOCK : `${API_URL}/stock`,
+   ADD_STOCK: `${API_URL}/stock/add`
 };

@@ -1,10 +1,9 @@
-import express from 'express';
-import {
-  getJumlahGudangPerJenis
-} from '../controllers/jenisGudangController.js';
+import { fetchAlljenisgudang } from "../controllers/masterGolonganStok.js";
+import { Router} from 'express';
 
-const router = express.Router();
+const router = Router();
 
-router.get('/jumlah', getJumlahGudangPerJenis);
+router.get('/',fetchAlljenisgudang);
 
 export default router;
+

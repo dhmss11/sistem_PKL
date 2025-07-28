@@ -10,7 +10,7 @@ import masterProdukRouters from "./routes/masterProdukRoutes.js"
 //import monitorSuhuRouter from "./routes/monitorSuhuRoutes.js";
 import masterGudang from "./routes/masterGudang.js"
 import jenisGudangRoutes from './routes/jenisGudangRoutes.js';
-
+import stockRoutes from './routes/stockRoutes.js';
 
 
 const app = express();
@@ -52,7 +52,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/master-produk", masterProdukRouters);
 app.use("/api/nama-gudang",masterGudang);
-app.use('/api/jenis-gudang', jenisGudangRoutes);
+app.use("/api/golonganstock", jenisGudangRoutes);
 //app.use("/api/monitor-suhu", monitorSuhuRouter);
-
+app.use('/api/stock', stockRoutes);
 export default app;

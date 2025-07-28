@@ -1,90 +1,79 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Button } from 'primereact/button';
-import { DataTable } from 'primereact/datatable';
+import { useRouter } from 'next/navigation';
 import { Column } from 'primereact/column';
+import { DataTable } from 'primereact/datatable';
+import { Button } from 'primereact/button';
 import ToastNotifier from '@/app/components/ToastNotifier';
 
-const JenisGudangPage = () => {
-  const toastRef = useRef(null);
-  const [jenisGudang, setJenisGudang] = useState([]);
-  const [jumlahMap, setJumlahMap] = useState({});
+export default function GolonganStokPage() {
+  const toastRef = useRef();
+  const [golongan, setGolongan] = useState([]);
   const [loading, setLoading] = useState(false);
-
-  const staticData = [
-    { nama: 'baku', keterangan: 'Bahan baku awal' },
-    { nama: 'mentah', keterangan: 'Belum siap edar' },
-    { nama: 'transit', keterangan: 'Gudang perantara' },
-  ];
-
-const fetchJumlah = async () => {
-  setLoading(true);
-  try {
-    const promises = staticData.map(async ({ nama }) => {
-      const res = await fetch(`/api/jenis-gudang/jumlah/${nama}`);
-      const json = await res.json();
-      if (json.status === '00') {
-        return { jenis: nama, jumlah: json.jumlah || 0 };
-      } else {
-        toastRef.current?.showToast(json.status, json.message);
-        return { jenis: nama, jumlah: 0 };
-      }
-    });
-
-    const results = await Promise.all(promises);
-    const map = {};
-    results.forEach(({ jenis, jumlah }) => {
-      map[jenis] = jumlah;
-    });
-    setJumlahMap(map);
-  } catch (err) {
-    toastRef.current?.showToast('99', 'Gagal mengambil jumlah gudang');
-  } finally {
-    setLoading(false);
-  }
-};
+  const router = useRouter();
 
   useEffect(() => {
-    setJenisGudang(staticData);
-    fetchJumlah();
+    fetchGolongan();
   }, []);
 
-  return (
-    <div className="card">
-      <h3 className="text-xl font-semibold mb-4">Master Jenis Gudang</h3>
+  const fetchGolongan = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/golonganstock');
+      const result = await res.json();
 
+      console.log('API response:', result); 
+
+      if (result.status === '00' && Array.isArray(result.data)) {
+       
+        const normalized = result.data.map(item => ({
+          kode: item.KODE,
+          nama: item.KETERANGAN,
+        }));
+        setGolongan(normalized);
+      } else {
+        toastRef.current?.showToast(result.status || '99', result.message || 'Gagal memuat data');
+      }
+    } catch (error) {
+      toastRef.current?.showToast('99', 'Gagal memuat data golongan');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const lihatGudangButton = (rowData) => (
+    <Button
+      label="Lihat Gudang"
+      icon="pi pi-eye"
+      className="p-button-sm"
+      onClick={() => router.push(`/master/gudang?golongan=${rowData.kode}`)}
+    />
+  );
+
+  return (
+    <div className="p-4">
+      <h2 className="text-xl font-semibold mb-4">Data Golongan Stok</h2>
       <DataTable
-        value={jenisGudang}
+        value={golongan}
+        rowKey="kode"
         loading={loading}
-        size="small"
+        paginator
+        rows={10}
+        stripedRows
+        emptyMessage="Tidak ada data"
         scrollable
-        className="text-sm"
       >
-        <Column field="nama" header="Jenis Gudang" />
-        <Column field="keterangan" header="Keterangan" />
-        <Column
-          header="Jumlah Gudang"
-          body={(row) => jumlahMap[row.nama] ?? 0}
-        />
+        <Column field="kode" header="Kode" style={{ minWidth: '100px' }} />
+        <Column field="nama" header="Nama Golongan" style={{ minWidth: '200px' }} />
         <Column
           header="Aksi"
-          body={(row) => (
-            <Button
-              label="Lihat Gudang"
-              icon="pi pi-search"
-              size="small"
-              onClick={() => {
-               window.location.href = `/master/gudang?jenis=${row.nama}`;
-              }}
-            />
-          )}
+          body={lihatGudangButton}
+          style={{ minWidth: '150px', textAlign: 'center' }}
         />
       </DataTable>
 
       <ToastNotifier ref={toastRef} />
     </div>
   );
-};
-
-export default JenisGudangPage;
+}

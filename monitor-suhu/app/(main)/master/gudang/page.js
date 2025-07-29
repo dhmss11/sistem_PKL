@@ -229,16 +229,12 @@ const GudangPage = () => {
         >
           <div className="mb-3">
             <label htmlFor="keterangan">Jenis</label>
-            <Dropdown
+            <InputText
               id="keterangan"
               name="keterangan"
               value={form.KETERANGAN}
-              options={keteranganOptions}
-              onChange={handleChange}
               className="w-full mt-2"
-              placeholder="Pilih jenis gudang"
-              required
-              disabled={!!jenisQuery}
+              readOnly
             />
           </div>
 

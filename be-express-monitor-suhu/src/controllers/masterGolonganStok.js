@@ -31,3 +31,33 @@ export const fetchAlljenisgudang = async (req,res) => {
     }
 };
 
+export const fetchAllKeteranganGolongan = async (req, res) => {
+  try {
+    const data = await db('golonganstock').distinct('KETERANGAN');
+
+    if (!data || data.length === 0) {
+      return res.status(404).json({
+        status: status.GAGAL,
+        message: 'Data keterangan kosong',
+        datetime: datetime(),
+        data: [],
+      });
+    }
+
+    return res.status(200).json({
+      status: status.SUKSES,
+      message: 'Berhasil ambil data keterangan golongan stock',
+      datetime: datetime(),
+      data,
+    });
+  } catch (error) {
+    console.error('Error ambil keterangan golongan:', error.message);
+    return res.status(500).json({
+      status: status.ERROR,
+      message: 'Terjadi kesalahan server',
+      datetime: datetime(),
+      error: error.message,
+    });
+  }
+};
+

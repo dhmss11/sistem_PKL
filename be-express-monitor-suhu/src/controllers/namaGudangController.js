@@ -1,7 +1,6 @@
 import {
     addGudang,
     editGudang,
-    GetAllGudang,
     getGudangByID,
     removeGudang,
 } from '../models/gudangModel.js';
@@ -214,16 +213,16 @@ export const fetchGudangByJenis = async (req, res) => {
 };
 
 export const fetchDetailGudangByJenis = async (req, res) => {
-    const { jenis } = req.params;
+    const { keterangan } = req.params;
 
     try {
         const data = await db('nama_gudang')
-            .where('jenis', jenis)
+            .where('keterangan', keterangan)
             .select('*'); 
 
         return res.json({
             status: '00',
-            message: `Detail gudang untuk jenis ${jenis} berhasil diambil`,
+            message: `Detail gudang untuk gudang ${keterangan} berhasil diambil`,
             datetime: datetime(),
             gudang: data
         });
@@ -231,7 +230,7 @@ export const fetchDetailGudangByJenis = async (req, res) => {
         console.error(' Error saat ambil detail gudang:', err);
         return res.status(500).json({
             status: '99',
-            message: 'Gagal mengambil detail gudang berdasarkan jenis',
+            message: 'Gagal mengambil detail gudang berdasarkan ketrangan jenis',
             datetime: datetime(),
         });
     }

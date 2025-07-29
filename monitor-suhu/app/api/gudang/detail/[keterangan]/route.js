@@ -7,15 +7,20 @@ import { NextResponse } from 'next/server';
  * Contoh: GET /api/gudang/detail/gudang-besi
  */
 export const GET = async (req, { params }) => {
-    const { jenis } = params;
+    const { keterangan } = params;
 
     try {
-        const response = await Axios.get(API_ENDPOINTS.GET_DETAIL_GUDANG_BY_JENIS(jenis));
-        return NextResponse.json({ data: response.data });
+        const response = await Axios.get(API_ENDPOINTS.GET_DETAIL_GUDANG_BY_JENIS(keterangan));
+            return NextResponse.json({
+            status: '00',
+            message: 'Berhasil mengambil data',
+            data: response.data, 
+            });
+
     } catch (err) {
         console.error('GET detail gudang error:', err.response?.data || err.message);
         return NextResponse.json(
-            { message: 'Gagal mengambil data detail gudang berdasarkan jenis' },
+            { status: '99', message: 'Gagal mengambil data detail gudang berdasarkan jenis' },
             { status: 500 }
         );
     }

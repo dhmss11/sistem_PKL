@@ -23,13 +23,12 @@ export default function GolonganStokPage() {
       const res = await fetch('/api/golonganstock');
       const result = await res.json();
 
-      console.log('API response:', result); 
+      console.log('API response:', result);
 
       if (result.status === '00' && Array.isArray(result.data)) {
-       
         const normalized = result.data.map(item => ({
           kode: item.KODE,
-          nama: item.KETERANGAN,
+          keterangan: item.KETERANGAN,
         }));
         setGolongan(normalized);
       } else {
@@ -47,7 +46,7 @@ export default function GolonganStokPage() {
       label="Lihat Gudang"
       icon="pi pi-eye"
       className="p-button-sm"
-      onClick={() => router.push(`/master/gudang?golongan=${rowData.kode}`)}
+      onClick={() => router.push(`/master/gudang?keterangan=${encodeURIComponent(rowData.keterangan)}`)}
     />
   );
 
@@ -65,7 +64,7 @@ export default function GolonganStokPage() {
         scrollable
       >
         <Column field="kode" header="Kode" style={{ minWidth: '100px' }} />
-        <Column field="nama" header="Nama Golongan" style={{ minWidth: '200px' }} />
+        <Column field="keterangan" header="Nama Golongan" style={{ minWidth: '200px' }} />
         <Column
           header="Aksi"
           body={lihatGudangButton}

@@ -17,7 +17,7 @@ router.post('/create', createGudang);
 router.put('/edit/:id', updateGudang);
 router.delete('/delete/:id', destroyGudang);
 router.get('/jenis/:jenis', fetchGudangByJenis);
-router.get('/detail/jenis/:jenis', fetchDetailGudangByJenis);
+router.get('/detail/keterangan/:keterangan', fetchDetailGudangByJenis);
 router.get('/nama',fetchNamaGudangOnly);
 
 export default router;

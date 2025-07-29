@@ -58,6 +58,21 @@ const StockPage = () => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
+   const handleEdit = (data) => {
+    setDialogMode('edit');
+    setSelectedStock(data);
+    setDialogVisible(true);
+  };
+
+  const handleDelete = async (data) => {
+    try {
+      await axios.delete(`${API_ENDPOINTS.DELETE_STOCK}/${data.id}`);
+      toastRef.current.show({ severity: 'success', summary: 'Berhasil', detail: 'Data dihapus' });
+      fetchStocks();
+    } catch (err) {
+      toastRef.current.show({ severity: 'error', summary: 'Gagal', detail: 'Gagal menghapus data' });
+    }
+  };
 
   const handleSubmit = async (data) => {
     try {

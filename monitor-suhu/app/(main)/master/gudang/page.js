@@ -10,33 +10,26 @@ import { InputText } from 'primereact/inputtext';
 import { Dropdown } from 'primereact/dropdown';
 import ToastNotifier from '@/app/components/ToastNotifier';
 
-
-const JENIS_OPTIONS = [
-  { label: 'Baku', value: 'baku' },
-  { label: 'Mentah', value: 'mentah' },
-  { label: 'Transit', value: 'transit' },
-];
-
 const GudangPage = () => {
   const toastRef = useRef(null);
   const searchParams = useSearchParams();
-  const jenisQuery = searchParams.get('jenis');
+  const jenisQuery = searchParams.get('keterangan');
 
   const [gudang, setGudang] = useState([]);
+  const [keteranganOptions, setKeteranganOptions] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [dialogMode, setDialogMode] = useState(null);
   const [selectedGudang, setSelectedGudang] = useState(null);
   const [form, setForm] = useState({
-    jenis: '',
+    KODE : '',
     nama: '',
     alamat: '',
-    keterangan: '',
+    KETERANGAN: '',
   });
 
   const [isLocked, setIsLocked] = useState(false);
 
   useEffect(() => {
-    
     if (!jenisQuery) {
       setIsLocked(true);
       toastRef.current?.showToast('99', 'Halaman dikunci, tidak ada jenis gudang');
@@ -44,7 +37,30 @@ const GudangPage = () => {
       setIsLocked(false);
       fetchGudang();
     }
+
+    fetchKeteranganOptions();
   }, [jenisQuery]);
+
+  const fetchKeteranganOptions = async () => {
+    try {
+      const res = await fetch(`/api/golonganstock/keterangan/${encodeURIComponent(jenisQuery)}`);
+      const json = await res.json();
+
+      if (json.status === '00') {
+        const options = json.data.map((item) => ({
+          label: item.nama,
+          value: item.nama,
+        }));
+        setKeteranganOptions(options);
+      } else {
+        toastRef.current?.showToast(json.status ?? '99', json.message ?? 'Gagal mengambil data keterangan');
+      }
+    } catch (err) {
+      console.error('Fetch keterangan error:', err);
+      toastRef.current?.showToast('99', 'Gagal mengambil data golongan stock');
+    }
+  };
+
   const fetchGudang = async () => {
     setIsLoading(true);
     try {
@@ -64,7 +80,7 @@ const GudangPage = () => {
     }
   };
 
-    const handleChange = (e) => {
+  const handleChange = (e) => {
     const { name, value } = e.target || e;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
@@ -125,7 +141,7 @@ const GudangPage = () => {
   };
 
   const resetForm = () => {
-    setForm({ jenis: '', nama: '', alamat: '', keterangan: '' });
+    setForm({ nama: '', alamat: '', KETERANGAN: '' });
     setDialogMode(null);
     setSelectedGudang(null);
   };
@@ -155,7 +171,7 @@ const GudangPage = () => {
           icon="pi pi-plus"
           onClick={() => {
             setDialogMode('add');
-            setForm({ jenis: jenisQuery, nama: '', alamat: '', keterangan: '' });
+            setForm({ KETERANGAN: jenisQuery, nama: '', alamat: '' });
           }}
         />
       </div>
@@ -169,10 +185,10 @@ const GudangPage = () => {
         loading={isLoading}
         scrollable
       >
-        <Column field="jenis" header="Jenis" />
+        <Column field="KODE" header ="KODE"/>
+        <Column field="KETERANGAN" header="Jenis" />
         <Column field="nama" header="Nama" />
         <Column field="alamat" header="Alamat" />
-        <Column field="keterangan" header="Keterangan" />
         <Column
           header="Aksi"
           style={{ width: '150px' }}
@@ -212,19 +228,32 @@ const GudangPage = () => {
           }}
         >
           <div className="mb-3">
-            <label htmlFor="jenis">Jenis</label>
+            <label htmlFor="keterangan">Jenis</label>
             <Dropdown
-              id="jenis"
-              name="jenis"
-              value={form.jenis}
-              options={JENIS_OPTIONS}
+              id="keterangan"
+              name="keterangan"
+              value={form.KETERANGAN}
+              options={keteranganOptions}
               onChange={handleChange}
               className="w-full mt-2"
               placeholder="Pilih jenis gudang"
               required
-              disabled={!!jenisQuery} 
+              disabled={!!jenisQuery}
             />
           </div>
+
+          <div className="mb-3">
+              <label htmlFor="KODE">Kode</label>
+              <InputText
+                id="KODE"
+                name="KODE"
+                value={form.KODE}
+                onChange={handleChange}
+                className="w-full mt-2"
+                required
+              />
+          </div>
+
 
           <div className="mb-3">
             <label htmlFor="nama">Nama</label>
@@ -247,17 +276,6 @@ const GudangPage = () => {
               onChange={handleChange}
               className="w-full mt-2"
               required
-            />
-          </div>
-
-          <div className="mb-3">
-            <label htmlFor="keterangan">Keterangan</label>
-            <InputText
-              id="keterangan"
-              name="keterangan"
-              value={form.keterangan}
-              onChange={handleChange}
-              className="w-full mt-2"
             />
           </div>
 

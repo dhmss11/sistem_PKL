@@ -40,16 +40,6 @@ export const fetchAllGudang = async (req, res) => {
 
 export const createGudang = async (req, res) => {
     try {
-        const allowedJenis = ['baku', 'mentah', 'transit'];
-
-        if (!allowedJenis.includes(req.body.jenis)) {
-            return res.status(400).json({
-                status: 'GAGAL',
-                message: 'Jenis gudang tidak valid',
-                datetime: datetime(),
-            });
-        }
-
         const validation = addGudangSchema.safeParse(req.body);
 
         if (!validation.success) {
@@ -64,7 +54,7 @@ export const createGudang = async (req, res) => {
             });
         }
 
-        const { jenis, nama, alamat, keterangan } = validation.data;
+        const { KODE, nama, alamat, KETERANGAN } = validation.data;
 
         const cekNama = await db('nama_gudang').where({ nama }).first();
         if (cekNama) {
@@ -75,7 +65,7 @@ export const createGudang = async (req, res) => {
             });
         }
 
-        const gudang = await addGudang({ jenis, nama, alamat, keterangan });
+        const gudang = await addGudang({ KODE, nama, alamat,KETERANGAN });
 
         return res.status(201).json({
             status: status.SUKSES,
@@ -88,23 +78,12 @@ export const createGudang = async (req, res) => {
             status: status.GAGAL,
             message: `Gagal menambahkan gudang: ${error.message}`,
             datetime: datetime(),
-        });
+        });   
     }
 };
 
 export const updateGudang = async (req, res) => {
     try {
-        const allowedJenis = ['baku', 'mentah', 'transit'];
-
-        if (!allowedJenis.includes(req.body.jenis)) {
-            return res.status(400).json({
-                    status: 'GAGAL',
-                    message: 'Jenis gudang tidak valid',
-                    datetime: datetime(),
-        
-            });
-        }
-
         const { id } = req.params;
 
         const validation = updateGudangSchema.safeParse(req.body);
@@ -130,7 +109,7 @@ export const updateGudang = async (req, res) => {
             });
         }
 
-        const { jenis, nama, alamat, keterangan } = validation.data;
+        const { KODE, nama, alamat, KETERANGAN } = validation.data;
 
         const namaDuplikat = await db('nama_gudang').where({ nama }).andWhereNot({ id }).first();
         if (namaDuplikat) {
@@ -141,7 +120,7 @@ export const updateGudang = async (req, res) => {
             });
         }
 
-        await editGudang({ id, jenis, nama, alamat, keterangan });
+        await editGudang({ id,KODE, nama, alamat, KETERANGAN });
         const updated = await getGudangByID(id);
 
         return res.status(200).json({

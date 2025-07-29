@@ -15,21 +15,21 @@ export const getGudangByID = async (id) =>
 /**
  * Tambah gudang baru
  * @param {{
- *  jenis: string,
+ *  KODE: string,
  *  nama: string,
  *  alamat: string,
- *  keterangan?: string
+ *  KETERANGAN: string
  * }} data
  */
-export const addGudang = async ({ jenis, nama, alamat, keterangan }) => {
-  const [id] = await db("nama_gudang").insert({ jenis, nama, alamat, keterangan });
+export const addGudang = async ({ KODE, nama, alamat, KETERANGAN }) => {
+  const [id] = await db("nama_gudang").insert({ KODE, nama, alamat, KETERANGAN });
   return db("nama_gudang").where({ id }).first();
 };
 
-export const editGudang = async ({ id, jenis, nama, alamat, keterangan }) => {
+export const editGudang = async ({ id, KODE, nama, alamat, KETERANGAN }) => {
   await db("nama_gudang")
     .where({ id })
-    .update({ jenis, nama, alamat, keterangan });
+    .update({ KODE, nama, alamat, KETERANGAN });
   return db("nama_gudang").where({ id }).first();
 };
 

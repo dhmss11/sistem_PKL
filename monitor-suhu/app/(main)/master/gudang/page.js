@@ -244,7 +244,7 @@ const GudangPage = () => {
             <InputText
               id="KODE"
               name="KODE"
-              value={form.KODE}
+              value={form.KODE || ''}
               onChange={handleChange}
               className="w-full mt-2"
               required
@@ -293,3 +293,5 @@ const GudangPage = () => {
 };
 
 export default GudangPage;
+
+

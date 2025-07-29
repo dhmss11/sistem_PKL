@@ -103,24 +103,20 @@ export const addStock = async (req, res) => {
         });
     }
 };
-
 export const editStock = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { id } = req.params; // ini asumsinya adalah KODE, bukan kolom id
 
     const {
       gudang, KODE, KODE_TOKO, NAMA, JENIS, GOLONGAN,
-      RAK, DOS, SATUAN, ISI, DISCOUNT, HB, HJ,
-      EXPIRED, TGL_MASUK, BERAT
+      RAK, DOS, SATUAN, ISI, DISCOUNT, HB, HJ, BERAT
     } = req.body;
 
     await db('stock')
-      .where({ id })
+      .where({ KODE: id }) // ganti ini ya
       .update({
         gudang, KODE, KODE_TOKO, NAMA, JENIS, GOLONGAN,
-        RAK, DOS, SATUAN, ISI, DISCOUNT, HB, HJ,
-        EXPIRED, TGL_MASUK, BERAT,
-        updated_at: datetime()
+        RAK, DOS, SATUAN, ISI, DISCOUNT, HB, HJ,BERAT
       });
 
     return res.json({
@@ -139,33 +135,34 @@ export const editStock = async (req, res) => {
   }
 };
 
-
 export const deleteStock = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const deleted = await db('stock').where({ id }).del();
+
+    const deleted = await db('stock').where({ KODE: id }).del();
 
     if (deleted) {
       return res.json({
         status: status.SUKSES,
-        message: 'stock berhasil dihapus',
+        message: 'Stock berhasil dihapus',
         datetime: datetime(),
       });
     } else {
       return res.status(404).json({
         status: status.NOT_FOUND,
-        message: 'stock tidak ditemukan',
+        message: 'Stock tidak ditemukan',
         datetime: datetime(),
       });
     }
 
   } catch (error) {
-    console.error('Error deleting stock:', error);
+    console.error('❌ Gagal hapus stock:', error.message);
     return res.status(500).json({
       status: status.GAGAL,
       message: 'Gagal menghapus stock',
       datetime: datetime(),
+      error: error.message,
     });
   }
 };

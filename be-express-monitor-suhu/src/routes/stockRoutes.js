@@ -12,6 +12,7 @@ const router = Router();
 router.get('/',fetchAllStock);
 router.post('/add',addStock);
 router.put('/edit/:id', editStock);
+router.delete('/:id', deleteStock);
 router.delete('/delete/:id', deleteStock);
 
 

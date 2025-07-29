@@ -15,6 +15,7 @@ const StockPage = () => {
   const [dialogMode, setDialogMode] = useState(null);
   const [selectedStock, setSelectedStock] = useState(null);
   const [form, setForm] = useState({
+
     gudang: '',
     KODE: '',
     KODE_TOKO: '',
@@ -58,19 +59,30 @@ const StockPage = () => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
-   const handleEdit = (data) => {
-    setDialogMode('edit');
-    setSelectedStock(data);
-    setDialogVisible(true);
-  };
 
   const handleDelete = async (data) => {
     try {
-      await axios.delete(`${API_ENDPOINTS.DELETE_STOCK}/${data.id}`);
-      toastRef.current.show({ severity: 'success', summary: 'Berhasil', detail: 'Data dihapus' });
-      fetchStocks();
+      if (!data?.KODE) {
+        toastRef.current?.showToast('warn', 'Data tidak valid');
+        return;
+      }
+
+      const res = await fetch(`/api/stock/${data.KODE}`, {
+        method: 'DELETE',
+      });
+
+      const json = await res.json();
+
+      if (!res.ok || json.status !== '00') {
+        toastRef.current?.showToast('error', json.message || 'Gagal menghapus data');
+        return;
+      }
+
+      toastRef.current?.showToast('success', 'Data berhasil dihapus');
+      fetchStock();
     } catch (err) {
-      toastRef.current.show({ severity: 'error', summary: 'Gagal', detail: 'Gagal menghapus data' });
+      console.error('Error:', err);
+      toastRef.current?.showToast('error', 'Terjadi kesalahan saat menghapus data');
     }
   };
 
@@ -98,6 +110,33 @@ const StockPage = () => {
         EXPIRED: '', TGL_MASUK: '', BERAT: ''
       });
       setDialogMode(null);
+    }
+  };
+
+  const handleUpdate = async () => {
+    try {
+      const res = await fetch(`/api/stock/${selectedStock.KODE}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form)
+      });
+      const json = await res.json();
+
+      if (res.ok && json.status === '00') {
+        toastRef.current?.showToast(json.status, 'Berhasil update stock');
+        fetchStock();
+      } else {
+        toastRef.current?.showToast('99', json.message || 'Gagal update stock');
+      }
+    } catch (err) {
+      console.error('Update error:', err);
+      toastRef.current?.showToast('99', 'Gagal update stock');
+    } finally {
+      setDialogMode(null);
+      setForm({
+        gudang: '', KODE: '', KODE_TOKO: '', NAMA: '', JENIS: '', GOLONGAN: '',
+        RAK: '', DOS: '', SATUAN: '', ISI: '', DISCOUNT: '', HB: '', HJ: '', BERAT: ''
+      });
     }
   };
 
@@ -135,13 +174,73 @@ const StockPage = () => {
         <Column field="EXPIRED" header="Expired" />
         <Column field="TGL_MASUK" header="Tgl Masuk" />
         <Column field="BERAT" header="Berat" />
+         <Column
+          header="Aksi"
+          style={{ width: '150px' }}
+          body={(row) => (
+            <div className="flex gap-2">
+              <Button
+                icon="pi pi-pencil"
+                size="small"
+                severity="warning"
+                onClick={() => {
+                  setDialogMode('edit');
+                  setSelectedStock(row);
+                  setForm({ ...row });
+                }}
+              />
+              <Button
+                icon="pi pi-trash"
+                size="small"
+                severity="danger"
+                onClick={() => handleDelete(row)}
+              />
+            </div>
+          )}
+        />
       </DataTable>
+
+            <Dialog
+  header="Edit Stock"
+  visible={dialogMode === 'edit'}
+  onHide={() => setDialogMode(null)}
+  style={{ width: '40rem' }}
+>
+  <form
+    onSubmit={(e) => {
+      e.preventDefault();
+      handleUpdate();
+    }}
+  >
+    {[
+      'gudang', 'KODE', 'KODE_TOKO', 'NAMA', 'JENIS', 'GOLONGAN', 'RAK',
+      'DOS', 'SATUAN', 'ISI', 'DISCOUNT', 'HB', 'HJ', 'BERAT',
+    ].map((field) => (
+      <div key={field} className="mb-3">
+        <label htmlFor={field}>{field.replace(/_/g, ' ')}</label>
+        <InputText
+          id={field}
+          name={field}
+          value={form[field]}
+          onChange={handleChange}
+          className="w-full mt-2"
+        />
+      </div>
+    ))}
+
+    <div className="flex justify-end">
+      <Button type="submit" label="Simpan" severity="info" icon="pi pi-save" />
+    </div>
+  </form>
+</Dialog>
+
 
      <Dialog
   header="Tambah Stock"
   visible={dialogMode === 'add'}
   onHide={() => setDialogMode(null)}
   style={{ width: '40rem' }}
+  
 >
   <form
     onSubmit={(e) => {

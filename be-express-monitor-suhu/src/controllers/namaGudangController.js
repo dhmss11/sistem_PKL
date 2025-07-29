@@ -109,7 +109,7 @@ export const updateGudang = async (req, res) => {
             });
         }
 
-        const { kode, nama, alamat, keterangan } = validation.data;
+        const { KODE, nama, alamat, KETERANGAN } = validation.data;
 
         const namaDuplikat = await db('nama_gudang').where({ nama }).andWhereNot({ id }).first();
         if (namaDuplikat) {
@@ -120,7 +120,7 @@ export const updateGudang = async (req, res) => {
             });
         }
 
-        await editGudang({ id,kode, nama, alamat, keterangan });
+        await editGudang({ id,KODE, nama, alamat, KETERANGAN });
         const updated = await getGudangByID(id);
 
         return res.status(200).json({

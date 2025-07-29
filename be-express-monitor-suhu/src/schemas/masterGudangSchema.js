@@ -21,7 +21,7 @@ export const addGudangSchema = z.object({
 
 
 export const updateGudangSchema = z.object({
-  kode: z
+  KODE: z
     .string({ required_error: 'Jenis gudang wajib diisi' })
     .min(1, 'Jenis gudang tidak boleh kosong'),
 
@@ -33,5 +33,5 @@ export const updateGudangSchema = z.object({
     .string({ required_error: 'Alamat wajib diisi' })
     .min(1, 'Alamat tidak boleh kosong'),
 
-  keterangan: z.string().optional()
+  KETERANGAN: z.string().optional()
 });

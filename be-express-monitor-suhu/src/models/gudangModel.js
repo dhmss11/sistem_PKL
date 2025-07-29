@@ -26,10 +26,10 @@ export const addGudang = async ({ KODE, nama, alamat, KETERANGAN }) => {
   return db("nama_gudang").where({ id }).first();
 };
 
-export const editGudang = async ({ id, kode, nama, alamat, keterangan }) => {
+export const editGudang = async ({ id, KODE, nama, alamat, KETERANGAN }) => {
   await db("nama_gudang")
     .where({ id })
-    .update({ kode, nama, alamat, keterangan });
+    .update({ KODE, nama, alamat, KETERANGAN });
   return db("nama_gudang").where({ id }).first();
 };
 

@@ -1,9 +1,9 @@
 import { z } from "zod";
 
 export const addGudangSchema = z.object({
-  jenis: z
-    .string({ required_error: 'Jenis gudang wajib diisi' })
-    .min(1, 'Jenis gudang tidak boleh kosong'),
+  KODE: z
+    .string({ required_error: 'kode gudang wajib diisi' })
+    .min(1, 'kode gudang tidak boleh kosong'),
 
   nama: z
     .string({ required_error: 'Nama gudang wajib diisi' })
@@ -13,13 +13,15 @@ export const addGudangSchema = z.object({
     .string({ required_error: 'Alamat wajib diisi' })
     .min(1, 'Alamat tidak boleh kosong'),
 
-  keterangan: z
-    .string({ required_error: 'Keterangan wajib diisi' })
-    .min(1, 'Keterangan tidak boleh kosong')
+  KETERANGAN: z
+   .string({ required_error: 'kode gudang wajib diisi' })
+    .min(1, 'kode gudang tidak boleh kosong'),
+
 });
 
+
 export const updateGudangSchema = z.object({
-  jenis: z
+  kode: z
     .string({ required_error: 'Jenis gudang wajib diisi' })
     .min(1, 'Jenis gudang tidak boleh kosong'),
 
@@ -31,7 +33,5 @@ export const updateGudangSchema = z.object({
     .string({ required_error: 'Alamat wajib diisi' })
     .min(1, 'Alamat tidak boleh kosong'),
 
-  keterangan: z
-    .string({ required_error: 'Keterangan wajib diisi' })
-    .min(1, 'Keterangan tidak boleh kosong')
+  keterangan: z.string().optional()
 });

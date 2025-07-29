@@ -236,18 +236,19 @@ const GudangPage = () => {
               className="w-full mt-2"
               readOnly
             />
+
           </div>
 
-          <div className="mb-3">
-              <label htmlFor="KODE">Kode</label>
-              <InputText
-                id="KODE"
-                name="KODE"
-                value={form.KODE}
-                onChange={handleChange}
-                className="w-full mt-2"
-                required
-              />
+            <div className="mb-3">
+            <label htmlFor="KODE">Kode</label>
+            <InputText
+              id="KODE"
+              name="KODE"
+              value={form.KODE}
+              onChange={handleChange}
+              className="w-full mt-2"
+              required
+            />
           </div>
 
 

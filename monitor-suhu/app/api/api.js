@@ -28,4 +28,11 @@ export const API_ENDPOINTS = {
    ADD_STOCK: `${API_URL}/stock/add`,
    EDIT_STOCK: (id) => `${API_URL}/stock/edit/${id}`,
    DELETE_STOCK: (id) => `${API_URL}/stock/delete/${id}`,
+
+      // Endpoint untuk satuanstock
+   GET_ALL_SATUAN: `${API_URL}/satuanstock`,
+   ADD_SATUAN: `${API_URL}/satuanstock/create`,
+   EDIT_SATUAN: (kode) => `${API_URL}/satuanstock/edit/${kode}`,
+   DELETE_SATUAN: (kode) => `${API_URL}/satuanstock/delete/${kode}`,
+
 };

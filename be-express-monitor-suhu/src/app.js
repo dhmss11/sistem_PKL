@@ -11,7 +11,7 @@ import masterProdukRouters from "./routes/masterProdukRoutes.js"
 import masterGudang from "./routes/masterGudang.js"
 import jenisGudangRoutes from './routes/jenisGudangRoutes.js';
 import stockRoutes from './routes/stockRoutes.js';
-
+import satuanStockRoutes from './routes/satuanStockRoutes.js';
 
 const app = express();
 
@@ -55,4 +55,5 @@ app.use("/api/nama-gudang",masterGudang);
 app.use("/api/golonganstock", jenisGudangRoutes);
 //app.use("/api/monitor-suhu", monitorSuhuRouter);
 app.use('/api/stock', stockRoutes);
+app.use('/api/satuanstock', satuanStockRoutes);
 export default app;

@@ -2,6 +2,13 @@ export const API_URL = process.env.API_URL;
 
 export const API_ENDPOINTS = {
 
+  GET_ALL_RAK: `${API_URL}/rak`,
+  GET_RAK_BY_KODE: (kode) => `${API_URL}/rak/${kode}`,
+  ADD_RAK: `${API_URL}/rak/create`,
+  EDIT_RAK: (kode) => `${API_URL}/rak/edit/${kode}`,
+  DELETE_RAK: (kode) => `${API_URL}/rak/delete/${kode}`,
+  GET_PRODUK_BY_RAK: (kode) => `${API_URL}/rak/${kode}/produk`,
+
     GETALLPRODUK: `${API_URL}/master-produk`,
     GETPRODUKBYID: (id) => `${API_URL}/master-produk/${id}`,
     ADDPRODUK: `${API_URL}/master-produk/create`,

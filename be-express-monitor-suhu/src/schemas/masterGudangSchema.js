@@ -35,3 +35,4 @@ export const updateGudangSchema = z.object({
 
   KETERANGAN: z.string().optional()
 });
+

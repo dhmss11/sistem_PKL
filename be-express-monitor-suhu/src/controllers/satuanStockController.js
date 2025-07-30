@@ -1,55 +1,116 @@
 import { db } from "../core/config/knex.js";
+import { datetime, status } from '../utils/general.js';
 
-// GET semua data satuan
-export const getAllSatuanStock = async (req, res) => {
-  try {
-    const satuan = await db('satuanstock').select('*');
-    res.json(satuan);
-  } catch (err) {
-    res.status(500).json({ error: 'Gagal mengambil data satuan', detail: err.message });
-  }
-};
 
-// POST tambah data
-export const createSatuanStock = async (req, res) => {
-  try {
-    console.log("ISI req.body:", req.body); // <--- log isi body
+export const fetchAllSatuan = async (req, res) => {
+    try {
+        const data = await db('satuanstock').select(['KODE', 'KETERANGAN']);
 
-    const { KODE, KETERANGAN } = req.body;
+        if (!data || data.length === 0) {
+            return res.status(404).json({
+                status: status.NOT_FOUND,
+                message: 'Data satuan kosong',
+                datetime: datetime(),
+                data: [],
+            });
+        }
 
-    if (!KODE || !KETERANGAN) {
-      return res.status(400).json({ message: "KODE dan KETERANGAN wajib diisi" });
+        return res.status(200).json({
+            status: status.SUKSES,
+            message: 'berhasil ambil data satuan',
+            datetime: datetime(),
+            data,
+        });
+    } catch (error) {
+        console.error('gagal ambil satuan:', error.message);
+        return res.status(500).json({
+            status: status.ERROR,
+            message: 'gagal menggambil data satuan',
+            datetime: datetime(),
+            error: error.message,
+        });
     }
-
-    await db('satuanstock').insert({ KODE, KETERANGAN });
-
-    res.json({ message: 'Satuan berhasil ditambahkan' });
-  } catch (err) {
-    console.error("ERROR INSERT:", err); // <--- log error detail
-    res.status(500).json({ error: 'Gagal menambah satuan', detail: err.message });
-  }
 };
 
+export const addSatuan = async (req, res) => {
+    try {
+        const {KODE, KETERANGAN} = req.body;
 
-// PUT edit data
-export const updateSatuanStock = async (req, res) => {
-  const { kode } = req.params;
-  const { KETERANGAN } = req.body;
-  try {
-    await db('satuanstock').where({ KODE: kode }).update({ KETERANGAN });
-    res.json({ message: 'Satuan berhasil diupdate' });
-  } catch (err) {
-    res.status(500).json({ error: 'Gagal mengedit satuan', detail: err.message });
-  }
+        await db ('satuanstock').insert({ KODE, KETERANGAN});
+
+        return res.status(201).json({
+            status: status.SUKSES,
+            message: 'satuan berhasil ditambakan',
+            datetime: datetime(),
+        });
+    } catch (error) {
+        console.error('gagal tambah satuan:', error.message);
+        return res.status(500).json({
+            status: status.GAGAL,
+            message: 'gagal menambahkan satuan',
+            datetime: datetime(),
+            error: error.message
+        });
+    }
 };
 
-// DELETE hapus data
-export const deleteSatuanStock = async (req, res) => {
-  const { kode } = req.params;
-  try {
-    await db('satuanstock').where({ KODE: kode }).del();
-    res.json({ message: 'Satuan berhasil dihapus' });
-  } catch (err) {
-    res.status(500).json({ error: 'Gagal menghapus satuan', detail: err.message });
-  }
+export const editSatuan = async (req, res) => {
+    const { KODE } = req.params;
+    const { KETERANGAN } = req.body;
+
+    try {
+        const updated = await db('satuanstock').where({ KODE }).update({ KETERANGAN });
+
+        if (updated) {
+            return res.json({
+                status: status.SUKSES,
+                message: 'satuan berhasil diupdate',
+                datetime: datetime(),
+            });
+        } else {
+            return res.status(404).json({
+                status: status.NOT_FOUND,
+                message: 'satuan tidak ditemukan',
+                datetime: datetime(),
+            });
+        }
+    } catch (error) {
+        console.error('gagal edit satuan: ', error.message);
+        return res.status(500).json({
+            status: status.ERROR,
+            message: 'gagal mengedit satuan',
+            datetime: datetime(),
+            error: error.message,
+        });
+    }
+};
+
+export const deleteSatuan = async (req, res) => {
+    const { KODE } = req.params;
+
+    try {
+        const deleted = await db('satuanstock').where({ KODE }).del();
+
+        if (deleted) {
+            return res.json({
+                status: status.SUKSES,
+                message: 'satuan berhasil dihapus',
+                datetime: datetime(),
+            });
+        } else {
+            return res.status(404).json({
+                status: status.NOT_FOUND,
+                message: 'satuan tidak di temukan',
+                datetime:  datetime(),
+            });
+        }
+    } catch (error) {
+        console.error('gagal hapus satuan:', error.message);
+        return res.status(500).json({
+            status: status.ERROR,
+            message: 'gagal menghapus satuan',
+            datetime: datetime(),
+            error: error.message,
+        });
+    }
 };

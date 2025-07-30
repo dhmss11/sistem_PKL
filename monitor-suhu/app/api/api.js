@@ -9,6 +9,14 @@ export const API_ENDPOINTS = {
   DELETE_RAK: (kode) => `${API_URL}/rak/delete/${kode}`,
   GET_PRODUK_BY_RAK: (kode) => `${API_URL}/rak/${kode}/produk`,
 
+ //SATUAN
+  GET_ALL_SATUAN: `${API_URL}/satuan`,
+  GET_SATUAN_BY_KODE: (kode) => `${API_URL}/satuan/${kode}`,
+  ADD_SATUAN: `${API_URL}/satuan/create`,
+  EDIT_SATUAN: (kode) => `${API_URL}/satuan/edit/${kode}`,
+  DELETE_SATUAN: (kode) => `${API_URL}/satuan/delete/${kode}`,
+  GET_PRODUK_BY_SATUAN: (kode) => `${API_URL}/satuan/${kode}/produk`,
+
   // PRODUK
   GETALLPRODUK: `${API_URL}/master-produk`,
   GETPRODUKBYID: (id) => `${API_URL}/master-produk/${id}`,
@@ -37,9 +45,4 @@ export const API_ENDPOINTS = {
   EDIT_STOCK: (id) => `${API_URL}/stock/edit/${id}`,
   DELETE_STOCK: (id) => `${API_URL}/stock/delete/${id}`,
 
-  // SATUAN STOCK
-  GET_ALL_SATUAN: `${API_URL}/satuanstock`,
-  ADD_SATUAN: `${API_URL}/satuanstock/create`,
-  EDIT_SATUAN: (kode) => `${API_URL}/satuanstock/edit/${kode}`,
-  DELETE_SATUAN: (kode) => `${API_URL}/satuanstock/delete/${kode}`,
 };

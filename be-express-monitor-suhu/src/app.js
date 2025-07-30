@@ -10,10 +10,9 @@ import masterProdukRouters from './routes/masterProdukRoutes.js';
 import masterGudang from './routes/masterGudang.js';
 import jenisGudangRoutes from './routes/jenisGudangRoutes.js';
 import stockRoutes from './routes/stockRoutes.js';
-
 import satuanStockRoutes from './routes/satuanStockRoutes.js';
-
 import rakRoutes from './routes/rakRoutes.js';
+
 
 
 const app = express();
@@ -48,20 +47,14 @@ app.use('/api/nama-gudang', masterGudang);
 app.use('/api/golonganstock', jenisGudangRoutes);
 app.use('/api/stock', stockRoutes);
 app.use('/api/rak', rakRoutes);
+app.use('/api/satuan', satuanStockRoutes);
 
 app.get('/', [setResponseHeader], (req, res) => {
   return res.status(200).json(`Welcome to the server! ${new Date().toLocaleString()}`);
 });
 
  
-app.use("/api/users", userRoutes);
-app.use("/api/auth", authRoutes);
-app.use("/api/master-produk", masterProdukRouters);
-app.use("/api/nama-gudang",masterGudang);
-app.use("/api/golonganstock", jenisGudangRoutes);
-//app.use("/api/monitor-suhu", monitorSuhuRouter);
-app.use('/api/stock', stockRoutes);
-app.use('/api/satuanstock', satuanStockRoutes);
+
 
 
 export default app;

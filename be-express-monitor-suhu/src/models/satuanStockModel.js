@@ -1,17 +1,20 @@
-import { db } from "../core/config/knex.js";
+import { db } from '../core/config/knex.js';
 
-export const findAllSatuan = () => {
-  return db('satuanstock').select('*');
+// Ambil semua rak
+export const getAllSatuan = () => {
+  return db('satuanstock').select(['KODE', 'KETERANGAN']);
 };
 
+// Tambah rak baru
 export const insertSatuan = (data) => {
   return db('satuanstock').insert(data);
 };
 
-export const updateSatuanByKode = (kode, data) => {
-  return db('satuanstock').where({ KODE: kode }).update(data);
+// Update rak berdasarkan KODE
+export const updateSatuanByKode = (KODE, data) => {
+  return db('satuanstock').where({ KODE }).update(data);
 };
-
-export const deleteSatuanByKode = (kode) => {
-  return db('satuanstock').where({ KODE: kode }).del();
+// Hapus rak berdasarkan KODE
+export const deleteSatuanByKode = (KODE) => {
+  return db('satuanstock').where({ KODE }).del();
 };

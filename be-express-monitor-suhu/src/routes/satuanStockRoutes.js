@@ -1,23 +1,20 @@
 import express from 'express';
 import {
-  getAllSatuanStock,
-  createSatuanStock,
-  updateSatuanStock,
-  deleteSatuanStock
+  fetchAllSatuan,
+  addSatuan,
+  editSatuan,
+  deleteSatuan
 } from '../controllers/satuanStockController.js';
 
 const router = express.Router();
 
-// GET semua data
-router.get('/', getAllSatuanStock);
 
-// POST tambah data
-router.post('/create', createSatuanStock);
+router.use(express.json());
 
-// PUT edit data berdasarkan KODE
-router.put('/edit/:kode', updateSatuanStock);
 
-// DELETE hapus data berdasarkan KODE
-router.delete('/delete/:kode', deleteSatuanStock);
+router.get('/', fetchAllSatuan);
+router.post('/create', addSatuan); 
+router.put('/:KODE', editSatuan);
+router.delete('/:KODE', deleteSatuan);
 
 export default router;

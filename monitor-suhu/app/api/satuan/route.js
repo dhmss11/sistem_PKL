@@ -10,7 +10,7 @@ const CORS_HEADERS = {
 
 export async function GET() {
   try {
-    const response = await Axios.get(API_ENDPOINTS.GET_ALL_RAK);
+    const response = await Axios.get(API_ENDPOINTS.GET_ALL_SATUAN);
 
     if (!response.data) {
       throw new Error('Data tidak ditemukan');
@@ -18,8 +18,8 @@ export async function GET() {
 
     return NextResponse.json(
       {
-        status: '00',
-        message: 'Berhasil Mengambil data rak',
+        status: '00', 
+        message: 'Berhasil Mengambil data satuanstock',
         data: response.data.data,
       },
       { 
@@ -28,11 +28,11 @@ export async function GET() {
       }
     );
   } catch (error) {
-    console.error('Error GET rak:', error.message);
+    console.error('Error GET satuanstock:', error.message);
     return NextResponse.json(
       {
         status: '01',
-        message: 'Gagal Mengambil data rak',
+        message: 'Gagal Mengambil data satuanstock',
         error: error.message || 'Unknown error',
       },
       { 
@@ -62,12 +62,12 @@ export async function POST(req) {
       );
     }
 
-    const response = await Axios.post(API_ENDPOINTS.ADD_RAK, body);
+    const response = await Axios.post(API_ENDPOINTS.ADD_SATUAN, body);
 
     return NextResponse.json(
       {
         status: '00',
-        message: 'Berhasil Menambah data rak',
+        message: 'Berhasil Menambah data satuanstock',
         data: response.data,
       },
       { 
@@ -76,7 +76,7 @@ export async function POST(req) {
       }
     );
   } catch (error) {
-    console.error('Error POST rak:', error.message);
+    console.error('Error POST satuanstock:', error.message);
     
     let statusCode = 500;
     let errorMessage = error.message || 'Unknown error';
@@ -89,7 +89,7 @@ export async function POST(req) {
     return NextResponse.json(
       {
         status: '01',
-        message: 'Gagal Menambahkan data rak',
+        message: 'Gagal Menambahkan data satuanstock',
         error: errorMessage,
       },
       { 

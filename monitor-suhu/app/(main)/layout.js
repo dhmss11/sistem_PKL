@@ -4,7 +4,6 @@ export const metadata = {
     title: 'PrimeReact Sakai',
     description: 'The ultimate collection of design-agnostic, flexible and accessible React UI Components.',
     robots: { index: false, follow: false },
-    viewport: { initialScale: 1, width: 'device-width' },
     openGraph: {
         type: 'website',
         title: 'PrimeReact SAKAI-REACT',
@@ -16,6 +15,11 @@ export const metadata = {
     icons: {
         icon: '/favicon.ico'
     }
+};
+
+export const viewport = {
+    width: 'device-width',
+    initialScale: 1  
 };
 
 export default function AppLayout({ children }) {

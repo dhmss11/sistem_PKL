@@ -25,7 +25,7 @@ const AppMenu = () => {
                     to: '/kode/rak'
                 },
                 {   label: 'Satuan Stock', 
-                    icon: 'pi pi-fw pi-tag', 
+                    icon: 'pi pi-list', 
                     to: '/kode/satuanstock' 
                 }
             ]

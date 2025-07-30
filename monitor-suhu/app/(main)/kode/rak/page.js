@@ -95,7 +95,7 @@ const RakPage = () => {
   };
    return (
     <div className="card">
-      <h3 className="text-xl font-semibold mb-4">Master Rak</h3>
+      <h3 className="text-xl font-semibold mb-4">Rak</h3>
 
       <div className="flex justify-end mb-4">
         <Button

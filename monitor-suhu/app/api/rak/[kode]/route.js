@@ -37,7 +37,7 @@ export async function PUT(request) {
     );
 
   } catch (error) {
-    console.error('Error PUT rak:', {
+    console.error('Error PUT Rak:', {
       message: error.message,
       code: error.code,
       response: error.response?.data
@@ -46,7 +46,7 @@ export async function PUT(request) {
     return NextResponse.json(
       {
         status: '01',
-        message: error.response?.data?.message || 'Gagal mengupdate rak',
+        message: error.response?.data?.message || 'Gagal mengupdate Rak',
         error: error.message,
       },
       { 
@@ -65,7 +65,7 @@ export async function DELETE(request) {
     // Validate KODE exists
     if (!kode) {
       return NextResponse.json(
-        { status: '01', message: 'KODE rak harus disediakan' },
+        { status: '01', message: 'KODE Rak harus disediakan' },
         { status: 400, headers: CORS_HEADERS }
       );
     }
@@ -84,7 +84,7 @@ export async function DELETE(request) {
       }
     );
   } catch (error) {
-    console.error('Error DELETE rak:', {
+    console.error('Error DELETE Rak:', {
       message: error.message,
       code: error.code,
       response: error.response?.data
@@ -93,7 +93,7 @@ export async function DELETE(request) {
     return NextResponse.json(
       {
         status: '01',
-        message: error.response?.data?.message || 'Gagal menghapus rak',
+        message: error.response?.data?.message || 'Gagal menghapus Rak',
         error: error.message,
       },
       { 

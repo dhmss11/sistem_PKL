@@ -19,7 +19,7 @@ export async function GET() {
     return NextResponse.json(
       {
         status: '00',
-        message: 'Berhasil Mengambil data rak',
+        message: 'Berhasil Mengambil data Rak',
         data: response.data.data,
       },
       { 
@@ -28,11 +28,11 @@ export async function GET() {
       }
     );
   } catch (error) {
-    console.error('Error GET rak:', error.message);
+    console.error('Error GET Rak:', error.message);
     return NextResponse.json(
       {
         status: '01',
-        message: 'Gagal Mengambil data rak',
+        message: 'Gagal Mengambil data Rak',
         error: error.message || 'Unknown error',
       },
       { 
@@ -67,7 +67,7 @@ export async function POST(req) {
     return NextResponse.json(
       {
         status: '00',
-        message: 'Berhasil Menambah data rak',
+        message: 'Berhasil Menambahkan data Rak',
         data: response.data,
       },
       { 
@@ -76,7 +76,7 @@ export async function POST(req) {
       }
     );
   } catch (error) {
-    console.error('Error POST rak:', error.message);
+    console.error('Error POST Rak:', error.message);
     
     let statusCode = 500;
     let errorMessage = error.message || 'Unknown error';
@@ -89,7 +89,7 @@ export async function POST(req) {
     return NextResponse.json(
       {
         status: '01',
-        message: 'Gagal Menambahkan data rak',
+        message: 'Gagal Menambahkan data Rak',
         error: errorMessage,
       },
       { 

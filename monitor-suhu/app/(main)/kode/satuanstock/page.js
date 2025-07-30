@@ -95,7 +95,7 @@ const SatuanPage = () => {
   };
    return (
     <div className="card">
-      <h3 className="text-xl font-semibold mb-4">Master Satuan</h3>
+      <h3 className="text-xl font-semibold mb-4">Satuan Stock</h3>
 
       <div className="flex justify-end mb-4">
         <Button

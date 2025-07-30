@@ -19,7 +19,7 @@ export async function GET() {
     return NextResponse.json(
       {
         status: '00', 
-        message: 'Berhasil Mengambil data satuanstock',
+        message: 'Berhasil Mengambil data Satuan Stock',
         data: response.data.data,
       },
       { 
@@ -28,11 +28,11 @@ export async function GET() {
       }
     );
   } catch (error) {
-    console.error('Error GET satuanstock:', error.message);
+    console.error('Error GET Satuan Stock:', error.message);
     return NextResponse.json(
       {
         status: '01',
-        message: 'Gagal Mengambil data satuanstock',
+        message: 'Gagal Mengambil data Satuan Stock',
         error: error.message || 'Unknown error',
       },
       { 
@@ -67,7 +67,7 @@ export async function POST(req) {
     return NextResponse.json(
       {
         status: '00',
-        message: 'Berhasil Menambah data satuanstock',
+        message: 'Berhasil Menambahkan data Satuan Stock',
         data: response.data,
       },
       { 
@@ -76,7 +76,7 @@ export async function POST(req) {
       }
     );
   } catch (error) {
-    console.error('Error POST satuanstock:', error.message);
+    console.error('Error POST Satuan Stock:', error.message);
     
     let statusCode = 500;
     let errorMessage = error.message || 'Unknown error';
@@ -89,7 +89,7 @@ export async function POST(req) {
     return NextResponse.json(
       {
         status: '01',
-        message: 'Gagal Menambahkan data satuanstock',
+        message: 'Gagal Menambahkan data Satuan Stock',
         error: errorMessage,
       },
       { 

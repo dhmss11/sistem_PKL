@@ -144,7 +144,7 @@ export default function GolonganStokPage() {
 
       <DataTable
         value={golongan}
-        rowKey="KODE"
+        rowkey="KODE"
         loading={loading}
         paginator
         rows={10}

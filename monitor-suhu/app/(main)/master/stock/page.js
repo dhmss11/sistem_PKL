@@ -9,6 +9,7 @@ import { InputText } from 'primereact/inputtext';
 import ToastNotifier from '@/app/components/ToastNotifier';
 import { Dropdown } from 'primereact/dropdown';
 import { Calendar } from 'primereact/calendar';
+
 const StockPage = () => {
   const toastRef = useRef(null);
   const [stock, setStock] = useState([]);
@@ -38,6 +39,12 @@ const StockPage = () => {
     BERAT: ''
   });
 
+   const golonganOptions = [
+    { label: 'MAKANAN', value: 'MAKANAN' },
+    { label: 'MINUMAN', value: 'MINUMAN' },
+    { label: 'ELEKTRONIK', value: 'ELEKTRONIK' },
+    { label: 'PAKAIAN', value: 'PAKAIAN' }
+  ];
 
    async function fetchsSatuanOptions() {
     try {
@@ -311,7 +318,7 @@ const handleDelete = async (data) => {
 >
   <form onSubmit={(e) => { e.preventDefault(); handleUpdate(); }}>
     {/* Field sebelum RAK */}
-    {['gudang', 'KODE', 'KODE_TOKO', 'NAMA', 'JENIS', 'GOLONGAN'].map((field) => (
+    {['gudang', 'KODE', 'KODE_TOKO', 'NAMA', 'JENIS'].map((field) => (
       <div key={field} className="mb-3">
         <label htmlFor={field}>{field.replace(/_/g, ' ')}</label>
         <InputText
@@ -353,6 +360,19 @@ const handleDelete = async (data) => {
         optionValue="value"
       />
     </div>
+
+    <div className="mb-3">
+  <label htmlFor="GOLONGAN">Golongan</label>
+  <Dropdown
+    id="GOLONGAN"
+    name="GOLONGAN"
+    value={form.GOLONGAN}
+    options={golonganOptions}
+    onChange={(e) => setForm((prev) => ({ ...prev, GOLONGAN: e.value }))}
+    placeholder="Pilih Golongan"
+    className="w-full mt-2"
+  />
+</div>
 
     {}
     {['DOS', 'ISI', 'DISCOUNT', 'HB', 'HJ', 'BERAT'].map((field) => (
@@ -445,15 +465,18 @@ const handleDelete = async (data) => {
     </div>
 
     <div className="mb-3">
-      <label htmlFor="GOLONGAN">Golongan</label>
-      <InputText
-        id="GOLONGAN"
-        name="GOLONGAN"
-        value={form.GOLONGAN}
-        onChange={handleChange}
-        className="w-full mt-2"
-      />
-    </div>
+  <label htmlFor="GOLONGAN">Golongan</label>
+  <Dropdown
+    id="GOLONGAN"
+    name="GOLONGAN"
+    value={form.GOLONGAN}
+    options={golonganOptions}
+    onChange={(e) => setForm((prev) => ({ ...prev, GOLONGAN: e.value }))}
+    placeholder="Pilih Golongan"
+    className="w-full mt-2"
+  />
+</div>
+
 
    <div className="mb-3">
             <label htmlFor="RAK">RAK</label>

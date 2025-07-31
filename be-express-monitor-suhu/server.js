@@ -3,15 +3,14 @@ import app from "./src/app.js";
 import { createRequire } from 'module';
 import http from 'http';
 
-// Load environment variables
+
 config({ path: './.env' });
 
-// Create server instance
 const server = http.createServer(app);
 const port = process.env.PORT || 8000;
 const host = process.env.HOST || 'localhost';
 
-// Error handling for uncaught exceptions
+
 process.on('uncaughtException', (err) => {
   console.error('Uncaught Exception:', err);
   process.exit(1);

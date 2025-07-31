@@ -2,6 +2,7 @@ import { Axios } from '@/utils/axios';
 import { API_ENDPOINTS  } from '../api';
 import { NextResponse } from 'next/server';
 
+
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
@@ -99,6 +100,7 @@ export async function POST(req) {
     );
   }
 }
+
 
 export async function OPTIONS() {
   return NextResponse.json(

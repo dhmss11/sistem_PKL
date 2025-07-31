@@ -7,10 +7,13 @@ import { Column } from 'primereact/column';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
 import ToastNotifier from '@/app/components/ToastNotifier';
-
+import { Dropdown } from 'primereact/dropdown';
+import { Calendar } from 'primereact/calendar';
 const StockPage = () => {
   const toastRef = useRef(null);
   const [stock, setStock] = useState([]);
+   const [rakOptions, setRakOptions] = useState([]); 
+  const [satuanOptions, setSatuanOptions] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [dialogMode, setDialogMode] = useState(null);
   const [selectedStock, setSelectedStock] = useState(null);
@@ -34,7 +37,64 @@ const StockPage = () => {
     BERAT: ''
   });
 
-  const fetchStock = async () => {
+  // GET SATUAN DARI API
+   async function fetchsSatuanOptions() {
+    try {
+      const res = await fetch('/api/satuan');
+      const json = await res.json();
+      if (json.status === '00') {
+        
+        const options = json.data.map(satuan => ({
+          value: satuan.KODE, 
+          label: satuan.KETERANGAN 
+        }));
+        setSatuanOptions(options);
+      } else {
+        toastRef.current?.showToast(json.status, json.message);
+      }
+    } catch (err) {
+      toastRef.current?.showToast('99', 'Gagal memuat data satuan stock');
+    }
+  }
+
+  async function fetchStock() {
+    setIsLoading(true);
+    try {
+      const res = await fetch('/api/satuan');
+      const json = await res.json();
+      if (json.status === '00') {
+        setStock(json.data);
+      } else {
+        toastRef.current?.showToast(json.status, json.message);
+      }
+    } catch (err) {
+      toastRef.current?.showToast('99', 'Gagal memuat data stock');
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  // GET RAK DARI API
+   async function fetchRakOptions() {
+    try {
+      const res = await fetch('/api/rak');
+      const json = await res.json();
+      if (json.status === '00') {
+        
+        const options = json.data.map(rak => ({
+          value: rak.KODE, 
+          label: rak.KETERANGAN 
+        }));
+        setRakOptions(options);
+      } else {
+        toastRef.current?.showToast(json.status, json.message);
+      }
+    } catch (err) {
+      toastRef.current?.showToast('99', 'Gagal memuat data rak');
+    }
+  }
+
+  async function fetchStock() {
     setIsLoading(true);
     try {
       const res = await fetch('/api/stock');
@@ -49,43 +109,36 @@ const StockPage = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }
 
   useEffect(() => {
     fetchStock();
+    fetchRakOptions();
+    fetchsSatuanOptions();
   }, []);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
+const handleChange = (e) => {
+  const { name, value } = e.target;
+  
+  if (name === 'TGL_MASUK') {
+    const formattedDate = value ? formatDateToDB(value) : '';
+    setForm((prev) => ({ ...prev, [name]: formattedDate }));
+  } else {
     setForm((prev) => ({ ...prev, [name]: value }));
-  };
+  }
+};
 
-  const handleDelete = async (data) => {
-    try {
-      if (!data?.KODE) {
-        toastRef.current?.showToast('warn', 'Data tidak valid');
-        return;
-      }
+function formatDateToDB(date) {
+  if (!date) return '';
+const d = new Date(date);
+d.setHours(12, 0, 0, 0);
 
-      const res = await fetch(`/api/stock/${data.KODE}`, {
-        method: 'DELETE',
-      });
+const year = d.getFullYear();
+const month = String(d.getMonth() + 1).padStart(2, '0');
+const day = String(d.getDate()).padStart(2, '0');
 
-      const json = await res.json();
-
-      if (!res.ok || json.status !== '00') {
-        toastRef.current?.showToast('error', json.message || 'Gagal menghapus data');
-        return;
-      }
-
-      toastRef.current?.showToast('success', 'Data berhasil dihapus');
-      fetchStock();
-    } catch (err) {
-      console.error('Error:', err);
-      toastRef.current?.showToast('error', 'Terjadi kesalahan saat menghapus data');
-    }
-  };
-
+return `${year}-${month}-${day}`;
+}
   const handleSubmit = async (data) => {
     try {
       const res = await fetch('/api/stock', {
@@ -113,32 +166,60 @@ const StockPage = () => {
     }
   };
 
-  const handleUpdate = async () => {
-    try {
-      const res = await fetch(`/api/stock/${selectedStock.KODE}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form)
-      });
-      const json = await res.json();
+ const handleUpdate = async () => {
+  try {
+    const res = await fetch(`/api/stock/${selectedStock.KODE}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(form)
+    });
 
-      if (res.ok && json.status === '00') {
-        toastRef.current?.showToast(json.status, 'Berhasil update stock');
-        fetchStock();
-      } else {
-        toastRef.current?.showToast('99', json.message || 'Gagal update stock');
-      }
-    } catch (err) {
-      console.error('Update error:', err);
-      toastRef.current?.showToast('99', 'Gagal update stock');
-    } finally {
-      setDialogMode(null);
-      setForm({
-        gudang: '', KODE: '', KODE_TOKO: '', NAMA: '', JENIS: '', GOLONGAN: '',
-        RAK: '', DOS: '', SATUAN: '', ISI: '', DISCOUNT: '', HB: '', HJ: '', BERAT: ''
-      });
+    // Periksa dulu apakah response memiliki body
+    const text = await res.text();
+    const json = text ? JSON.parse(text) : {};
+
+    if (!res.ok) {
+      throw new Error(json.message || 'Gagal update stock');
     }
-  };
+
+    toastRef.current?.showToast(json.status || '00', 'Berhasil update stock');
+    fetchStock();
+  } catch (err) {
+    console.error('Update error:', err);
+    toastRef.current?.showToast('99', err.message || 'Gagal update stock');
+  } finally {
+    setDialogMode(null);
+    setForm({
+      gudang: '', KODE: '', KODE_TOKO: '', NAMA: '', JENIS: '', GOLONGAN: '',
+      RAK: '', DOS: '', SATUAN: '', ISI: '', DISCOUNT: '', HB: '', HJ: '', BERAT: ''
+    });
+  }
+};
+const handleDelete = async (data) => {
+  try {
+    if (!data?.KODE) {
+      toastRef.current?.showToast('warn', 'Data tidak valid');
+      return;
+    }
+
+    const res = await fetch(`/api/stock/${data.KODE}`, {
+      method: 'DELETE',
+    });
+
+    const json = await res.json();
+
+    if (!res.ok || json.status !== '00') {
+      toastRef.current?.showToast('error', json.message || 'Gagal menghapus data');
+      return;
+    }
+
+    toastRef.current?.showToast('success', 'Data berhasil dihapus');
+    fetchStock(); // Refresh data setelah menghapus
+  } catch (err) {
+    console.error('Error:', err);
+    toastRef.current?.showToast('error', 'Terjadi kesalahan saat menghapus data');
+  }
+};
 
   return (
     <div className="card">
@@ -206,16 +287,53 @@ const StockPage = () => {
   onHide={() => setDialogMode(null)}
   style={{ width: '40rem' }}
 >
-  <form
-    onSubmit={(e) => {
-      e.preventDefault();
-      handleUpdate();
-    }}
-  >
-    {[
-      'gudang', 'KODE', 'KODE_TOKO', 'NAMA', 'JENIS', 'GOLONGAN', 'RAK',
-      'DOS', 'SATUAN', 'ISI', 'DISCOUNT', 'HB', 'HJ', 'BERAT',
-    ].map((field) => (
+  <form onSubmit={(e) => { e.preventDefault(); handleUpdate(); }}>
+    {/* Field sebelum RAK */}
+    {['gudang', 'KODE', 'KODE_TOKO', 'NAMA', 'JENIS', 'GOLONGAN'].map((field) => (
+      <div key={field} className="mb-3">
+        <label htmlFor={field}>{field.replace(/_/g, ' ')}</label>
+        <InputText
+          id={field}
+          name={field}
+          value={form[field]}
+          onChange={handleChange}
+          className="w-full mt-2"
+        />
+      </div>
+    ))}
+
+    {/* Field RAK sebagai Dropdown */}
+    <div className="mb-3">
+      <label htmlFor="RAK">RAK</label>
+      <Dropdown
+        id="RAK"
+        name="RAK"
+        value={form.RAK}
+        options={rakOptions}
+        onChange={handleChange}
+        className="w-full mt-2"
+        placeholder="Pilih RAK"
+        optionLabel="label"
+        optionValue="value"
+      />
+    </div>
+     <div className="mb-3">
+      <label htmlFor="SATUAN">SATUAN</label>
+      <Dropdown
+        id="SATUAN"
+        name="SATUAN"
+        value={form.SATUAN}
+        options={satuanOptions}
+        onChange={handleChange}
+        className="w-full mt-2"
+        placeholder="Pilih SATUAN"
+        optionLabel="label"
+        optionValue="value"
+      />
+    </div>
+
+    {}
+    {['DOS', 'ISI', 'DISCOUNT', 'HB', 'HJ', 'BERAT'].map((field) => (
       <div key={field} className="mb-3">
         <label htmlFor={field}>{field.replace(/_/g, ' ')}</label>
         <InputText
@@ -233,7 +351,6 @@ const StockPage = () => {
     </div>
   </form>
 </Dialog>
-
 
      <Dialog
   header="Tambah Stock"
@@ -314,17 +431,34 @@ const StockPage = () => {
       />
     </div>
 
-    <div className="mb-3">
-      <label htmlFor="RAK">RAK</label>
-      <InputText
-        id="RAK"
-        name="RAK"
-        value={form.RAK}
-        onChange={handleChange}
-        className="w-full mt-2"
-      />
-    </div>
-
+   <div className="mb-3">
+            <label htmlFor="RAK">RAK</label>
+           <Dropdown
+              id="RAK"
+              name="RAK"
+              value={form.RAK}
+              options={rakOptions}
+              onChange={handleChange}
+              className="w-full mt-2"
+              placeholder="Pilih RAK"
+              optionLabel="label"
+              optionValue="value"
+            />
+          </div>
+          <div className="mb-3">
+            <label htmlFor="SATUAN">Satuan</label>
+            <Dropdown
+              id="SATUAN"
+              name="SATUAN"
+              value={form.SATUAN}
+              options={satuanOptions}
+              onChange={handleChange}
+              className="w-full mt-2"
+              placeholder="Pilih Satuan"
+              optionLabel="label"
+              optionValue="value"
+            />
+          </div>
     <div className="mb-3">
       <label htmlFor="DOS">DOS</label>
       <InputText
@@ -336,16 +470,6 @@ const StockPage = () => {
       />
     </div>
 
-    <div className="mb-3">
-      <label htmlFor="SATUAN">Satuan</label>
-      <InputText
-        id="SATUAN"
-        name="SATUAN"
-        value={form.SATUAN}
-        onChange={handleChange}
-        className="w-full mt-2"
-      />
-    </div>
 
     <div className="mb-3">
       <label htmlFor="ISI">Isi</label>
@@ -402,16 +526,21 @@ const StockPage = () => {
       />
     </div>
 
-    <div className="mb-3">
-      <label htmlFor="TGL_MASUK">Tanggal Masuk</label>
-      <InputText
-        id="TGL_MASUK"
-        name="TGL_MASUK"
-        value={form.TGL_MASUK}
-        onChange={handleChange}
-        className="w-full mt-2"
-      />
-    </div>
+   <div className="mb-3">
+  <label htmlFor="TGL_MASUK">Tanggal Masuk</label>
+  <Calendar
+  id="TGL_MASUK"
+  name="TGL_MASUK"
+  value={form.TGL_MASUK ? new Date(form.TGL_MASUK) : null}
+  onChange={handleChange}
+  dateFormat="dd-mm-yy"
+  showIcon
+  className="w-full mt-2"
+  // Tambahkan ini untuk memastikan tanggal sesuai input user
+  keepInvalid={false}
+  hideOnDateTimeSelect={true}
+/>
+</div>
 
     <div className="mb-3">
       <label htmlFor="BERAT">Berat</label>

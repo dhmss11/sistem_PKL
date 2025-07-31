@@ -14,6 +14,7 @@ const StockPage = () => {
   const [stock, setStock] = useState([]);
    const [rakOptions, setRakOptions] = useState([]); 
   const [satuanOptions, setSatuanOptions] = useState([]);
+   const [listGudang, setListGudang] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [dialogMode, setDialogMode] = useState(null);
   const [selectedStock, setSelectedStock] = useState(null);
@@ -37,7 +38,7 @@ const StockPage = () => {
     BERAT: ''
   });
 
-  // GET SATUAN DARI API
+
    async function fetchsSatuanOptions() {
     try {
       const res = await fetch('/api/satuan');
@@ -74,7 +75,7 @@ const StockPage = () => {
     }
   }
 
-  // GET RAK DARI API
+
    async function fetchRakOptions() {
     try {
       const res = await fetch('/api/rak');
@@ -111,7 +112,28 @@ const StockPage = () => {
     }
   }
 
+
+  
+const fetchGudang = async () => {
+    try {
+        const res = await fetch("/api/gudang/nama");
+        const json = await res.json();
+
+        if (json.status === "00") {
+            const options = json.namaGudang.map((nama)=>({
+                label : nama,
+                value :nama,
+            }));
+            setListGudang(options);
+        }
+    }catch (error){
+        console.error("Form Gagal ambil nama gudang")
+    }
+};
+
+
   useEffect(() => {
+    fetchGudang();
     fetchStock();
     fetchRakOptions();
     fetchsSatuanOptions();
@@ -366,15 +388,17 @@ const handleDelete = async (data) => {
     }}
   >
     <div className="mb-3">
-      <label htmlFor="gudang">Gudang</label>
-      <InputText
-        id="gudang"
-        name="gudang"
-        value={form.gudang}
-        onChange={handleChange}
-        className="w-full mt-2"
+       <label htmlFor="satuan">Gudang</label>
+       <Dropdown
+       id="gudang"
+       name="gudang"
+       value={form.gudang}
+       options={listGudang}
+       onChange={(e) => setForm((prev) => ({ ...prev, gudang: e.value }))}
+       placeholder="Pilih Gudang"
+      className="w-full mt-2"
       />
-    </div>
+ </div>
 
     <div className="mb-3">
       <label htmlFor="KODE">Kode</label>

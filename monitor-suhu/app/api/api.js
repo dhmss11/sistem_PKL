@@ -20,9 +20,11 @@ export const API_ENDPOINTS = {
    GET_NAMA_GUDANG: `${API_URL}/nama-gudang/nama`,
    GET_PRODUK_BY_GUDANG: (gudang) => `${API_URL}/master-produk/gudang/${gudang}`,
 
-   GET_ALL_JENIS_GUDANG : `${API_URL}/golonganstock`,
-   GET_ALL_KETERANGAN_STOCK: (keterangan) => `${API_URL}/golonganstock/keterangan/${keterangan}`,
-
+    GET_ALL_JENIS_GUDANG : `${API_URL}/golonganstock`,
+    GET_ALL_KETERANGAN_STOCK: (keterangan) => `${API_URL}/golonganstock/keterangan/${keterangan}`,
+    ADD_GOLONGAN_STOCK: `${API_URL}/golonganstock/create`,
+    EDIT_JENIS_GUDANG: (id) => `${API_URL}/golonganstock/edit/${id}`,
+    DELETE_JENIS_GUDANG: (id) => `${API_URL}/golonganstock/delete/${id}`,
    
    GET_ALL_STOCK : `${API_URL}/stock`,
    ADD_STOCK: `${API_URL}/stock/add`,

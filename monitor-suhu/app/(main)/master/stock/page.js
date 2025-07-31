@@ -16,6 +16,7 @@ const StockPage = () => {
    const [rakOptions, setRakOptions] = useState([]); 
   const [satuanOptions, setSatuanOptions] = useState([]);
    const [listGudang, setListGudang] = useState(null);
+   const [golonganOptions, setGolonganOptions] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [dialogMode, setDialogMode] = useState(null);
   const [selectedStock, setSelectedStock] = useState(null);
@@ -39,12 +40,6 @@ const StockPage = () => {
     BERAT: ''
   });
 
-   const golonganOptions = [
-    { label: 'MAKANAN', value: 'MAKANAN' },
-    { label: 'MINUMAN', value: 'MINUMAN' },
-    { label: 'ELEKTRONIK', value: 'ELEKTRONIK' },
-    { label: 'PAKAIAN', value: 'PAKAIAN' }
-  ];
 
    async function fetchsSatuanOptions() {
     try {
@@ -98,9 +93,46 @@ const StockPage = () => {
         toastRef.current?.showToast(json.status, json.message);
       }
     } catch (err) {
-      toastRef.current?.showToast('99', 'Gagal memuat data rak');
+      toastRef.current?.showToast('99', 'Gagal memuat data stock');
     }
   }
+
+  async function fetchGolonganOptions() {
+    try {
+      const res = await fetch('/api/golonganstock');
+      const json = await res.json();
+      if (json.status === '00') {
+        
+        const options = json.data.map(golongan => ({
+          value: golongan.KODE, 
+          label: golongan.KETERANGAN 
+        }));
+        setGolonganOptions(options);
+      } else {
+        toastRef.current?.showToast(json.status, json.message);
+      }
+    } catch (err) {
+      toastRef.current?.showToast('99', 'Gagal memuat data Golongan stock');
+    }
+  }
+
+  async function fetchStock() {
+    setIsLoading(true);
+    try {
+      const res = await fetch('/api/golonganstock');
+      const json = await res.json();
+      if (json.status === '00') {
+        setStock(json.data);
+      } else {
+        toastRef.current?.showToast(json.status, json.message);
+      }
+    } catch (err) {
+      toastRef.current?.showToast('99', 'Gagal memuat data stock');
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
 
   async function fetchStock() {
     setIsLoading(true);
@@ -144,12 +176,13 @@ const fetchGudang = async () => {
     fetchStock();
     fetchRakOptions();
     fetchsSatuanOptions();
+    fetchGolonganOptions();
   }, []);
 
 const handleChange = (e) => {
   const { name, value } = e.target;
   
-  if (name === 'TGL_MASUK') {
+  if (name === 'TGL_MASUK' || name === 'EXPIRED') {
     const formattedDate = value ? formatDateToDB(value) : '';
     setForm((prev) => ({ ...prev, [name]: formattedDate }));
   } else {
@@ -331,7 +364,20 @@ const handleDelete = async (data) => {
       </div>
     ))}
 
-    {/* Field RAK sebagai Dropdown */}
+     <div className="mb-3">
+      <label htmlFor="GOLONGAN">Golongan</label>
+      <Dropdown
+        id="GOLONGAN"
+        name="GOLONGAN"
+        value={form.GOLONGAN}
+        options={golonganOptions}
+        onChange={handleChange}
+        className="w-full mt-2"
+        placeholder="Pilih Golongan"
+        optionLabel="label"
+        optionValue="value"
+      />
+    </div>
     <div className="mb-3">
       <label htmlFor="RAK">RAK</label>
       <Dropdown
@@ -360,19 +406,6 @@ const handleDelete = async (data) => {
         optionValue="value"
       />
     </div>
-
-    <div className="mb-3">
-  <label htmlFor="GOLONGAN">Golongan</label>
-  <Dropdown
-    id="GOLONGAN"
-    name="GOLONGAN"
-    value={form.GOLONGAN}
-    options={golonganOptions}
-    onChange={(e) => setForm((prev) => ({ ...prev, GOLONGAN: e.value }))}
-    placeholder="Pilih Golongan"
-    className="w-full mt-2"
-  />
-</div>
 
     {}
     {['DOS', 'ISI', 'DISCOUNT', 'HB', 'HJ', 'BERAT'].map((field) => (
@@ -464,19 +497,20 @@ const handleDelete = async (data) => {
       />
     </div>
 
-    <div className="mb-3">
-  <label htmlFor="GOLONGAN">Golongan</label>
-  <Dropdown
-    id="GOLONGAN"
-    name="GOLONGAN"
-    value={form.GOLONGAN}
-    options={golonganOptions}
-    onChange={(e) => setForm((prev) => ({ ...prev, GOLONGAN: e.value }))}
-    placeholder="Pilih Golongan"
-    className="w-full mt-2"
-  />
-</div>
-
+  <div className="mb-3">
+      <label htmlFor="GOLONGAN">Golongan</label>
+          <Dropdown
+             id="GOLONGAN"
+             name="GOLONGAN"
+             value={form.GOLONGAN}
+             options={golonganOptions}
+             onChange={handleChange}
+             className="w-full mt-2"
+             placeholder="Pilih Golongan"
+             optionLabel="label"
+             optionValue="value"
+            />
+          </div>
 
    <div className="mb-3">
             <label htmlFor="RAK">RAK</label>
@@ -564,29 +598,34 @@ const handleDelete = async (data) => {
 
     <div className="mb-3">
       <label htmlFor="EXPIRED">Expired</label>
-      <InputText
-        id="EXPIRED"
-        name="EXPIRED"
-        value={form.EXPIRED}
-        onChange={handleChange}
-        className="w-full mt-2"
-      />
+      <Calendar
+      id="EXPIRED"
+      name="EXPIRED"
+      value={form.EXPIRED ? new Date(form.EXPIRED) : null}
+      onChange={handleChange}
+      dateFormat="dd-mm-yy"
+      showIcon
+      className="w-full mt-2"
+      keepInvalid={false}
+      hideOnDateTimeSelect={true}
+      placeholder='Pilih Tanggal Expired'
+    />
     </div>
 
    <div className="mb-3">
   <label htmlFor="TGL_MASUK">Tanggal Masuk</label>
-  <Calendar
-  id="TGL_MASUK"
-  name="TGL_MASUK"
-  value={form.TGL_MASUK ? new Date(form.TGL_MASUK) : null}
-  onChange={handleChange}
-  dateFormat="dd-mm-yy"
-  showIcon
-  className="w-full mt-2"
-  // Tambahkan ini untuk memastikan tanggal sesuai input user
-  keepInvalid={false}
-  hideOnDateTimeSelect={true}
-/>
+      <Calendar
+      id="TGL_MASUK"
+      name="TGL_MASUK"
+      value={form.TGL_MASUK ? new Date(form.TGL_MASUK) : null}
+      onChange={handleChange}
+      dateFormat="dd-mm-yy"
+      showIcon
+      className="w-full mt-2"
+      keepInvalid={false}
+      hideOnDateTimeSelect={true}
+      placeholder='Pilih Tanggal Masuk'
+    />
 </div>
 
     <div className="mb-3">

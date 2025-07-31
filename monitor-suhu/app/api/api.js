@@ -50,8 +50,8 @@ export const API_ENDPOINTS = {
     GET_ALL_JENIS_GUDANG : `${API_URL}/golonganstock`,
     GET_ALL_KETERANGAN_STOCK: (keterangan) => `${API_URL}/golonganstock/keterangan/${keterangan}`,
     ADD_GOLONGAN_STOCK: `${API_URL}/golonganstock/create`,
-    EDIT_JENIS_GUDANG: (id) => `${API_URL}/golonganstock/edit/${id}`,
-    DELETE_JENIS_GUDANG: (id) => `${API_URL}/golonganstock/delete/${id}`,
+    EDIT_JENIS_GUDANG: (kode) => `${API_URL}/golonganstock/edit/${kode}`,
+    DELETE_JENIS_GUDANG: (kode) => `${API_URL}/golonganstock/delete/${kode}`,
    
    GET_ALL_STOCK : `${API_URL}/stock`,
    ADD_STOCK: `${API_URL}/stock/add`,

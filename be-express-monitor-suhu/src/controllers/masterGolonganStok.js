@@ -80,7 +80,6 @@ export const createJenisGudang = async (req, res) => {
 
     const { KODE, KETERANGAN } = validation.data;
 
-
     const existing = await db('golonganstock').where({ KODE }).first();
     if (existing) {
       return res.status(400).json({
@@ -89,13 +88,14 @@ export const createJenisGudang = async (req, res) => {
         datetime: datetime(),
       });
     }
-    const [id] = await db('golonganstock').insert({ KODE, KETERANGAN }).returning('id');
+
+    await db('golonganstock').insert({ KODE, KETERANGAN });
 
     return res.status(201).json({
       status: status.SUKSES,
       message: 'Jenis gudang berhasil ditambahkan',
       datetime: datetime(),
-      data: { id, KODE, KETERANGAN },
+      data: { KODE, KETERANGAN },
     });
   } catch (error) {
     console.error('Error tambah jenis gudang:', error.message);
@@ -108,70 +108,62 @@ export const createJenisGudang = async (req, res) => {
 };
 
 export const editJenisGudang = async (req, res) => {
-  const { id } = req.params;
-
-  const parsed = updateJenisGudangSchema.safeParse(req.body);
-  if (!parsed.success) {
-    return res.status(400).json({
-      status: status.GAGAL,
-      message: 'Validasi gagal',
-      error: parsed.error.flatten(),
-      datetime: datetime(),
-    });
-  }
-
-  const { KODE, KETERANGAN } = parsed.data;
-
   try {
-    const updated = await db('golonganstock').where('id', id).update({ KODE, KETERANGAN });
+    const { kode } = req.params;
+    const { KETERANGAN } = req.body;
 
-    if (!updated) {
-      return res.status(404).json({
-        status: status.GAGAL,
-        message: 'Jenis gudang tidak ditemukan',
+    if (!kode || !KETERANGAN) {
+      return res.status(400).json({
+        status: '99',
+        message: 'Data tidak lengkap',
         datetime: datetime(),
       });
     }
 
-    return res.status(200).json({
-      status: status.SUKSES,
-      message: 'Berhasil mengubah jenis gudang',
+    await db('golonganstock')
+      .where('KODE', kode)
+      .update({ KETERANGAN });
+
+    res.status(200).json({
+      status: '00',
+      message: 'Data berhasil diupdate',
       datetime: datetime(),
     });
   } catch (error) {
-    console.error('Error edit jenis gudang:', error.message);
-    return res.status(500).json({
-      status: status.ERROR,
-      message: `Gagal mengubah jenis gudang: ${error.message}`,
+    console.error('Error update jenis gudang:', error.message);
+    res.status(500).json({
+      status: '99',
+      message: 'Gagal mengupdate jenis gudang',
       datetime: datetime(),
     });
   }
 };
-export const deleteJenisGudang = async (req,res) => {
-    const {id} = req.params;
 
-    try {
-        const deleted = await db('golonganstock').where('id',id).del();
+export const deleteJenisGudang = async (req, res) => {
+  try {
+    const { kode } = req.params;
 
-        if (!deleted) {
-            return res.status(404).json({
-                status : status.GAGAL,
-                message : 'Jenis gudang tidak ditemukan',
-                datetime : datetime(),
-            });
-        }
-
-        return res.status(200).json({
-            status : status.SUKSES,
-            message : 'Berhasil mengahpus jenis gudang',
-            datetime : datetime(),
-        });
-    }catch (error) {
-        console.error('Error hapus jenis gudang :',error.message);
-        return res.status(500).json({
-            status : status.ERROR,
-            message : `Gagal menghapus jenis gudang : ${error.message}`,
-            datetime : datetime(),
-        });
+    if (!kode) {
+      return res.status(400).json({
+        status: '99',
+        message: 'Kode tidak ditemukan di parameter',
+        datetime: datetime(),
+      });
     }
+
+    await db('golonganstock').where('KODE', kode).del();
+
+    res.status(200).json({
+      status: '00',
+      message: 'Data berhasil dihapus',
+      datetime: datetime(),
+    });
+  } catch (error) {
+    console.error('Error hapus jenis gudang:', error.message);
+    res.status(500).json({
+      status: '99',
+      message: 'Gagal menghapus jenis gudang',
+      datetime: datetime(),
+    });
+  }
 };

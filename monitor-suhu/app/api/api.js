@@ -46,7 +46,7 @@ export const API_ENDPOINTS = {
   EDIT_STOCK: (id) => `${API_URL}/stock/edit/${id}`,
   DELETE_STOCK: (id) => `${API_URL}/stock/delete/${id}`,
 
-
+    // JENIS GUDANG
     GET_ALL_JENIS_GUDANG : `${API_URL}/golonganstock`,
     GET_ALL_KETERANGAN_STOCK: (keterangan) => `${API_URL}/golonganstock/keterangan/${keterangan}`,
     ADD_GOLONGAN_STOCK: `${API_URL}/golonganstock/create`,
@@ -57,5 +57,12 @@ export const API_ENDPOINTS = {
    ADD_STOCK: `${API_URL}/stock/add`,
    EDIT_STOCK: (id) => `${API_URL}/stock/edit/${id}`,
    DELETE_STOCK: (id) => `${API_URL}/stock/delete/${id}`,
+   
+    // KARTU STOCK
+    GET_ALL_KARTUSTOCK: `${API_URL}/kartustock`,
+    ADD_KARTUSTOCK: `${API_URL}/kartustock/add`,
+    EDIT_KARTUSTOCK: (id) => `${API_URL}/kartustock/edit/${id}`,
+    DELETE_KARTUSTOCK: (id) => `${API_URL}/kartustock/${id}`,
+
 
 };

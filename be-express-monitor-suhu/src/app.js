@@ -12,7 +12,7 @@ import jenisGudangRoutes from './routes/jenisGudangRoutes.js';
 import stockRoutes from './routes/stockRoutes.js';
 import satuanStockRoutes from './routes/satuanStockRoutes.js';
 import rakRoutes from './routes/rakRoutes.js';
-
+import kartuStockRoutes from './routes/kartuStockRoutes.js';
 
 
 const app = express();
@@ -48,6 +48,7 @@ app.use('/api/golonganstock', jenisGudangRoutes);
 app.use('/api/stock', stockRoutes);
 app.use('/api/rak', rakRoutes);
 app.use('/api/satuan', satuanStockRoutes);
+app.use('/api/kartustock', kartuStockRoutes);
 
 app.get('/', [setResponseHeader], (req, res) => {
   return res.status(200).json(`Welcome to the server! ${new Date().toLocaleString()}`);

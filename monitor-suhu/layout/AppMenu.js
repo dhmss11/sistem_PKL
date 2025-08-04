@@ -56,13 +56,13 @@ const AppMenu = () => {
             ]
         },
         {
-            label: 'Monitor',
+            label: 'Laporan',
             icon: 'pi pi-fw pi-chart-bar',
             items: [
                 {
-                    label: 'Update Suhu Mesin',
+                    label: 'Kartu Stock',
                     icon: 'pi pi-fw pi-sync',
-                    to: '/monitor/suhu'
+                    to: '/laporan/kartustock'
                 }
             ]
         }

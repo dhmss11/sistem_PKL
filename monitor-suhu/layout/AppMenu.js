@@ -29,20 +29,19 @@ const AppMenu = () => {
                 {   label: 'Satuan Stock', 
                     icon: 'pi pi-list', 
                     to: '/kode/satuanstock' 
-                }
+                },
+                {
+                    label: 'Golongan',
+                    icon: 'pi pi-fw pi-th-large',
+                    to: '/master/jenis-gudang'
+                },
             ]
-            
         },
         {
 
             label: 'Master',
             icon: 'pi pi-fw pi-sitemap',
             items: [
-                {
-                    label: 'Jenis Gudang',
-                    icon: 'pi pi-fw pi-th-large',
-                    to: '/master/jenis-gudang'
-                },
                 {
                     label: 'Gudang',
                     icon: 'pi pi-fw pi-building',
@@ -53,6 +52,21 @@ const AppMenu = () => {
                     icon: 'pi pi-fw pi-box',
                     to: '/master/stock'
                 },
+                {
+                    label: 'export',
+                    icon: 'pi pi-download',
+                    to: '/master/export'
+                },
+                {
+                    label: 'import',
+                    icon: 'pi pi-upload',
+                    to: '/master/import'
+                },
+                {
+                    label: 'Users',
+                    icon: 'pi pi-users',
+                    to: '/master/user'
+                }
             ]
         },
         {

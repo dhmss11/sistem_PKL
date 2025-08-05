@@ -13,7 +13,7 @@ import { db } from "../core/config/knex.js";
 
 export const fetchAllGudang = async (req, res) => {
   try {
-    const gudang = await db("master_gudang").select("id", "nama");
+    const gudang = await db("nama_gudang").select("id", "nama","alamat","KODE","KETERANGAN");
 
     if (!gudang || gudang.length === 0) {
       return res.status(404).json({

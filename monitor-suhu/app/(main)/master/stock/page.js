@@ -8,7 +8,6 @@ import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
 import { Dropdown } from 'primereact/dropdown';
 import { Calendar } from 'primereact/calendar';
-import { format, parseISO } from 'date-fns';
 import ToastNotifier from '@/app/components/ToastNotifier';
 
 const initialFormState = {
@@ -45,10 +44,9 @@ const StockPage = () => {
 const formatDateToDB = (date) => {
   if (!date) return '';
   
-  // Pastikan date adalah objek Date
+  
   const d = new Date(date);
   
-  // Gunakan metode UTC untuk menghindari pengaruh timezone lokal
   const year = d.getUTCFullYear();
   const month = String(d.getUTCMonth() + 1).padStart(2, '0');
   const day = String(d.getUTCDate()).padStart(2, '0');
@@ -56,7 +54,7 @@ const formatDateToDB = (date) => {
   return `${year}-${month}-${day}`;
 };
 
-  // Fetch data dengan error handling
+  
   const fetchData = useCallback(async (endpoint, setData, labelField = 'KETERANGAN') => {
     try {
       const res = await fetch(`/api/${endpoint}`);
@@ -77,7 +75,7 @@ const formatDateToDB = (date) => {
     }
   }, []);
 
-  // KHUSUS LIST GUDANG
+
   const fetchGudang = async () => {
     try {
         const res = await fetch("/api/gudang/nama");
@@ -95,7 +93,7 @@ const formatDateToDB = (date) => {
     }
 };
 
-  // Fetch stock data
+
   const fetchStock = useCallback(async () => {
     setIsLoading(true);
     try {
@@ -115,7 +113,6 @@ const formatDateToDB = (date) => {
     }
   }, []);
 
-  // Fetch all initial data
   useEffect(() => {
     const loadInitialData = async () => {
       await Promise.all([
@@ -130,7 +127,6 @@ const formatDateToDB = (date) => {
     loadInitialData();
   }, [fetchData, fetchStock]);
 
-  // Handle form changes
   const handleChange = useCallback((e) => {
     const { name, value } = e.target;
     
@@ -143,7 +139,7 @@ const formatDateToDB = (date) => {
     }
   }, [formatDateToDB]);
 
-  // Handle form submission
+
   const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -162,9 +158,9 @@ const formatDateToDB = (date) => {
 
       if (res.ok && json.status === '00') {
         toastRef.current?.showToast(json.status, json.message);
-        fetchStock(); // Refresh data
-        setDialogMode(null); // Tutup dialog
-        setForm(initialFormState); // Reset form
+        fetchStock(); 
+        setDialogMode(null); 
+        setForm(initialFormState); 
         setStock((prev) => [...prev, json.data]);
       } else {
         toastRef.current?.showToast(json.status || '99', json.message || 'Gagal menyimpan data');
@@ -177,7 +173,6 @@ const formatDateToDB = (date) => {
     }
   }, [dialogMode, form, selectedStock, fetchStock]);
 
-  // Handle delete
   const handleDelete = useCallback(async (data) => {
     if (!window.confirm('Apakah Anda yakin ingin menghapus data ini?')) return;
     
@@ -203,11 +198,11 @@ const formatDateToDB = (date) => {
     return;
   }
   
-  // Format tanggal ke YYYY-MM-DD tanpa pengaruh timezone
+
   const formattedDate = formatDateToDB(value);
   setForm(prev => ({ ...prev, [name]: formattedDate }));
 };
-  // Render Calendar input dengan konsisten
+ 
   const renderCalendarInput = (name, label) => (
     <div className="mb-3">
       <label htmlFor={name}>{label}</label>
@@ -368,7 +363,7 @@ const formatDateToDB = (date) => {
 
   return (
     <div className="card">
-      <h3 className="text-xl font-semibold">Master Stock</h3>
+      <h3 className="text-xl font-semibold">Stock</h3>
       
       <Button
         label="Tambah Stock"
@@ -387,7 +382,7 @@ const formatDateToDB = (date) => {
         emptyMessage="Tidak ada data stock"
       >
         {Object.keys(initialFormState)
-          .filter(key => key !== 'BERAT') // Sembunyikan beberapa field jika perlu
+          .filter(key => key !== 'BERAT') 
           .map(key => (
             <Column 
               key={key} 

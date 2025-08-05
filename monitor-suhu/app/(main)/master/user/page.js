@@ -7,250 +7,293 @@ import { Column } from 'primereact/column';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
 import { Dropdown } from 'primereact/dropdown';
-import ToastNotifier from '@/app/components/ToastNotifier'; // Pastikan path sesuai struktur proyekmu
+import ToastNotifier from '@/app/components/ToastNotifier';
 
-/**
- * @typedef {Object} User
- * @property {number} [id]
- * @property {string} name
- * @property {string} email
- * @property {string} password
- * @property {string} phone
- * @property {string} role
- */
+const defaultForm = {
+  username: '',
+  password: '',
+  email: '',
+  no_hp: '',
+  role: '',
+};
 
 const UserPage = () => {
-    const toastRef = useRef(null);
-    const [users, setUsers] = useState([]);
-    const [isLoading, setIsLoading] = useState(false);
-    const [dialogMode, setDialogMode] = useState(null); // 'add' | 'edit'
-    const [selectedUser, setSelectedUser] = useState(null);
-    const [form, setForm] = useState({
-        name: '',
-        email: '',
-        password: '',
-        role: ''
-    });
+  const toastRef = useRef(null);
+  const [users, setUsers] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [dialogMode, setDialogMode] = useState(null);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [form, setForm] = useState(defaultForm);
 
-    const fetchUser = async () => {
-        setIsLoading(true);
-        try {
-            const res = await fetch('/api/users');
-            const json = await res.json();
-
-            setUsers(json.data.users);
-        } catch (err) {
-            console.error(`Failed to fetch: ${err}`);
-            toastRef.current?.showToast('99', 'Gagal memuat data user');
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setForm((prev) => ({ ...prev, [name]: value }));
-    };
-
- const handleSubmit = async (data) => {
-    let updated;
-
-   if (dialogMode === 'add') {
-    console.log('Data yang dikirim ke backend:', data);
-
-    const res = await fetch('/api/users', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-    });
-
-        const json = await res.json();
-        const body = json.data;
-
-        if (body.status === '00') {
-            toastRef.current?.showToast(body.status, body.message);
-            updated = body.user;
-            setUsers((prev) => [...prev, updated]);
-        } else {
-            toastRef.current?.showToast(body.status, body.message);
-        }
-    } else if (dialogMode === 'edit' && selectedUser) {
-        const res = await fetch(`/api/users/${selectedUser.id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data),
-        });
-
-        const json = await res.json();
-
-        if (json.status === '00') {
-            toastRef.current?.showToast(json.status, json.message);
-            updated = json.data.user;
-            setUsers((prev) =>
-                prev.map((item) => (item.id === updated.id ? updated : item))
-            );
-        } else {
-            toastRef.current?.showToast(json.status, json.message);
-        }
+  const fetchUser = async () => {
+    setIsLoading(true);
+    try {
+      const res = await fetch('/api/users');
+      const json = await res.json();
+      setUsers(json.data.users);
+    } catch (err) {
+      console.error(`Failed to fetch: ${err}`);
+      toastRef.current?.showToast('99', 'Gagal memuat data user');
+    } finally {
+      setIsLoading(false);
     }
-    setForm({ name: '', email: '', password: '', role: '' });
+  };
+
+  const resetFormAndCloseDialog = () => {
+    setForm(defaultForm);
     setDialogMode(null);
     setSelectedUser(null);
-};
+  };
 
-const handleDelete = async (user) => {
-    if (!confirm(`hapus user ${user.name}?`))return;
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+
+    if (!form.username || !form.email || !form.no_hp || !form.role) {
+      toastRef.current?.showToast('99', 'Semua field wajib diisi');
+      setIsSubmitting(false);
+      return;
+    }
 
     try {
-        const res = await fetch (`/api/users/${user.id}`,{
-            method: 'DELETE',
+      let res, json;
+
+      if (dialogMode === 'add') {
+        res = await fetch('/api/users', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(form),
         });
-        const json = await res.json();
+      } else if (dialogMode === 'edit' && selectedUser) {
+        const payload = {
+          username: form.username,
+          email: form.email,
+          no_hp: form.no_hp,
+          role: form.role,
+        };
 
-        if (json.status === '00') {
-            toastRef.current?.showToast(json.status, json.message);
+        if (form.password !== '') payload.password = form.password;
+
+        res = await fetch(`/api/users/${selectedUser.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+      }
+
+      json = await res.json();
+
+      if (!res.ok) {
+        if (json?.errors) {
+          json.errors.forEach((err) => {
+            toastRef.current?.showToast('99', `${err.field}: ${err.message}`);
+          });
         } else {
-            toastRef.current?.showToast(json.status, json.message);
+          toastRef.current?.showToast('99', json.message || 'Gagal menyimpan data');
         }
-    } catch (err) {
-        toastRef.current?.showToast('99', 'Gagal menghapus user');
-    }
-};
+        setIsSubmitting(false);
+        return;
+      }
 
-    useEffect(() => {
-        fetchUser();
-    }, []);
+      toastRef.current?.showToast(json.status, json.message);
+      resetFormAndCloseDialog();
+      await fetchUser();
+    } catch (error) {
+      toastRef.current?.showToast('99', 'Gagal menyimpan data');
+      console.error('Submit error:', error);
+    }
+
+    setIsSubmitting(false);
+  };
+
+  const handleDelete = async (user) => {
+    if (!confirm(`Hapus user "${user.username}"?`)) return;
+
+    try {
+      const res = await fetch(`/api/users/${user.id}`, {
+        method: 'DELETE',
+      });
+
+      const json = await res.json();
+
+      if (json.status === '00') {
+        toastRef.current?.showToast('00', json.message);
+        await fetchUser();
+      } else {
+        toastRef.current?.showToast(json.status ?? '99', json.message);
+      }
+    } catch (err) {
+      console.error('Delete error:', err);
+      toastRef.current?.showToast('99', 'Gagal menghapus user');
+    }
+  };
+
+  useEffect(() => {
+    fetchUser();
+  }, []);
 
   return (
-        <div className="card">
-            <h3 className="text-xl font-semibold">Master User</h3>
+    <div className="card">
+      <h3 className="text-xl font-semibold">Master User</h3>
 
-            <div className="flex justify-end my-3">
-                <Button
-                    label="Tambah User"
-                    icon="pi pi-plus"
-                    className="text-sm"
-                    onClick={() => {
-                        setDialogMode('add');
-                        setForm({ name: '', email: '', password: '', role: '' });
-                    }}
-                />
-            </div>
+      <div className="flex justify-end my-3">
+        <Button
+          label="Tambah User"
+          icon="pi pi-plus"
+          className="text-sm"
+          onClick={() => {
+            setDialogMode('add');
+            setForm(defaultForm);
+            setSelectedUser(null);
+          }}
+        />
+      </div>
 
-            <DataTable
+      <DataTable
+        size="small"
+        className="text-sm"
+        value={users}
+        paginator
+        rows={10}
+        loading={isLoading}
+        scrollable
+      >
+        <Column field="username" header="Username" filter />
+        <Column field="email" header="Email" />
+        <Column field="no_hp" header="No HP" />
+        <Column field="role" header="Role" />
+        <Column
+          header="Aksi"
+          body={(row) => (
+            <div className="flex gap-2">
+              <Button
+                icon="pi pi-pencil text-sm"
                 size="small"
-                className="text-sm"
-                value={users}
-                paginator
-                rows={10}
-                loading={isLoading}
-                scrollable
-            >
-                <Column field="name" header="Nama" filter />
-                <Column field="email" header="Email" />
-                <Column field="role" header="Role" />
-                <Column
-                    header="Aksi"
-                    body={(row) => (
-                        <div className="flex gap-2">
-                            <Button
-                                icon="pi pi-pencil text-sm"
-                                size="small"
-                                severity="warning"
-                                onClick={() => {
-                                    setDialogMode('edit');
-                                    setSelectedUser(row);
-                                    setForm({
-                                        name: row.name,
-                                        email: row.email,
-                                        password: '',
-                                        role: row.role
-                                    });
-                                }}
-                            />
-                            <Button
-                                icon="pi pi-trash text-sm"
-                                size="small"
-                                severity="danger"
-                                onClick={() => console.log('delete')}
-                            />
-                        </div>
-                    )}
-                    style={{ width: '150px' }}
-                />
-            </DataTable>
+                severity="warning"
+                onClick={() => {
+                  setDialogMode('edit');
+                  setSelectedUser(row);
+                  setForm({
+                    username: row.username,
+                    email: row.email,
+                    password: '',
+                    no_hp: row.no_hp,
+                    role: row.role,
+                  });
+                }}
+              />
+              <Button
+                icon="pi pi-trash text-sm"
+                size="small"
+                severity="danger"
+                onClick={() => handleDelete(row)}
+              />
+            </div>
+          )}
+          style={{ width: '150px' }}
+        />
+      </DataTable>
 
-            <Dialog
-                header={dialogMode === 'add' ? 'Tambah User' : 'Edit User'}
-                visible={dialogMode !== null}
-                onHide={() => setDialogMode(null)}
-                style={{ width: '30rem' }}
-            >
-                <form
-                    onSubmit={(e) => {
-                        e.preventDefault();
-                        handleSubmit(form);
-                    }}
-                >
-                    <div className="mb-3">
-                        <label htmlFor="name">Nama User</label>
-                        <InputText
-                            id="name"
-                            name="name"
-                            value={form.name}
-                            onChange={handleChange}
-                            type="text"
-                            className="w-full mt-3"
-                            placeholder="Nama"
-                        />
-                    </div>
-                    <div className="mb-3">
-                        <label htmlFor="email">Email</label>
-                        <InputText
-                            id="email"
-                            name="email"
-                            value={form.email}
-                            onChange={handleChange}
-                            type="email"
-                            className="w-full mt-3"
-                            placeholder="Email"
-                        />
-                    </div>
-                    <div className="mb-3">
-                        <label htmlFor="password">Password</label>
-                        <InputText
-                            id="password"
-                            name="password"
-                            value={form.password}
-                            onChange={handleChange}
-                            type="password"
-                            className="w-full mt-3"
-                            placeholder="Password"
-                        />
-                    </div>
-                    <div className="mb-3">
-                        <label htmlFor="role">Role</label>
-                        <Dropdown
-                            id="role"
-                            name="role"
-                            value={form.role}
-                            options={['admin', 'user']}
-                            onChange={(e) => setForm((prev) => ({ ...prev, role: e.value }))}
-                            className="w-full mt-3"
-                            placeholder="Pilih Role"
-                        />
-                    </div>
+      <Dialog
+      key={dialogMode}
+        header={dialogMode === 'add' ? 'Tambah User' : 'Edit User'}
+        visible={dialogMode !== null}
+        onHide={resetFormAndCloseDialog}
+        style={{ width: '30rem' }}
+        unmountOnHide
+      >
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSubmit();
+          }}
+        >
+          <div className="mb-3">
+            <label htmlFor="username">Nama User</label>
+            <InputText
+              id="username"
+              name="username"
+              value={form.username}
+              onChange={handleChange}
+              type="text"
+              className="w-full mt-3"
+              placeholder="Username"
+            />
+          </div>
 
-                    <div className="flex justify-end">
-                        <Button type="submit" label="Submit" severity="success" icon="pi pi-save" />
-                    </div>
-                </form>
-            </Dialog>
+          <div className="mb-3">
+            <label htmlFor="email">Email</label>
+            <InputText
+              id="email"
+              name="email"
+              value={form.email}
+              onChange={handleChange}
+              type="email"
+              className="w-full mt-3"
+              placeholder="Email"
+            />
+          </div>
 
-            <ToastNotifier ref={toastRef} />
-        </div>
-    );
+          <div className="mb-3">
+            <label htmlFor="password">Password</label>
+            <InputText
+              id="password"
+              name="password"
+              value={form.password}
+              onChange={handleChange}
+              type="password"
+              className="w-full mt-3"
+              placeholder='pasword'
+            />
+          </div>
+
+          <div className="mb-3">
+            <label htmlFor="no_hp">Nomor HP</label>
+            <InputText
+              id="no_hp"
+              name="no_hp"
+              value={form.no_hp}
+              onChange={handleChange}
+              type="text"
+              className="w-full mt-3"
+              placeholder="No HP"
+            />
+          </div>
+
+          <div className="mb-3">
+            <label htmlFor="role">Role</label>
+            <Dropdown
+              id="role"
+              name="role"
+              value={form.role}
+              options={['user', 'admin', 'superadmin']}
+              onChange={(e) => setForm((prev) => ({ ...prev, role: e.value }))}
+              className="w-full mt-3"
+              placeholder="Pilih Role"
+            />
+          </div>
+
+          <div className="flex justify-end">
+            <Button
+              type="submit"
+              label="Submit"
+              severity="success"
+              icon="pi pi-save"
+              disabled={isSubmitting}
+            />
+          </div>
+        </form>
+      </Dialog>
+
+      <ToastNotifier ref={toastRef} />
+    </div>
+  );
 };
 
 export default UserPage;
-

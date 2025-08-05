@@ -35,10 +35,10 @@ export const fetchAllUsers = async (req, res) => {
 export const createNewUser = async (req, res) => {
   try {
     const validation = registerSchema.safeParse(req.body);
+    console.log('Body:', req.body);
 
      if (!validation.success) {
   return res.status(400).json({
-    status: status.BAD_REQUEST,
     message: "Validasi gagal",
     datetime: datetime(),
     errors: validation.error.errors.map((err) => ({
@@ -48,7 +48,7 @@ export const createNewUser = async (req, res) => {
   });
 }
 
-const { name, email, password, role } = validation.data;
+const { username, password, email, no_hp, role } = validation.data;
 
 const existingUser = await getUserByEmail(email);
 if (existingUser) {
@@ -61,7 +61,7 @@ if (existingUser) {
 
 const hashedPassword = await hashPassword(password);
 
-const newUser = await addUser({ name, email, password: hashedPassword, role });
+const newUser = await addUser({ username, password: hashedPassword, email, no_hp, role });
 
 return res.status(200).json({
   status: status.SUKSES,
@@ -69,8 +69,9 @@ return res.status(200).json({
   datetime: datetime(),
   user: {
     id: newUser.id,
-    name: newUser.name,
+    username: newUser.username,
     email: newUser.email,
+    no_hp: newUser.no_hp,
     role: newUser.role,
 },
 });
@@ -137,10 +138,11 @@ export const updateUser = async (req, res) => {
       });
     }
 
-    const { name, email, password, role } = validation.data;
+    const { username, password, email, no_hp, role } = validation.data;
     const updateData = {
-      ...(name && { name }),
+      ...(username && { username }),
       ...(email && { email }),
+      ...(no_hp && {no_hp}),
       ...(role && { role }),
     };
 
@@ -157,8 +159,9 @@ export const updateUser = async (req, res) => {
       datetime: datetime(),
       user: {
         id: updatedUser.id,
-        name: updatedUser.name,
+        username: updatedUser.username,
         email: updatedUser.email,
+        no_hp: updatedUser.no_hp,
         role: updatedUser.role,
       },
     });
@@ -187,7 +190,8 @@ export const deleteUser = async (req,res) => {
     await db("users").where({ id }).del();
 
     return res.status(200).json({
-      status: 'User berhsil di hapus',
+      status: status.SUKSES,
+      message : 'user berhasil dihapus',
       datetime: datetime(),
     });
   } catch (error) {

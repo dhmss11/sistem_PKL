@@ -19,15 +19,12 @@ export const getUserByEmail = async (email) =>
 /**
  * Create new user
  **/
-export const addUser = async ({ name, email, password, role = "user" }) => {
-  const [id] = await db("users").insert({ name, email, password, role });
+export const addUser = async ({ username, password, email, no_hp, role = "users" }) => {
+  const [id] = await db("users").insert({ username, password, email, no_hp, role });
   return db("users").where({ id }).first();
 };
 
 
-/**
- * Update user by ID
- */
 export const updateUserById = async (id, updateData) => {
   const affected = await db("users").where({ id }).update(updateData);
   if (affected === 0) {
@@ -35,3 +32,6 @@ export const updateUserById = async (id, updateData) => {
   }
   return getUserById(id);
 };
+
+
+

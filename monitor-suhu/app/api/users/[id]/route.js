@@ -7,7 +7,7 @@ export const PUT = async (req, { params }) => {
   const body = await req.json();
 
   try {
-    const response = await Axios.put(API_ENDPOINTS.EDITUSER(id), body);
+    const response = await Axios.put(API_ENDPOINTS.EDIT_USER(id), body);
     return NextResponse.json({
       status: response.data.status,
       message: response.data.message,
@@ -22,19 +22,23 @@ export const PUT = async (req, { params }) => {
   }
 };
 
-export const DELETE = async (req,{params}) => {
+export const DELETE = async (req, { params }) => {
   const id = params.id;
 
   try {
-    const response = await Axios.delete(API_ENDPOINTS.DELETEUSER(id));
+    const response = await Axios.delete(API_ENDPOINTS.DELETE_USER(id));
     return NextResponse.json({
-      status: response.data.status,
-      message: response.data.message,
+      status: response?.data?.status || '00',
+      message: response?.data?.message || 'User berhasil dihapus',
     });
   } catch (err) {
-    return NextResponse.json({
-      status: '99',
-      message: 'Gagal menghapus user',
-    }, {status: 500});
+    console.error('Gagal hapus user:', err?.response?.data || err);
+    return NextResponse.json(
+      {
+        status: '99',
+        message: err?.response?.data?.message || 'Gagal menghapus user',
+      },
+      { status: 500 }
+    );
   }
-}
+};

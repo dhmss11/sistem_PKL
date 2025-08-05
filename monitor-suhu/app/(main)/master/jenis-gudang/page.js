@@ -16,7 +16,7 @@ export default function GolonganStokPage() {
   const [golongan, setGolongan] = useState([]);
   const [loading, setLoading] = useState(false);
   const [dialogVisible, setDialogVisible] = useState(false);
-  const [dialogMode, setDialogMode] = useState('add'); // 'add' | 'edit'
+  const [dialogMode, setDialogMode] = useState('add'); 
   const [form, setForm] = useState({ KODE: '', KETERANGAN: '' });
 
   useEffect(() => {
@@ -51,18 +51,18 @@ export default function GolonganStokPage() {
     let res, json;
 
     if (dialogMode === 'add') {
-      // Create (POST)
+
       res = await fetch('/api/golonganstock', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
       });
     } else if (dialogMode === 'edit') {
-      // Edit (PUT)
+
       res = await fetch(`/api/golonganstock/${form.KODE}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ KETERANGAN: form.KETERANGAN }), // hanya kirim data yg diedit
+        body: JSON.stringify({ KETERANGAN: form.KETERANGAN }), 
       });
     }
 
@@ -102,12 +102,6 @@ export default function GolonganStokPage() {
 
   const actionButtons = (rowData) => (
     <div className="flex gap-2 justify-center">
-      <Button
-        icon="pi pi-eye"
-        className="p-button-sm p-button-info"
-        tooltip="Lihat Gudang"
-        onClick={() => router.push(`/master/gudang?keterangan=${encodeURIComponent(rowData.KETERANGAN)}`)}
-      />
       <Button
         icon="pi pi-pencil"
         className="p-button-sm p-button-warning"

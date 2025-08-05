@@ -1,177 +1,141 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
 import { Button } from 'primereact/button';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
-import { Dropdown } from 'primereact/dropdown';
 import ToastNotifier from '@/app/components/ToastNotifier';
+
+const defaultForm = {
+  KODE: '',
+  nama: '',
+  alamat: '',
+  KETERANGAN: '',
+};
 
 const GudangPage = () => {
   const toastRef = useRef(null);
-  const searchParams = useSearchParams();
-  const jenisQuery = searchParams.get('keterangan');
-
-  const [gudang, setGudang] = useState([]);
-  const [keteranganOptions, setKeteranganOptions] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [dialogMode, setDialogMode] = useState(null);
+  const [gudangList, setGudangList] = useState([]);
+  const [dialogMode, setDialogMode] = useState(null); // 'add' or 'edit'
   const [selectedGudang, setSelectedGudang] = useState(null);
-  const [form, setForm] = useState({
-    KODE : '',
-    nama: '',
-    alamat: '',
-    KETERANGAN: '',
-  });
+  const [form, setForm] = useState(defaultForm);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [isLocked, setIsLocked] = useState(false);
+ const fetchGudang = async () => {
+  setIsLoading(true);
+  try {
+    const res = await fetch('/api/gudang');
+    const json = await res.json();
+    console.log('RESPON API:', json); 
+    if (res.ok && json.status === '00') {
+     setGudangList(Array.isArray(json.gudang || json.data) ? (json.gudang || json.data) : []);
+    } else {
+      toastRef.current?.showToast('99', json.message || 'Gagal memuat data gudang');
+    }
+  } catch (err) {
+    toastRef.current?.showToast('99', 'Gagal fetch data');
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   useEffect(() => {
-    if (!jenisQuery) {
-      setIsLocked(true);
-      toastRef.current?.showToast('99', 'Halaman dikunci, tidak ada jenis gudang');
-    } else {
-      setIsLocked(false);
-      fetchGudang();
-    }
+    fetchGudang();
+  }, []);
 
-    fetchKeteranganOptions();
-  }, [jenisQuery]);
-
-  const fetchKeteranganOptions = async () => {
-    try {
-      const res = await fetch(`/api/golonganstock/keterangan/${encodeURIComponent(jenisQuery)}`);
-      const json = await res.json();
-
-      if (json.status === '00') {
-        const options = json.data.map((item) => ({
-          label: item.nama,
-          value: item.nama,
-        }));
-        setKeteranganOptions(options);
-      } else {
-        toastRef.current?.showToast(json.status ?? '99', json.message ?? 'Gagal mengambil data keterangan');
-      }
-    } catch (err) {
-      console.error('Fetch keterangan error:', err);
-      toastRef.current?.showToast('99', 'Gagal mengambil data golongan stock');
-    }
-  };
-
-  const fetchGudang = async () => {
-    setIsLoading(true);
-    try {
-      const res = await fetch(`/api/gudang/detail/${encodeURIComponent(jenisQuery)}`);
-      const json = await res.json();
-
-      if (json.data?.status === '00') {
-        setGudang(json.data.gudang);
-      } else {
-        toastRef.current?.showToast(json.data?.status ?? '99', json.data?.message ?? 'Gagal memuat data');
-      }
-    } catch (err) {
-      console.error('Fetch error:', err);
-      toastRef.current?.showToast('99', 'Gagal memuat data gudang');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target || e;
-    setForm((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = async (data) => {
-    setIsLoading(true);
-    try {
-      const url = dialogMode === 'add'
-        ? '/api/gudang'
-        : `/api/gudang/${selectedGudang.id}`;
-
-      const method = dialogMode === 'add' ? 'POST' : 'PUT';
-
-      const res = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-
-      const json = await res.json();
-      const status = json.data?.status ?? '99';
-      const message = json.data?.message;
-
-      toastRef.current?.showToast(status, message);
-
-      if (status === '00') {
-        const newRow = json.data?.gudang;
-        setGudang((prev) =>
-          dialogMode === 'add'
-            ? [...prev, newRow]
-            : prev.map((r) => (r.id === newRow.id ? newRow : r))
-        );
-      }
-    } catch (err) {
-      console.error('Submit error:', err);
-      toastRef.current?.showToast('99', 'Terjadi kesalahan saat menyimpan');
-    } finally {
-      setIsLoading(false);
-      resetForm();
-    }
-  };
-
-  const handleDelete = async (item) => {
-    if (!confirm(`Hapus gudang "${item.nama}"?`)) return;
-    try {
-      const res = await fetch(`/api/gudang/${item.id}`, { method: 'DELETE' });
-      const json = await res.json();
-
-      if (json.status === '00') {
-        toastRef.current?.showToast('00', json.message);
-        setGudang((prev) => prev.filter((i) => i.id !== item.id));
-      } else {
-        toastRef.current?.showToast(json.status ?? '99', json.message);
-      }
-    } catch (err) {
-      toastRef.current?.showToast('99', 'Gagal menghapus gudang');
-    }
-  };
-
-  const resetForm = () => {
-    setForm({ nama: '', alamat: '', KETERANGAN: '' });
+  const resetFormAndCloseDialog = () => {
+    setForm(defaultForm);
     setDialogMode(null);
     setSelectedGudang(null);
   };
 
-  if (isLocked) {
-    return (
-      <div className="card text-center">
-        <h3 className="text-xl text-red-600 font-bold mb-3">Halaman Terkunci</h3>
-        <p className="text-gray-600">
-          Anda tidak bisa mengakses halaman ini langsung.
-          Silakan kembali ke halaman <strong>Master Jenis Gudang</strong> dan pilih jenis gudang terlebih dahulu.
-        </p>
-        <ToastNotifier ref={toastRef} />
-      </div>
-    );
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+
+    if (!form.KODE || !form.nama || !form.alamat || !form.KETERANGAN) {
+      toastRef.current?.showToast('99', 'Kode, Nama, alamat, dan Keterangan wajib diisi');
+      setIsSubmitting(false);
+      return;
+    }
+
+    try {
+      let res, json;
+
+      if (dialogMode === 'add') {
+        res = await fetch('/api/gudang', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(form),
+        });
+      } else if (dialogMode === 'edit' && selectedGudang) {
+        res = await fetch(`/api/gudang/edit?id=${selectedGudang.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(form),
+        });
+      }
+
+      json = await res.json();
+
+      if (!res.ok) {
+        toastRef.current?.showToast('99', json.message || 'Gagal menyimpan data');
+        setIsSubmitting(false);
+        return;
+      }
+
+      toastRef.current?.showToast('00', json.message);
+      resetFormAndCloseDialog();
+      await fetchGudang();
+    } catch (err) {
+      toastRef.current?.showToast('99', 'Terjadi kesalahan');
+    }
+
+    setIsSubmitting(false);
+  };
+
+  const handleDelete = async (item) => {
+  if (!confirm(`Hapus gudang "${item.nama}"?`)) return;
+  try {
+    const res = await fetch(`/api/gudang/${item.id}`, {
+      method: 'DELETE',
+    });
+
+    const json = await res.json();
+    if (res.ok) {
+      toastRef.current?.showToast('00', json.message);
+      await fetchGudang();
+    } else {
+      toastRef.current?.showToast(json.status || '99', json.message);
+    }
+  } catch (err) {
+    toastRef.current?.showToast('99', 'Gagal menghapus gudang');
   }
+};
+
 
   return (
     <div className="card">
-      <h3 className="text-xl font-semibold mb-4">
-        Master Nama Gudang (Jenis: {jenisQuery})
-      </h3>
+      <h3 className="text-xl font-semibold">Master Gudang</h3>
 
-      <div className="flex justify-end mb-4">
+      <div className="flex justify-end my-3">
         <Button
           label="Tambah Gudang"
           icon="pi pi-plus"
+          className="text-sm"
           onClick={() => {
             setDialogMode('add');
-            setForm({ KETERANGAN: jenisQuery, nama: '', alamat: '' });
+            setForm(defaultForm);
+            setSelectedGudang(null);
           }}
         />
       </div>
@@ -179,19 +143,19 @@ const GudangPage = () => {
       <DataTable
         size="small"
         className="text-sm"
-        value={gudang}
+        value={gudangList}
         paginator
         rows={10}
         loading={isLoading}
         scrollable
+       
       >
-        <Column field="KODE" header ="KODE"/>
-        <Column field="KETERANGAN" header="Jenis" />
+        <Column field="KODE" header="Kode" />
         <Column field="nama" header="Nama" />
         <Column field="alamat" header="Alamat" />
+        <Column field="KETERANGAN" header="Keterangan" />
         <Column
           header="Aksi"
-          style={{ width: '150px' }}
           body={(row) => (
             <div className="flex gap-2">
               <Button
@@ -201,7 +165,12 @@ const GudangPage = () => {
                 onClick={() => {
                   setDialogMode('edit');
                   setSelectedGudang(row);
-                  setForm({ ...row });
+                  setForm({
+                    KODE: row.KODE,
+                    nama: row.nama,
+                    alamat: row.alamat || '',
+                    KETERANGAN: row.KETERANGAN,
+                  });
                 }}
               />
               <Button
@@ -212,45 +181,35 @@ const GudangPage = () => {
               />
             </div>
           )}
+          style={{ width: '150px' }}
         />
       </DataTable>
 
       <Dialog
-        header={dialogMode === 'add' ? 'Tambah Gudang' : 'Edit Gudang'}
+        key={dialogMode}
+        header={dialogMode === 'edit' ? 'Edit Gudang' : 'Tambah Gudang'}
         visible={dialogMode !== null}
-        onHide={resetForm}
-        style={{ width: '40rem' }}
+        onHide={resetFormAndCloseDialog}
+        style={{ width: '30rem' }}
+        unmountOnHide
       >
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            handleSubmit(form);
+            handleSubmit();
           }}
         >
           <div className="mb-3">
-            <label htmlFor="keterangan">Jenis</label>
-            <InputText
-              id="keterangan"
-              name="keterangan"
-              value={form.KETERANGAN}
-              className="w-full mt-2"
-              readOnly
-            />
-
-          </div>
-
-            <div className="mb-3">
             <label htmlFor="KODE">Kode</label>
             <InputText
               id="KODE"
               name="KODE"
-              value={form.KODE || ''}
+              value={form.KODE}
               onChange={handleChange}
               className="w-full mt-2"
-              required
+              placeholder="Kode Gudang"
             />
           </div>
-
 
           <div className="mb-3">
             <label htmlFor="nama">Nama</label>
@@ -260,7 +219,7 @@ const GudangPage = () => {
               value={form.nama}
               onChange={handleChange}
               className="w-full mt-2"
-              required
+              placeholder="Nama Gudang"
             />
           </div>
 
@@ -272,7 +231,19 @@ const GudangPage = () => {
               value={form.alamat}
               onChange={handleChange}
               className="w-full mt-2"
-              required
+              placeholder="Alamat Gudang"
+            />
+          </div>
+
+          <div className="mb-3">
+            <label htmlFor="KETERANGAN">Keterangan</label>
+            <InputText
+              id="KETERANGAN"
+              name="KETERANGAN"
+              value={form.KETERANGAN}
+              onChange={handleChange}
+              className="w-full mt-2"
+              placeholder="Keterangan"
             />
           </div>
 
@@ -282,6 +253,7 @@ const GudangPage = () => {
               label="Simpan"
               icon="pi pi-save"
               severity="success"
+              disabled={isSubmitting}
             />
           </div>
         </form>
@@ -293,5 +265,3 @@ const GudangPage = () => {
 };
 
 export default GudangPage;
-
-

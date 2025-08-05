@@ -7,8 +7,9 @@ import { DataTable } from 'primereact/datatable';
 /**
  * @typedef {Object} User
  * @property {number} id
- * @property {string} name
+ * @property {string} username
  * @property {string} email
+ * @property {number} no_hp
  * @property {string} role
  */
 
@@ -32,8 +33,9 @@ const UserTable = ({ data = [], loading = false, onEdit, onDelete }) => {
             scrollable
             emptyMessage="Tidak ada data user"
         >
-            <Column field="name" header="Nama" filter />
+            <Column field="username" header="Username" filter />
             <Column field="email" header="Email" filter />
+            <Column field="no_hp" header="No HP" filter />
             <Column field="role" header="Role" />
             <Column
                 header="Aksi"

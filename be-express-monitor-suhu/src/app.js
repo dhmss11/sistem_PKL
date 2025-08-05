@@ -4,7 +4,7 @@ import logger from 'morgan';
 
 import { setResponseHeader } from './middleware/set-headers.js';
 
-import userRoutes from './routes/userRoutes.js';
+import usersRoutes from './routes/usersRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import masterProdukRouters from './routes/masterProdukRoutes.js';
 import masterGudang from './routes/masterGudang.js';
@@ -40,7 +40,7 @@ app.use(
   })
 );
 
-app.use('/api/users', userRoutes);
+app.use('/api/users', usersRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/master-produk', masterProdukRouters);
 app.use('/api/nama-gudang', masterGudang);

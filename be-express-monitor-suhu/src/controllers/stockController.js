@@ -166,3 +166,22 @@ export const deleteStock = async (req, res) => {
     });
   }
 };
+
+export const fetchStockBySatuan = async (req, res) => {
+  console.log('Masuk fetchStockBySatuan:', req.params);
+
+  try {
+    const { satuan } = req.params;
+    if (!satuan) {
+      return res.status(400).json({ status: '99', message: 'Satuan kosong' });
+    }
+
+    // log query Anda
+    const result = await db('stock').where({ satuan }); // contoh query
+    return res.status(200).json({ status: '00', data: result });
+  } catch (error) {
+    console.error('Error fetchStockBySatuan:', error);
+    return res.status(500).json({ status: '99', message: 'Gagal mengambil data' });
+  }
+};
+

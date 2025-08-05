@@ -4,11 +4,13 @@ import {
     addStock,
     editStock,
     deleteStock,
+    fetchStockBySatuan,
  
 } from '../controllers/stockController.js';
 
 const router = Router();
 
+router.get('/satuan/:satuan', fetchStockBySatuan);
 router.get('/',fetchAllStock);
 router.post('/add',addStock);
 router.put('/edit/:id', editStock);

@@ -49,6 +49,7 @@ export const API_ENDPOINTS = {
   ADD_STOCK: `${API_URL}/stock/add`,
   EDIT_STOCK: (id) => `${API_URL}/stock/edit/${id}`,
   DELETE_STOCK: (id) => `${API_URL}/stock/delete/${id}`,
+  GET_STOCK_BY_SATUAN: (satuan) => `${API_URL}/stock/satuan/${satuan}`,
 
     // JENIS GUDANG
     GET_ALL_JENIS_GUDANG : `${API_URL}/golonganstock`,

@@ -29,7 +29,12 @@ const AppMenu = () => {
                 {   label: 'Satuan Stock', 
                     icon: 'pi pi-list', 
                     to: '/kode/satuanstock' 
-                }
+                },
+                 {
+                    label: 'Golongan Stock',
+                    icon: 'pi pi-fw pi-th-large',
+                    to: '/kode/golonganstock'
+                },
             ]
             
         },
@@ -39,9 +44,9 @@ const AppMenu = () => {
             icon: 'pi pi-fw pi-sitemap',
             items: [
                 {
-                    label: 'Jenis Gudang',
+                    label: 'Golongan Stock',
                     icon: 'pi pi-fw pi-th-large',
-                    to: '/master/jenis-gudang'
+                    to: '/master/golonganstock'
                 },
                 {
                     label: 'Gudang',

@@ -64,4 +64,5 @@ export const API_ENDPOINTS = {
     DELETE_KARTUSTOCK: (id) => `${API_URL}/kartustock/${id}`,
 
 
+
 };

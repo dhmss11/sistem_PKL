@@ -8,7 +8,9 @@ import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
 import { Dropdown } from 'primereact/dropdown';
 import { Calendar } from 'primereact/calendar';
+import { format, parseISO } from 'date-fns';
 import ToastNotifier from '@/app/components/ToastNotifier';
+import { date } from 'yup';
 
 const initialFormState = {
   gudang: '',
@@ -42,7 +44,6 @@ const StockPage = () => {
   const [form, setForm] = useState(initialFormState);
 
 
-
   const formatDateToDB = (date) => {
     if (!date) return '';
     const d = new Date(date);
@@ -55,8 +56,9 @@ const StockPage = () => {
     const month = String(jakartaDate.getUTCMonth() + 1).padStart(2, '0');
     const day = String(jakartaDate.getUTCDate()).padStart(2, '0');
     
-    return `${year}-${month}-${day}`, d.toISOString;
+    return `${year}-${month}-${day}`;
   };
+
   
   const fetchData = useCallback(async (endpoint, setData, labelField = 'KETERANGAN') => {
     try {
@@ -78,7 +80,7 @@ const StockPage = () => {
     }
   }, []);
 
-
+  // KHUSUS LIST GUDANG
   const fetchGudang = async () => {
     try {
         const res = await fetch("/api/gudang/nama");
@@ -109,7 +111,7 @@ const parseDateFromDB = (dateString) => {
   }
 };
 
-
+  // Fetch stock data
   const fetchStock = useCallback(async () => {
     setIsLoading(true);
     try {
@@ -134,7 +136,9 @@ const parseDateFromDB = (dateString) => {
       setIsLoading(false);
     }
   }, []);
- useEffect(() => {
+
+  
+  useEffect(() => {
     const loadInitialData = async () => {
       await Promise.all([
         fetchStock(),
@@ -148,12 +152,13 @@ const parseDateFromDB = (dateString) => {
     loadInitialData();
   }, [fetchData, fetchStock]);
 
- const handleChange = useCallback((e) => {
+  
+  const handleChange = useCallback((e) => {
     const { name, value } = e.target;
     setForm(prev => ({ ...prev, [name]: value }));
   }, []);
 
-
+  
   const handleCalendarChange = useCallback((name, value) => {
     if (!value) {
       setForm(prev => ({ ...prev, [name]: '' }));
@@ -165,6 +170,7 @@ const parseDateFromDB = (dateString) => {
     setForm(prev => ({ ...prev, [name]: formattedDate }));
   }, []);
 
+  
   const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -173,7 +179,7 @@ const parseDateFromDB = (dateString) => {
       const method = dialogMode === 'add' ? 'POST' : 'PUT';
       const url = dialogMode === 'add' ? '/api/stock' : `/api/stock/${selectedStock.KODE}`;
       
-      console.log('Submitting form data:', form); // Debug log
+      console.log('Submitting form data:', form); 
       
       const res = await fetch(url, {
         method,
@@ -185,10 +191,6 @@ const parseDateFromDB = (dateString) => {
 
       if (res.ok && json.status === '00') {
         toastRef.current?.showToast(json.status, json.message);
-        fetchStock(); 
-        setDialogMode(null); 
-        setForm(initialFormState); 
-        setStock((prev) => [...prev, json.data]);
         
        
         await fetchStock(); 
@@ -207,6 +209,7 @@ const parseDateFromDB = (dateString) => {
     }
   }, [dialogMode, form, selectedStock, fetchStock]);
 
+  
   const handleDelete = useCallback(async (data) => {
     if (!window.confirm('Apakah Anda yakin ingin menghapus data ini?')) return;
     
@@ -231,12 +234,6 @@ const parseDateFromDB = (dateString) => {
   }, [fetchStock]);
 
   
-
-
-  const formattedDate = formatDateToDB(value);
-  setForm(prev => ({ ...prev, [name]: formattedDate }));
-};
- 
   const renderCalendarInput = (name, label) => {
     let dateValue = null;
     if (form[name]) {
@@ -272,31 +269,26 @@ const parseDateFromDB = (dateString) => {
 
   
   const handleEdit = useCallback((row) => {
-  console.log('Editing row:', row); 
+    console.log('Editing row:', row); 
+    setDialogMode('edit');
+    setSelectedStock(row);
+    
+  
+    const formData = { ...row };
+    
+    
+    if (formData.TGL_MASUK) {
+      formData.TGL_MASUK = parseDateFromDB(formData.TGL_MASUK);
+    }
+    if (formData.EXPIRED) {
+      formData.EXPIRED = parseDateFromDB(formData.EXPIRED);
+    }
+    
+    console.log('Form data for edit:', formData); 
+    setForm(formData);
+  }, []);
 
-  setDialogMode('edit');
-  setSelectedStock(row);
-
-  const formData = { ...row };
-
-  try {
-    formData.TGL_MASUK = row.TGL_MASUK ? format(parseISO(row.TGL_MASUK), 'yyyy-MM-dd') : '';
-  } catch (err) {
-    console.warn('Invalid TGL_MASUK:', row.TGL_MASUK, err);
-    formData.TGL_MASUK = '';
-  }
-
-  try {
-    formData.EXPIRED = row.EXPIRED ? format(parseISO(row.EXPIRED), 'yyyy-MM-dd') : '';
-  } catch (err) {
-    console.warn('Invalid EXPIRED:', row.EXPIRED, err);
-    formData.EXPIRED = '';
-  }
-
-  console.log('Form data for edit:', formData); 
-  setForm(formData);
-}, []);
-
+  // Render Dialog Form
   const renderDialogForm = () => (
     <Dialog
       header={dialogMode === 'add' ? 'Tambah Stock' : 'Edit Stock'}
@@ -453,7 +445,7 @@ const parseDateFromDB = (dateString) => {
 
   return (
     <div className="card">
-      <h3 className="text-xl font-semibold">Stock</h3>
+      <h3 className="text-xl font-semibold">Master Stock</h3>
       
       <Button
         label="Tambah Stock"
@@ -476,7 +468,7 @@ const parseDateFromDB = (dateString) => {
         emptyMessage="Tidak ada data stock"
       >
         {Object.keys(initialFormState)
-          .filter(key => key !== 'BERAT') 
+          .filter(key => key !== 'BERAT') // Sembunyikan beberapa field jika perlu
           .map(key => (
             <Column 
               key={key} 
@@ -524,5 +516,6 @@ const parseDateFromDB = (dateString) => {
       <ToastNotifier ref={toastRef} />
     </div>
   );
+};
 
 export default StockPage;

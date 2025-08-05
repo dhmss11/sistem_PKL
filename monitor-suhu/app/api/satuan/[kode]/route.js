@@ -59,7 +59,7 @@ export async function PUT(request) {
 
 export async function DELETE(request) {
   try {
-    // Dapatkan kode dari URL
+    
     const kode = request.nextUrl.pathname.split('/').pop();
 
     // Validate KODE exists

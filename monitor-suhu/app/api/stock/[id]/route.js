@@ -2,46 +2,47 @@ import { Axios } from '@/utils/axios';
 import { API_ENDPOINTS } from '@/app/api/api';
 import { NextResponse } from 'next/server';
 
+
 export const PUT = async (request, { params }) => {
-  const {id} = params
+  const { id } = await params;
+  
   try {
     const body = await request.json();
     const response = await Axios.put(API_ENDPOINTS.EDIT_STOCK(id), body);
-
-    return NextResponse.json({
-      status: '00', 
-      message: 'Update berhasil',
+    
+    return Response.json({
+      status: '00',
+      message: 'Stock berhasil diupdate',
       data: response.data
     });
-  } catch (err) {
-    console.error('PUT stock error:', err.message);
-    return NextResponse.json(
-      {
-        status: '99',
-        message: 'Gagal meng-update data stock'
-      },
-      { status: 500 }
-    );
+    
+  } catch (error) {
+    console.error('Error updating stock:', error);
+    return Response.json({
+      status: '99',
+      message: error.response?.data?.message || 'Gagal mengupdate stock'
+    }, { status: 500 });
   }
 };
 
 
-export async function DELETE(_request, { params }) {
-  const { id } = params;
-
+export const DELETE = async (request, { params }) => {
+  const { id } = await params;
+  
   try {
     const response = await Axios.delete(API_ENDPOINTS.DELETE_STOCK(id));
-
-    return NextResponse.json({
-  status: '00',
-  message: response.data.message || 'Stock berhasil dihapus',
-});
-
+    
+    return Response.json({
+      status: '00',
+      message: 'Stock berhasil dihapus',
+      data: response.data
+    });
+    
   } catch (error) {
-    console.error('Gagal hapus stock:', error);
+    console.error('Error deleting stock:', error);
     return Response.json({
       status: '99',
-      message: 'Gagal menghapus stock',
+      message: error.response?.data?.message || 'Gagal menghapus stock'
     }, { status: 500 });
   }
-}
+};

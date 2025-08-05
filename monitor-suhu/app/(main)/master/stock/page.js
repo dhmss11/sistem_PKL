@@ -10,6 +10,7 @@ import { Dropdown } from 'primereact/dropdown';
 import { Calendar } from 'primereact/calendar';
 import { format, parseISO } from 'date-fns';
 import ToastNotifier from '@/app/components/ToastNotifier';
+import { date } from 'yup';
 
 
 const initialFormState = {
@@ -35,6 +36,8 @@ const StockPage = () => {
   const toastRef = useRef(null);
   const [ filterSatuan, setFilterSatuan] = useState('');
   const [stock, setStock] = useState([]);
+  const [filteredStocks, setFilteredStocks] = useState([]);
+  const [selectedRakFilter, setSelectedRakFilter] = useState('');
   const [rakOptions, setRakOptions] = useState([]); 
   const [satuanOptions, setSatuanOptions] = useState([]);
   const [listGudang, setListGudang] = useState([]);
@@ -45,14 +48,14 @@ const StockPage = () => {
   const [form, setForm] = useState(initialFormState);
 
 
+
   const formatDateToDB = (date) => {
     if (!date) return '';
     const d = new Date(date);
     if (isNaN(d.getTime())) return '';
   
-    const jakartaDate = new Date(d.getTime() + (7 * 60 * 60 * 1000)); // UTC+7
+    const jakartaDate = new Date(d.getTime() + (7 * 60 * 60 * 1000)); 
     
-   
     const year = jakartaDate.getUTCFullYear();
     const month = String(jakartaDate.getUTCMonth() + 1).padStart(2, '0');
     const day = String(jakartaDate.getUTCDate()).padStart(2, '0');
@@ -60,7 +63,7 @@ const StockPage = () => {
     return `${year}-${month}-${day}`;
   };
 
-  
+
   const fetchData = useCallback(async (endpoint, setData, labelField = 'KETERANGAN') => {
     try {
       const res = await fetch(`/api/${endpoint}`);
@@ -99,6 +102,8 @@ const StockPage = () => {
     }
   };
 
+  const parseDateFromDB = (dateString) => {
+    if (!dateString) return '';
 
 const parseDateFromDB = (dateString) => {
   if (!dateString) return '';
@@ -112,6 +117,16 @@ const parseDateFromDB = (dateString) => {
   }
 };
 
+    try {
+      const parsedDate = parseISO(dateString); 
+      return format(parsedDate, 'yyyy-MM-dd'); 
+    } catch (error) {
+      console.error('Invalid date string:', error);
+      return '';
+    }
+  };
+
+
   // Fetch stock data
   const fetchStock = useCallback(async () => {
     setIsLoading(true);
@@ -120,13 +135,13 @@ const parseDateFromDB = (dateString) => {
       const json = await res.json();
       
       if (json.status === '00') {
-      
         const processedData = json.data.map(item => ({
           ...item,
           TGL_MASUK: parseDateFromDB(item.TGL_MASUK),
           EXPIRED: parseDateFromDB(item.EXPIRED)
         }));
         setStock(processedData);
+        setFilteredStocks(processedData); 
       } else {
         toastRef.current?.showToast(json.status, json.message);
       }
@@ -163,6 +178,26 @@ const parseDateFromDB = (dateString) => {
     }
   }, []);
 
+
+  
+  const handleRakFilterChange = useCallback((e) => {
+    const kodeRak = e.value;
+    setSelectedRakFilter(kodeRak);
+
+    if (kodeRak) {
+      const filtered = stock.filter(item => item.RAK === kodeRak);
+      setFilteredStocks(filtered);
+    } else {
+      setFilteredStocks(stock);
+    }
+  }, [stock]);
+
+  
+  const clearRakFilter = useCallback(() => {
+    setSelectedRakFilter('');
+    setFilteredStocks(stock);
+  }, [stock]);
+
   
   useEffect(() => {
     const loadInitialData = async () => {
@@ -174,17 +209,27 @@ const parseDateFromDB = (dateString) => {
         fetchGudang(),
       ]);
     };
-    
     loadInitialData();
   }, [fetchData, fetchStock]);
 
   
+
+  useEffect(() => {
+    if (selectedRakFilter) {
+      const filtered = stock.filter(item => item.RAK === selectedRakFilter);
+      setFilteredStocks(filtered);
+    } else {
+      setFilteredStocks(stock);
+    }
+  }, [stock, selectedRakFilter]);
+  
+
   const handleChange = useCallback((e) => {
     const { name, value } = e.target;
     setForm(prev => ({ ...prev, [name]: value }));
   }, []);
 
-  
+
   const handleCalendarChange = useCallback((name, value) => {
     if (!value) {
       setForm(prev => ({ ...prev, [name]: '' }));
@@ -192,7 +237,7 @@ const parseDateFromDB = (dateString) => {
     }
     
     const formattedDate = formatDateToDB(value);
-    console.log(`Calendar ${name} changed:`, { original: value, formatted: formattedDate }); // Debug log
+    console.log(`Calendar ${name} changed:`, { original: value, formatted: formattedDate });
     setForm(prev => ({ ...prev, [name]: formattedDate }));
   }, []);
 
@@ -205,7 +250,7 @@ const parseDateFromDB = (dateString) => {
       const method = dialogMode === 'add' ? 'POST' : 'PUT';
       const url = dialogMode === 'add' ? '/api/stock' : `/api/stock/${selectedStock.KODE}`;
       
-      console.log('Submitting form data:', form); // Debug log
+      console.log('Submitting form data:', form);
       
       const res = await fetch(url, {
         method,
@@ -218,7 +263,6 @@ const parseDateFromDB = (dateString) => {
       if (res.ok && json.status === '00') {
         toastRef.current?.showToast(json.status, json.message);
         
-       
         await fetchStock(); 
         
         setDialogMode(null); 
@@ -246,7 +290,6 @@ const parseDateFromDB = (dateString) => {
 
       if (res.ok && json.status === '00') {
         toastRef.current?.showToast(json.status, json.message);
-       
         await fetchStock();
       } else {
         toastRef.current?.showToast(json.status || '99', json.message || 'Gagal menghapus data');
@@ -259,13 +302,12 @@ const parseDateFromDB = (dateString) => {
     }
   }, [fetchStock]);
 
-  
+
   const renderCalendarInput = (name, label) => {
     let dateValue = null;
     if (form[name]) {
       const dateString = form[name] + 'T12:00:00';
       dateValue = new Date(dateString);
-      
       
       if (isNaN(dateValue.getTime())) {
         dateValue = null;
@@ -285,7 +327,6 @@ const parseDateFromDB = (dateString) => {
           className="w-full mt-2"
           placeholder={`Pilih ${label}`}
         />
-        {/* Debug info */}
         <small className="text-gray-500">
           Current value: {form[name] || 'kosong'} | Display: {dateValue ? dateValue.toLocaleDateString('id-ID') : 'kosong'}
         </small>
@@ -293,16 +334,15 @@ const parseDateFromDB = (dateString) => {
     );
   };
 
-  
-  const handleEdit = useCallback((row) => {
-    console.log('Editing row:', row); // Debug log
+  const handleEdit = useCallback((row) => {    
+    // Parse tanggal dengan benar (tanggal sudah dalam format YYYY-MM-DD dari fetchStock)
+
+    console.log('Editing row:', row);
     setDialogMode('edit');
     setSelectedStock(row);
     
-  
     const formData = { ...row };
     
-    // Parse tanggal dengan benar (tanggal sudah dalam format YYYY-MM-DD dari fetchStock)
     if (formData.TGL_MASUK) {
       formData.TGL_MASUK = parseDateFromDB(formData.TGL_MASUK);
     }
@@ -310,7 +350,11 @@ const parseDateFromDB = (dateString) => {
       formData.EXPIRED = parseDateFromDB(formData.EXPIRED);
     }
     
+
     console.log('Form data for edit:', formData); // Debug log
+
+    console.log('Form data for edit:', formData); 
+
     setForm(formData);
   }, []);
 
@@ -515,6 +559,14 @@ const parseDateFromDB = (dateString) => {
           setSelectedStock(null);
         }}
       />
+      <Button
+            label="Reset Filter"
+            icon="pi pi-refresh"
+            severity="secondary"
+            onClick={clearRakFilter}
+            className="mb-3 ml-3"
+          />
+
       <div className="mb-3 flex gap-3 items-center">
   <Dropdown
     value={filterSatuan}
@@ -535,18 +587,48 @@ const parseDateFromDB = (dateString) => {
     showClear
   />
   </div>
+      <div className="mb-4 p-3 border rounded-lg bg-gray-50">
+       <div className="flex gap-3 items-end">
+          <div className="flex-1">
+            <label htmlFor="rakFilter" className="block mb-1 text-sm font-medium">
+              Filter by Rak
+            </label>
+            <Dropdown
+              id="rakFilter"
+              value={selectedRakFilter}
+              options={rakOptions}
+              onChange={handleRakFilterChange}
+              className="w-full"
+              placeholder="pilih rak"
+              optionLabel="label"
+              optionValue="value"
+              showClear
+            />
+          </div>
+        </div>
+      </div>
+
 
       <DataTable
-        value={stock}
+        value={filteredStocks}
         paginator
         rows={10}
         loading={isLoading}
         scrollable
         size="small"
         emptyMessage="Tidak ada data stock"
+        header={
+          <div className="flex justify-between items-center">
+           
+          </div>
+        }
       >
         {Object.keys(initialFormState)
+
           .filter(key => key !== 'BERAT') // Sembunyikan beberapa field jika perlu
+
+          .filter(key => key !== 'BERAT')
+
           .map(key => (
             <Column 
               key={key} 
@@ -556,12 +638,11 @@ const parseDateFromDB = (dateString) => {
                 (rowData) => {
                   const dateValue = rowData[key];
                   if (!dateValue) return '-';
-                  // PERBAIKAN: Tampilkan tanggal dengan format yang benar
                   try {
                     const date = new Date(dateValue + 'T12:00:00');
                     return date.toLocaleDateString('id-ID');
                   } catch (e) {
-                    return dateValue; // Fallback ke nilai asli
+                    return dateValue;
                   }
                 } 
                 : undefined

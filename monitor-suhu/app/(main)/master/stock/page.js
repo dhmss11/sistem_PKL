@@ -41,19 +41,22 @@ const StockPage = () => {
   const [selectedStock, setSelectedStock] = useState(null);
   const [form, setForm] = useState(initialFormState);
 
-const formatDateToDB = (date) => {
-  if (!date) return '';
-  
-  
-  const d = new Date(date);
-  
-  const year = d.getUTCFullYear();
-  const month = String(d.getUTCMonth() + 1).padStart(2, '0');
-  const day = String(d.getUTCDate()).padStart(2, '0');
-  
-  return `${year}-${month}-${day}`;
-};
 
+
+  const formatDateToDB = (date) => {
+    if (!date) return '';
+    const d = new Date(date);
+    if (isNaN(d.getTime())) return '';
+  
+    const jakartaDate = new Date(d.getTime() + (7 * 60 * 60 * 1000)); // UTC+7
+    
+   
+    const year = jakartaDate.getUTCFullYear();
+    const month = String(jakartaDate.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(jakartaDate.getUTCDate()).padStart(2, '0');
+    
+    return `${year}-${month}-${day}`, d.toISOString;
+  };
   
   const fetchData = useCallback(async (endpoint, setData, labelField = 'KETERANGAN') => {
     try {
@@ -91,6 +94,19 @@ const formatDateToDB = (date) => {
     }catch (error){
         console.error("Form Gagal ambil nama gudang")
     }
+  };
+
+
+const parseDateFromDB = (dateString) => {
+  if (!dateString) return '';
+
+  try {
+    const parsedDate = parseISO(dateString); 
+    return format(parsedDate, 'yyyy-MM-dd'); 
+  } catch (error) {
+    console.error('Invalid date string:', error);
+    return '';
+  }
 };
 
 
@@ -101,7 +117,13 @@ const formatDateToDB = (date) => {
       const json = await res.json();
       
       if (json.status === '00') {
-        setStock(json.data);
+      
+        const processedData = json.data.map(item => ({
+          ...item,
+          TGL_MASUK: parseDateFromDB(item.TGL_MASUK),
+          EXPIRED: parseDateFromDB(item.EXPIRED)
+        }));
+        setStock(processedData);
       } else {
         toastRef.current?.showToast(json.status, json.message);
       }
@@ -112,8 +134,7 @@ const formatDateToDB = (date) => {
       setIsLoading(false);
     }
   }, []);
-
-  useEffect(() => {
+ useEffect(() => {
     const loadInitialData = async () => {
       await Promise.all([
         fetchStock(),
@@ -127,18 +148,22 @@ const formatDateToDB = (date) => {
     loadInitialData();
   }, [fetchData, fetchStock]);
 
-  const handleChange = useCallback((e) => {
+ const handleChange = useCallback((e) => {
     const { name, value } = e.target;
-    
-    if (name === 'TGL_MASUK' || name === 'EXPIRED') {
-      const dateValue = value instanceof Date ? value : new Date(value);
-      const formattedDate = formatDateToDB(dateValue);
-      setForm(prev => ({ ...prev, [name]: formattedDate }));
-    } else {
-      setForm(prev => ({ ...prev, [name]: value }));
-    }
-  }, [formatDateToDB]);
+    setForm(prev => ({ ...prev, [name]: value }));
+  }, []);
 
+
+  const handleCalendarChange = useCallback((name, value) => {
+    if (!value) {
+      setForm(prev => ({ ...prev, [name]: '' }));
+      return;
+    }
+    
+    const formattedDate = formatDateToDB(value);
+    console.log(`Calendar ${name} changed:`, { original: value, formatted: formattedDate }); // Debug log
+    setForm(prev => ({ ...prev, [name]: formattedDate }));
+  }, []);
 
   const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
@@ -147,6 +172,8 @@ const formatDateToDB = (date) => {
     try {
       const method = dialogMode === 'add' ? 'POST' : 'PUT';
       const url = dialogMode === 'add' ? '/api/stock' : `/api/stock/${selectedStock.KODE}`;
+      
+      console.log('Submitting form data:', form); // Debug log
       
       const res = await fetch(url, {
         method,
@@ -162,12 +189,19 @@ const formatDateToDB = (date) => {
         setDialogMode(null); 
         setForm(initialFormState); 
         setStock((prev) => [...prev, json.data]);
+        
+       
+        await fetchStock(); 
+        
+        setDialogMode(null); 
+        setForm(initialFormState); 
+        setSelectedStock(null); 
       } else {
         toastRef.current?.showToast(json.status || '99', json.message || 'Gagal menyimpan data');
       }
     } catch (err) {
       console.error('Submit error:', err);
-      toastRef.current?.showToast('error', err.message);
+      toastRef.current?.showToast('error', err.message || 'Terjadi kesalahan saat menyimpan data');
     } finally {
       setIsLoading(false);
     }
@@ -176,50 +210,93 @@ const formatDateToDB = (date) => {
   const handleDelete = useCallback(async (data) => {
     if (!window.confirm('Apakah Anda yakin ingin menghapus data ini?')) return;
     
+    setIsLoading(true);
     try {
       const res = await fetch(`/api/stock/${data.KODE}`, { method: 'DELETE' });
       const json = await res.json();
 
       if (res.ok && json.status === '00') {
         toastRef.current?.showToast(json.status, json.message);
-        setStock((prev) => [...prev, json.data]);
+       
+        await fetchStock();
       } else {
-        toastRef.current?.showToast(json.status || '99', json.message || 'Gagal menyimpan data');
+        toastRef.current?.showToast(json.status || '99', json.message || 'Gagal menghapus data');
       }
     } catch (err) {
       console.error('Delete error:', err);
-      toastRef.current?.showToast('error', err.message);
+      toastRef.current?.showToast('error', err.message || 'Terjadi kesalahan saat menghapus data');
+    } finally {
+      setIsLoading(false);
     }
   }, [fetchStock]);
 
-  const handleCalendarChange = (name, value) => {
-  if (!value) {
-    setForm(prev => ({ ...prev, [name]: '' }));
-    return;
-  }
   
+
 
   const formattedDate = formatDateToDB(value);
   setForm(prev => ({ ...prev, [name]: formattedDate }));
 };
  
-  const renderCalendarInput = (name, label) => (
-    <div className="mb-3">
-      <label htmlFor={name}>{label}</label>
-      <Calendar
-        id={name}
-        name={name}
-        value={form[name] ? new Date(form[name]+ 'T12:00:00') : null}
-        onChange={(e) => handleCalendarChange(name, e.value)}
-        dateFormat="yy-mm-dd"
-        showIcon
-        className="w-full mt-2"
-        placeholder={`Pilih ${label}`}
-      />
-    </div>
-  );
+  const renderCalendarInput = (name, label) => {
+    let dateValue = null;
+    if (form[name]) {
+      const dateString = form[name] + 'T12:00:00';
+      dateValue = new Date(dateString);
+      
+      
+      if (isNaN(dateValue.getTime())) {
+        dateValue = null;
+      }
+    }
 
-  // Render Dialog Form
+    return (
+      <div className="mb-3">
+        <label htmlFor={name}>{label}</label>
+        <Calendar
+          id={name}
+          name={name}
+          value={dateValue}
+          onChange={(e) => handleCalendarChange(name, e.value)}
+          dateFormat="yy-mm-dd"
+          showIcon
+          className="w-full mt-2"
+          placeholder={`Pilih ${label}`}
+        />
+        {/* Debug info */}
+        <small className="text-gray-500">
+          Current value: {form[name] || 'kosong'} | Display: {dateValue ? dateValue.toLocaleDateString('id-ID') : 'kosong'}
+        </small>
+      </div>
+    );
+  };
+
+  
+  const handleEdit = useCallback((row) => {
+  console.log('Editing row:', row); 
+
+  setDialogMode('edit');
+  setSelectedStock(row);
+
+  const formData = { ...row };
+
+  try {
+    formData.TGL_MASUK = row.TGL_MASUK ? format(parseISO(row.TGL_MASUK), 'yyyy-MM-dd') : '';
+  } catch (err) {
+    console.warn('Invalid TGL_MASUK:', row.TGL_MASUK, err);
+    formData.TGL_MASUK = '';
+  }
+
+  try {
+    formData.EXPIRED = row.EXPIRED ? format(parseISO(row.EXPIRED), 'yyyy-MM-dd') : '';
+  } catch (err) {
+    console.warn('Invalid EXPIRED:', row.EXPIRED, err);
+    formData.EXPIRED = '';
+  }
+
+  console.log('Form data for edit:', formData); 
+  setForm(formData);
+}, []);
+
   const renderDialogForm = () => (
     <Dialog
       header={dialogMode === 'add' ? 'Tambah Stock' : 'Edit Stock'}
@@ -227,6 +304,7 @@ const formatDateToDB = (date) => {
       onHide={() => {
         setDialogMode(null);
         setForm(initialFormState);
+        setSelectedStock(null);
       }}
       style={{ width: '40rem' }}
     >
@@ -254,7 +332,7 @@ const formatDateToDB = (date) => {
             <InputText
               id={field}
               name={field}
-              value={form[field]}
+              value={form[field] || ''}
               onChange={handleChange}
               className="w-full mt-2"
             />
@@ -290,19 +368,21 @@ const formatDateToDB = (date) => {
             optionValue="value"
           />
         </div>
+        
         {/* Field lainnya */}
-        {[ 'DOS'].map((field) => (
+        {['DOS'].map((field) => (
           <div key={field} className="mb-3">
             <label htmlFor={field}>{field.replace(/_/g, ' ')}</label>
             <InputText
               id={field}
               name={field}
-              value={form[field]}
+              value={form[field] || ''}
               onChange={handleChange}
               className="w-full mt-2"
             />
           </div>
         ))}
+        
         <div className="mb-3">
           <label htmlFor="SATUAN">Satuan</label>
           <Dropdown
@@ -318,13 +398,13 @@ const formatDateToDB = (date) => {
           />
         </div>
 
-         {[ 'ISI', 'DISCOUNT', 'HB', 'HJ'].map((field) => (
+        {['ISI', 'DISCOUNT', 'HB', 'HJ'].map((field) => (
           <div key={field} className="mb-3">
             <label htmlFor={field}>{field.replace(/_/g, ' ')}</label>
             <InputText
               id={field}
               name={field}
-              value={form[field]}
+              value={form[field] || ''}
               onChange={handleChange}
               className="w-full mt-2"
             />
@@ -335,13 +415,13 @@ const formatDateToDB = (date) => {
         {renderCalendarInput('TGL_MASUK', 'Tanggal Masuk')}
         {renderCalendarInput('EXPIRED', 'Tanggal Expired')}
 
-           {['BERAT'].map((field) => (
+        {['BERAT'].map((field) => (
           <div key={field} className="mb-3">
             <label htmlFor={field}>{field.replace(/_/g, ' ')}</label>
             <InputText
               id={field}
               name={field}
-              value={form[field]}
+              value={form[field] || ''}
               onChange={handleChange}
               className="w-full mt-2"
             />
@@ -349,6 +429,16 @@ const formatDateToDB = (date) => {
         ))}
 
         <div className="flex justify-end gap-2">
+          <Button 
+            type="button" 
+            label="Batal" 
+            severity="secondary" 
+            onClick={() => {
+              setDialogMode(null);
+              setForm(initialFormState);
+              setSelectedStock(null);
+            }}
+          />
           <Button 
             type="submit" 
             label="Simpan" 
@@ -369,7 +459,11 @@ const formatDateToDB = (date) => {
         label="Tambah Stock"
         icon="pi pi-plus"
         className="mb-3"
-        onClick={() => setDialogMode('add')}
+        onClick={() => {
+          setDialogMode('add');
+          setForm(initialFormState);
+          setSelectedStock(null);
+        }}
       />
 
       <DataTable
@@ -387,7 +481,21 @@ const formatDateToDB = (date) => {
             <Column 
               key={key} 
               field={key} 
-              header={key.replace(/_/g, ' ')} 
+              header={key.replace(/_/g, ' ')}
+              body={key === 'TGL_MASUK' || key === 'EXPIRED' ? 
+                (rowData) => {
+                  const dateValue = rowData[key];
+                  if (!dateValue) return '-';
+                  // PERBAIKAN: Tampilkan tanggal dengan format yang benar
+                  try {
+                    const date = new Date(dateValue + 'T12:00:00');
+                    return date.toLocaleDateString('id-ID');
+                  } catch (e) {
+                    return dateValue; // Fallback ke nilai asli
+                  }
+                } 
+                : undefined
+              }
             />
           ))}
           
@@ -399,11 +507,7 @@ const formatDateToDB = (date) => {
                 icon="pi pi-pencil"
                 size="small"
                 severity="warning"
-                onClick={() => {
-                  setDialogMode('edit');
-                  setSelectedStock(row);
-                  setForm({ ...row });
-                }}
+                onClick={() => handleEdit(row)}
               />
               <Button
                 icon="pi pi-trash"
@@ -420,6 +524,5 @@ const formatDateToDB = (date) => {
       <ToastNotifier ref={toastRef} />
     </div>
   );
-};
 
 export default StockPage;

@@ -30,10 +30,11 @@ const AppMenu = () => {
                     icon: 'pi pi-list', 
                     to: '/kode/satuanstock' 
                 },
-                {
-                    label: 'Golongan',
+
+                 {
+                    label: 'Golongan Stock',
                     icon: 'pi pi-fw pi-th-large',
-                    to: '/master/jenis-gudang'
+                    to: '/kode/golonganstock'
                 },
             ]
         },
@@ -43,7 +44,7 @@ const AppMenu = () => {
             icon: 'pi pi-fw pi-sitemap',
             items: [
                 {
-                    label: 'Gudang',
+                   label: 'Gudang',
                     icon: 'pi pi-fw pi-building',
                     to: '/master/gudang'
                 },
@@ -70,13 +71,13 @@ const AppMenu = () => {
             ]
         },
         {
-            label: 'Monitor',
+            label: 'Laporan',
             icon: 'pi pi-fw pi-chart-bar',
             items: [
                 {
-                    label: 'Update Suhu Mesin',
+                    label: 'Kartu Stock',
                     icon: 'pi pi-fw pi-sync',
-                    to: '/monitor/suhu'
+                    to: '/laporan/kartustock'
                 }
             ]
         }

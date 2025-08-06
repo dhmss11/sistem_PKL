@@ -5,7 +5,6 @@ import {
     editStock,
     deleteStock,
     fetchStockBySatuan,
- 
 } from '../controllers/stockController.js';
 
 const router = Router();

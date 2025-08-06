@@ -109,14 +109,14 @@ export const editStock = async (req, res) => {
 
     const {
       gudang, KODE, KODE_TOKO, NAMA, JENIS, GOLONGAN,
-      RAK, DOS, SATUAN, ISI, DISCOUNT, HB, HJ, TGL_MASUK, EXPIRED, BERAT
+      RAK, DOS, SATUAN, ISI, DISCOUNT, HB, HJ, BERAT
     } = req.body;
 
     await db('stock')
       .where({ KODE: id }) // ganti ini ya
       .update({
         gudang, KODE, KODE_TOKO, NAMA, JENIS, GOLONGAN,
-        RAK, DOS, SATUAN, ISI, DISCOUNT, HB, HJ, TGL_MASUK, EXPIRED ,BERAT
+        RAK, DOS, SATUAN, ISI, DISCOUNT, HB, HJ,BERAT
       });
 
     return res.json({
@@ -166,7 +166,6 @@ export const deleteStock = async (req, res) => {
     });
   }
 };
-
 export const fetchStockBySatuan = async (req, res) => {
   console.log('Masuk fetchStockBySatuan:', req.params);
 
@@ -176,12 +175,11 @@ export const fetchStockBySatuan = async (req, res) => {
       return res.status(400).json({ status: '99', message: 'Satuan kosong' });
     }
 
-    // log query Anda
-    const result = await db('stock').where({ satuan }); // contoh query
+    const result = await db('stock').where({ satuan });
+
     return res.status(200).json({ status: '00', data: result });
   } catch (error) {
     console.error('Error fetchStockBySatuan:', error);
     return res.status(500).json({ status: '99', message: 'Gagal mengambil data' });
   }
 };
-

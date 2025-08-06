@@ -11,7 +11,6 @@ const router = express.Router();
 
 router.use(express.json());
 
-
 router.get('/', fetchAllSatuan);
 router.post('/create', addSatuan); 
 router.put('/:KODE', editSatuan);

@@ -8,7 +8,6 @@ import usersRoutes from './routes/usersRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import masterProdukRouters from './routes/masterProdukRoutes.js';
 import masterGudang from './routes/masterGudang.js';
-//import jenisGudangRoutes from './routes/jenisGudangRoutes.js';
 import stockRoutes from './routes/stockRoutes.js';
 import satuanStockRoutes from './routes/satuanStockRoutes.js';
 import rakRoutes from './routes/rakRoutes.js';

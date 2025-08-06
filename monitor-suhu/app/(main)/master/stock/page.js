@@ -34,7 +34,7 @@ const initialFormState = {
 
 const StockPage = () => {
   const toastRef = useRef(null);
-  const [ filterSatuan, setFilterSatuan] = useState('');
+  const [filterSatuan, setFilterSatuan] = useState('');
   const [stock, setStock] = useState([]);
   const [filteredStocks, setFilteredStocks] = useState([]);
   const [selectedRakFilter, setSelectedRakFilter] = useState('');

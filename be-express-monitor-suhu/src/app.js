@@ -13,8 +13,8 @@ import satuanStockRoutes from './routes/satuanStockRoutes.js';
 import rakRoutes from './routes/rakRoutes.js';
 import kartuStockRoutes from './routes/kartuStockRoutes.js';
 import golonganstock from './routes/golonganstock.js';
-
-
+import kirimBarang from './routes/kirimBarangRoutes.js';
+import terimaBarang from './routes/terimaBarangRoutes.js';
 const app = express();
 
 const allowedOrigins = ['http://localhost:3000'];
@@ -44,13 +44,13 @@ app.use('/api/users', usersRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/master-produk', masterProdukRouters);
 app.use('/api/nama-gudang', masterGudang);
-//app.use('/api/', jenisGudangRoutes);
 app.use('/api/stock', stockRoutes);
 app.use('/api/rak', rakRoutes);
 app.use('/api/satuan', satuanStockRoutes);
 app.use('/api/kartustock', kartuStockRoutes);
 app.use('/api/golonganstock',golonganstock);
-
+app.use('/api/kirimbarang', kirimBarang)
+app.use('/api/terimabarang', terimaBarang)
 app.get('/', [setResponseHeader], (req, res) => {
   return res.status(200).json(`Welcome to the server! ${new Date().toLocaleString()}`);
 });

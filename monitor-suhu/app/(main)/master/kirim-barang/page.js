@@ -79,7 +79,12 @@ const fetchSatuan = useCallback(async () => {
     <div className="card">
       <Toast />
       <h2 className="text-xl font-bold mb-4">Kirim Barang</h2>
+<<<<<<< HEAD
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+=======
+      <div className="mb-4 p-3 border rounded-lg bg-gray-50">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+>>>>>>> b4adc4e7014ff79acd838515b63d2d5da67d7537
           <div>
             <label className="block text-sm font-medium mb-1">Dari Gudang</label>
             <Dropdown
@@ -110,6 +115,7 @@ const fetchSatuan = useCallback(async () => {
               showClear
             />
           </div>
+<<<<<<< HEAD
           <div className="flex gap-2">
           <div className="w-1/2">
             <label className="block text-sm font-medium mb-1">Tanggal</label>
@@ -167,6 +173,31 @@ const fetchSatuan = useCallback(async () => {
               showClear
             />
       </div>
+=======
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div>
+            <label className="block text-sm font-medium mb-1">Tanggal</label>
+            <Calendar
+              id='tanggal'
+              name='tanggal'
+              className='w-full'
+              placeholder='Tanggal Kirim'
+              showIcon
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Faktur</label>
+            <InputText
+              id='faktur'
+              name='faktur'
+              className='w-full'
+              placeholder='Faktur'
+            />
+          </div>
+        </div>
+>>>>>>> b4adc4e7014ff79acd838515b63d2d5da67d7537
       </div>
 
 

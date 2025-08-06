@@ -1,15 +1,37 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Toast } from 'primereact/toast';
 import { Button } from 'primereact/button';
 import { Dropdown } from 'primereact/dropdown';
+import { Calendar } from 'primereact/calendar';
+import { InputText } from 'primereact/inputtext';
 
 export default function MasterExportPage() {
   const [exportData, setExportData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [gudangOptions, setGudangOptions] = useState([]);
+  const [selectedFromGudang, setSelectedFromGudang] = useState(null);
+  const [selectedToGudang, setSelectedToGudang] = useState(null);
+
+  const fetchGudang = useCallback(async () => {
+    try {
+      const res = await fetch("/api/gudang/nama");
+      const json = await res.json();
+
+      if (json.status === "00") {
+        const options = json.namaGudang.map(nama => ({
+          label: nama,
+          value: nama,
+        }));
+        setGudangOptions(options);
+      }
+    } catch (error) {
+      console.error("Form Gagal ambil nama gudang", error);
+    }
+  }, []);
 
   const fetchExportData = async () => {
     try {
@@ -25,21 +47,25 @@ export default function MasterExportPage() {
 
   useEffect(() => {
     fetchExportData();
-  }, []);
+    fetchGudang();
+  }, [fetchGudang]);
 
   return (
     <div className="p-4">
       <Toast />
       <h2 className="text-xl font-bold mb-4">Kirim Barang</h2>
-               <div className="mb-4 p-3 border rounded-lg bg-gray-50">
+      <div className="mb-4 p-3 border rounded-lg bg-gray-50">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div>
             <label className="block text-sm font-medium mb-1">Dari Gudang</label>
             <Dropdown
-              id= 'darigudang'
-              name= 'darigudang'
+              id='darigudang'
+              name='darigudang'
               className="w-full"
               placeholder="Pilih Gudang"
+              options={gudangOptions}
+              value={selectedFromGudang}
+              onChange={(e) => setSelectedFromGudang(e.value)}
               optionLabel="label"
               optionValue="value"
               showClear
@@ -48,17 +74,41 @@ export default function MasterExportPage() {
           <div>
             <label className="block text-sm font-medium mb-1">Ke Gudang</label>
             <Dropdown
-              id= 'kegudang'
-              name= 'kegudang'
+              id='kegudang'
+              name='kegudang'
               className="w-full"
               placeholder="Pilih Gudang"
+              options={gudangOptions}
+              value={selectedToGudang}
+              onChange={(e) => setSelectedToGudang(e.value)}
               optionLabel="label"
               optionValue="value"
               showClear
             />
           </div>
+          <div className= ''>
+             <label className="block text-sm font-medium mb-1">Tanggal</label>
+             <Calendar
+              id= 'tanggal'
+              name= 'tanggal'
+              className= 'w-full'
+              placeholder='Tanggal Kirim'
+              showIcon
+             />
+
+          </div>
+        </div>
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
+          <label className='block text-sm font-medium mb-1'>Faktur</label>
+          <InputText
+            id = 'faktur'
+            name= 'faktur'
+            className='w-full'
+            placeholder='Faktur'
+          />
         </div>
       </div>
+     
 
       <DataTable
         size="small"

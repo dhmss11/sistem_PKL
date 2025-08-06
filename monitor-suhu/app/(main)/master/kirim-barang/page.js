@@ -5,6 +5,7 @@ import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Toast } from 'primereact/toast';
 import { Button } from 'primereact/button';
+import { Dropdown } from 'primereact/dropdown';
 
 export default function MasterExportPage() {
   const [exportData, setExportData] = useState([]);
@@ -29,7 +30,35 @@ export default function MasterExportPage() {
   return (
     <div className="p-4">
       <Toast />
-      <h2 className="text-xl font-bold mb-4">Export Gudang</h2>
+      <h2 className="text-xl font-bold mb-4">Kirim Barang</h2>
+               <div className="mb-4 p-3 border rounded-lg bg-gray-50">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div>
+            <label className="block text-sm font-medium mb-1">Dari Gudang</label>
+            <Dropdown
+              id= 'darigudang'
+              name= 'darigudang'
+              className="w-full"
+              placeholder="Pilih Gudang"
+              optionLabel="label"
+              optionValue="value"
+              showClear
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Ke Gudang</label>
+            <Dropdown
+              id= 'kegudang'
+              name= 'kegudang'
+              className="w-full"
+              placeholder="Pilih Gudang"
+              optionLabel="label"
+              optionValue="value"
+              showClear
+            />
+          </div>
+        </div>
+      </div>
 
       <DataTable
         size="small"

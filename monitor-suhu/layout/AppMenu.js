@@ -54,14 +54,14 @@ const AppMenu = () => {
                     to: '/master/stock'
                 },
                 {
-                    label: 'export',
-                    icon: 'pi pi-download',
-                    to: '/master/export'
+                    label: 'Kirim Barang',
+                    icon: 'pi pi-send',
+                    to: '/master/kirim-barang'
                 },
                 {
-                    label: 'import',
-                    icon: 'pi pi-upload',
-                    to: '/master/import'
+                    label: 'Terima Barang',
+                    icon: 'pi pi-inbox',
+                    to: '/master/terima-barang'
                 },
                 {
                     label: 'Users',

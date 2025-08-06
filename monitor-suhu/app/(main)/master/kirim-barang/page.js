@@ -55,7 +55,7 @@ export default function MasterExportPage() {
       <Toast />
       <h2 className="text-xl font-bold mb-4">Kirim Barang</h2>
       <div className="mb-4 p-3 border rounded-lg bg-gray-50">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
           <div>
             <label className="block text-sm font-medium mb-1">Dari Gudang</label>
             <Dropdown
@@ -86,29 +86,30 @@ export default function MasterExportPage() {
               showClear
             />
           </div>
-          <div className= ''>
-             <label className="block text-sm font-medium mb-1">Tanggal</label>
-             <Calendar
-              id= 'tanggal'
-              name= 'tanggal'
-              className= 'w-full'
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div>
+            <label className="block text-sm font-medium mb-1">Tanggal</label>
+            <Calendar
+              id='tanggal'
+              name='tanggal'
+              className='w-full'
               placeholder='Tanggal Kirim'
               showIcon
-             />
-
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Faktur</label>
+            <InputText
+              id='faktur'
+              name='faktur'
+              className='w-full'
+              placeholder='Faktur'
+            />
           </div>
         </div>
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
-          <label className='block text-sm font-medium mb-1'>Faktur</label>
-          <InputText
-            id = 'faktur'
-            name= 'faktur'
-            className='w-full'
-            placeholder='Faktur'
-          />
-        </div>
       </div>
-     
 
       <DataTable
         size="small"

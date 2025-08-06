@@ -1,36 +1,114 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Toast } from 'primereact/toast';
 import { Button } from 'primereact/button';
+import { Dropdown } from 'primereact/dropdown';
+import { Calendar } from 'primereact/calendar';
+import { InputText } from 'primereact/inputtext';
 
-export default function MasterImportPage() {
-    const [Import, setImport] = useState([]); 
-  const [dataImport, setDataImport] = useState([]);
+export default function MasterExportPage() {
+  const [Import, setImport] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [gudangOptions, setGudangOptions] = useState([]);
+  const [selectedFromGudang, setSelectedFromGudang] = useState(null);
+  const [selectedToGudang, setSelectedToGudang] = useState(null);
 
-  const fetchImportData = async () => {
+  const fetchGudang = useCallback(async () => {
     try {
-      const res = await fetch('/api/import');
+      const res = await fetch("/api/gudang/nama");
       const json = await res.json();
-      setDataImport(json.data || []);
+
+      if (json.status === "00") {
+        const options = json.namaGudang.map(nama => ({
+          label: nama,
+          value: nama,
+        }));
+        setGudangOptions(options);
+      }
+    } catch (error) {
+      console.error("Form Gagal ambil nama gudang", error);
+    }
+  }, []);
+
+  const fetchExportData = async () => {
+    try {
+      const res = await fetch('/api/export');
+      const json = await res.json();
+      setExportData(json.data || []);
     } catch (err) {
-      console.error('Gagal ambil data import:', err);
+      console.error('Gagal ambil data export:', err);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchImportData();
-  }, []);
+    fetchExportData();
+    fetchGudang();
+  }, [fetchGudang]);
 
   return (
-    <div className="p-4">
+    <div className="card">
       <Toast />
-      <h2 className="text-xl font-bold mb-4">Terima Barang</h2>
+      <h2 className="text-xl font-bold mb-4">terima Barang</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div>
+            <label className="block text-sm font-medium mb-1">Dari Gudang</label>
+            <Dropdown
+              id='darigudang'
+              name='darigudang'
+              className="w-full"
+              placeholder="Pilih Gudang"
+              options={gudangOptions}
+              value={selectedFromGudang}
+              onChange={(e) => setSelectedFromGudang(e.value)}
+              optionLabel="label"
+              optionValue="value"
+              showClear
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Ke Gudang</label>
+            <Dropdown
+              id='kegudang'
+              name='kegudang'
+              className="w-full"
+              placeholder="Pilih Gudang"
+              options={gudangOptions}
+              value={selectedToGudang}
+              onChange={(e) => setSelectedToGudang(e.value)}
+              optionLabel="label"
+              optionValue="value"
+              showClear
+            />
+          </div>
+          <div className= ''>
+             <label className="block text-sm font-medium mb-1">Tanggal</label>
+             <Calendar
+              id= 'tanggal'
+              name= 'tanggal'
+              className= 'w-full'
+              placeholder='Tanggal Kirim'
+              showIcon
+             />
+
+          </div>
+        </div>
+        <div className="mb-3 p-2 border rounded-lg bg-gray-50"> {/*untuk tabel*/}
+        <div className="grid grid-cols-1 md:grid-cols-1 gap-1 mr-5">
+          <label className='block text-sm font-medium mt-1 '>Faktur</label>
+          <InputText
+            id = 'faktur'
+            name= 'faktur'
+            className='w-full'
+            placeholder='Faktur'
+          />
+        </div>
+      </div>
+     
 
       <DataTable
         size='small'
@@ -38,7 +116,6 @@ export default function MasterImportPage() {
         value={Import}
         paginator
         rows={10}
-        // loading={isLoading}
         scrollable
     >
         <Column field="faktur" header="FAKTUR" />

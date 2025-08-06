@@ -503,7 +503,7 @@ const StockPage = () => {
               options={options.rak}
               onChange={(e) => handleFilterChange('rak', e.value)}
               className="w-full"
-              placeholder="Pilih RAK untuk filter"
+              placeholder="Pilih RAK "
               optionLabel="label"
               optionValue="value"
               showClear
@@ -516,7 +516,7 @@ const StockPage = () => {
               options={options.satuan}
               onChange={(e) => handleFilterChange('satuan', e.value)}
               className="w-full"
-              placeholder="Pilih Satuan untuk filter"
+              placeholder="Pilih Satuan"
               optionLabel="label"
               optionValue="value"
               showClear

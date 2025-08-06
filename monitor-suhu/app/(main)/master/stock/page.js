@@ -40,16 +40,12 @@ const StockPage = () => {
     rak: '',
     satuan: ''
   });
-  
-
-  const [options, setOptions] = useState({
+   const [options, setOptions] = useState({
     rak: [],
     satuan: [],
     gudang: [],
     golongan: []
   });
-  
-  
   const [dialogMode, setDialogMode] = useState(null);
   const [selectedStock, setSelectedStock] = useState(null);
   const [form, setForm] = useState(initialFormState);
@@ -165,7 +161,7 @@ const StockPage = () => {
     loadInitialData();
   }, [fetchDropdownData, fetchGudang, fetchStock]);
 
-  // Filtered stock data using useMemo for performance
+  
   const filteredStocks = useMemo(() => {
     let filtered = stock;
 
@@ -180,7 +176,6 @@ const StockPage = () => {
     return filtered;
   }, [stock, filters]);
 
-  // Filter handlers
   const handleFilterChange = useCallback((filterType, value) => {
     setFilters(prev => ({
       ...prev,
@@ -211,7 +206,7 @@ const StockPage = () => {
     setForm(prev => ({ ...prev, [name]: formattedDate }));
   }, []);
 
-  // CRUD operations
+  
   const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
     setIsLoading(true);

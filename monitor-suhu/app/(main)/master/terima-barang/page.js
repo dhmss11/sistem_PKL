@@ -30,7 +30,7 @@ export default function MasterImportPage() {
   return (
     <div className="p-4">
       <Toast />
-      <h2 className="text-xl font-bold mb-4">Import Gudang</h2>
+      <h2 className="text-xl font-bold mb-4">Terima Barang</h2>
 
       <DataTable
         size='small'

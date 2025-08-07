@@ -9,8 +9,8 @@ import { Dropdown } from 'primereact/dropdown';
 import { Calendar } from 'primereact/calendar';
 import { InputText } from 'primereact/inputtext';
 
-export default function MasterExportPage() {
-  const [exportData, setExportData] = useState([]);
+export default function MutasiKirimData() {
+  const [kirimData, setKirimData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [gudangOptions, setGudangOptions] = useState([]);
   const [selectedFromGudang, setSelectedFromGudang] = useState(null);
@@ -58,20 +58,20 @@ const fetchSatuan = useCallback(async () => {
 
 
   
-  const fetchExportData = async () => {
+  const fetchKirimData = async () => {
     try {
-      const res = await fetch('/api/export');
+      const res = await fetch('/api/kirimbarang');
       const json = await res.json();
-      setExportData(json.data || []);
+      setKirimData(json.data || []);
     } catch (err) {
-      console.error('Gagal ambil data export:', err);
+      console.error('Gagal ambil data Mutasi:', err);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchExportData();
+    fetchKirimData();
     fetchGudang();
     fetchSatuan();
   }, [fetchGudang, fetchSatuan]);
@@ -180,7 +180,7 @@ const fetchSatuan = useCallback(async () => {
       <DataTable
         size="small"
         className="text-sm"
-        value={exportData}
+        value={kirimData}
         paginator
         rows={10}
         loading={loading}

@@ -39,16 +39,17 @@ const fetchSatuan = useCallback(async () => {
   try {
     const res = await fetch("/api/satuan");
     const json = await res.json();
+    console.log("DATA SATUAN:", json); // Debug log
 
-    if (json.status === "00" ) {
-      const options = json.satuanStock.map((KODE) => ({
-        label: KODE,
-        value: KODE,
+    if (json.status === "00" && Array.isArray(json.data)) {
+      const options = json.data.map((item) => ({
+        label: item.KODE,
+        value: item.KODE,
       }));
       setSelectSatuan(options);
     } else {
       console.warn("Data satuan tidak valid:", json);
-      setSelectSatuan([]); // kosongkan jika tidak ada data
+      setSelectSatuan([]);
     }
   } catch (error) {
     console.error("Form Gagal ambil satuan", error);
@@ -79,12 +80,9 @@ const fetchSatuan = useCallback(async () => {
     <div className="card">
       <Toast />
       <h2 className="text-xl font-bold mb-4">Kirim Barang</h2>
-<<<<<<< HEAD
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-=======
-      <div className="mb-4 p-3 border rounded-lg bg-gray-50">
+      {/* <div className="mb-4 p-3 border rounded-lg bg-gray-50"> */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
->>>>>>> b4adc4e7014ff79acd838515b63d2d5da67d7537
           <div>
             <label className="block text-sm font-medium mb-1">Dari Gudang</label>
             <Dropdown
@@ -115,7 +113,6 @@ const fetchSatuan = useCallback(async () => {
               showClear
             />
           </div>
-<<<<<<< HEAD
           <div className="flex gap-2">
           <div className="w-1/2">
             <label className="block text-sm font-medium mb-1">Tanggal</label>
@@ -139,66 +136,44 @@ const fetchSatuan = useCallback(async () => {
           </div>
         </div>
 
-        {/* <div className="mb-3 p-2 border rounded-lg bg-gray-50"> untuk tabel */}
-       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-1/2 ">
-        <div>
-          <label className='block text-sm font-medium mb-1'>Faktur</label>
-          <InputText
-            id='faktur'
-            name='faktur'
-            className='w-full'
-            placeholder='Faktur'
-          />
-        </div>
-        <div>
-          <label className='block text-sm font-medium mb-1'>QTY</label>
-          <InputText
-            id='QTY'
-            name='QTY'
-            className='w-full'
-            placeholder='QTY'
-          />
-        </div>
-        <label className="block text-sm font-medium mb-1">satuan</label>
-            <Dropdown
-              id='satuan'
-              name='satuan'
-              className="w-full"
-              placeholder="Pilih satuan"
-              options={satuanOptions}
-              value={satuanSelect}
-              onChange={(e) => setSatuanSelect(e.value)}
-              optionLabel="label"
-              optionValue="value"
-              showClear
-            />
-      </div>
-=======
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <div>
-            <label className="block text-sm font-medium mb-1">Tanggal</label>
-            <Calendar
-              id='tanggal'
-              name='tanggal'
-              className='w-full'
-              placeholder='Tanggal Kirim'
-              showIcon
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Faktur</label>
-            <InputText
-              id='faktur'
-              name='faktur'
-              className='w-full'
-              placeholder='Faktur'
-            />
-          </div>
-        </div>
->>>>>>> b4adc4e7014ff79acd838515b63d2d5da67d7537
-      </div>
+         <div className="mb-3 p-2 border rounded-lg bg-gray-50"> 
+  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+    <div>
+      <label className='block text-sm font-medium mb-1'>Faktur</label>
+      <InputText
+        id='faktur'
+        name='faktur'
+        className='w-full'
+        placeholder='Faktur'
+      />
+    </div>
+    <div>
+      <label className='block text-sm font-medium mb-1'>QTY</label>
+      <InputText
+        id='QTY'
+        name='QTY'
+        className='w-full'
+        placeholder='QTY'
+      />
+    </div>
+    <div>
+      <label className="block text-sm font-medium mb-1">Satuan</label>
+      <Dropdown
+        id='satuan'
+        name='satuan'
+        className="w-full"
+        placeholder="Pilih satuan"
+        options={satuanOptions}
+        value={satuanSelect}
+        onChange={(e) => setSatuanSelect(e.value)}
+        optionLabel="label"
+        optionValue="value"
+        showClear
+      />
+    </div>
+  </div>
+</div>
+
 
 
      <div className='mt-3'>
@@ -224,5 +199,8 @@ const fetchSatuan = useCallback(async () => {
       </DataTable>
     </div>
     </div>
+    </div>
+    </div>
+
   );
 }

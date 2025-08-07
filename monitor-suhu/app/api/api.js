@@ -64,6 +64,13 @@ export const API_ENDPOINTS = {
     EDIT_KARTUSTOCK: (id) => `${API_URL}/kartustock/edit/${id}`,
     DELETE_KARTUSTOCK: (id) => `${API_URL}/kartustock/${id}`,
 
+
+    GET_ALL_KIRIM: `${API_URL}/kirimbarang`,
+    ADD_KIRIM: `${API_URL}/kirimbarang/create`,
+
+    GET_ALL_TERIMA: `${API_URL}/terimabarang`,
+    ADD_TERIMA: `${API_URL}/terimabarang/create`,
+
     
 
 

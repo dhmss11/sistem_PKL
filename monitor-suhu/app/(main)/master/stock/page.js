@@ -39,21 +39,15 @@ const StockPage = () => {
     rak: '',
     satuan: ''
   });
-  
-  // State for dropdown options
   const [options, setOptions] = useState({
     rak: [],
     satuan: [],
     gudang: [],
     golongan: []
   });
-  
-  // State for dialog
   const [dialogMode, setDialogMode] = useState(null);
   const [selectedStock, setSelectedStock] = useState(null);
   const [form, setForm] = useState(initialFormState);
-
-  // Utility functions
   const formatDateToDB = (date) => {
     if (!date) return '';
     const d = new Date(date);
@@ -77,8 +71,6 @@ const StockPage = () => {
       return '';
     }
   };
-
-  // Generic fetch function for dropdown options
   const fetchDropdownData = useCallback(async (endpoint, labelField = 'KETERANGAN') => {
     try {
       const res = await fetch(`/api/${endpoint}`);
@@ -99,8 +91,6 @@ const StockPage = () => {
       return [];
     }
   }, []);
-
-  // Fetch gudang data
   const fetchGudang = useCallback(async () => {
     try {
       const res = await fetch("/api/gudang/nama");
@@ -118,8 +108,6 @@ const StockPage = () => {
       return [];
     }
   }, []);
-
-  // Fetch stock data
   const fetchStock = useCallback(async () => {
     setIsLoading(true);
     try {

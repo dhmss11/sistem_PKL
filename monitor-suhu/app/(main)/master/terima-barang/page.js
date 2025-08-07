@@ -9,7 +9,7 @@ import { Dropdown } from 'primereact/dropdown';
 import { Calendar } from 'primereact/calendar';
 import { InputText } from 'primereact/inputtext';
 
-export default function MasterExportPage() {
+export default function MasterImportPage() {
   const [Import, setImport] = useState([]);
   const [loading, setLoading] = useState(true);
   const [gudangOptions, setGudangOptions] = useState([]);
@@ -50,11 +50,13 @@ export default function MasterExportPage() {
     fetchGudang();
   }, [fetchGudang]);
 
-  return (
+    return (
     <div className="card">
       <Toast />
-      <h2 className="text-xl font-bold mb-4">terima Barang</h2>
+      <h2 className="text-xl font-bold mb-4">Kirim Barang</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+      {/* <div className="mb-4 p-3 border rounded-lg bg-gray-50"> */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
           <div>
             <label className="block text-sm font-medium mb-1">Dari Gudang</label>
             <Dropdown
@@ -85,29 +87,62 @@ export default function MasterExportPage() {
               showClear
             />
           </div>
-          <div className= ''>
-             <label className="block text-sm font-medium mb-1">Tanggal</label>
-             <Calendar
-              id= 'tanggal'
-              name= 'tanggal'
-              className= 'w-full'
-              placeholder='Tanggal Kirim'
+          <div className="flex gap-2">
+          <div className="w-1/2">
+            <label className="block text-sm font-medium mb-1">Tanggal</label>
+            <Calendar
+              id="tanggal"
+              name="tanggal"
+              className="w-full"
+              placeholder="Tanggal Kirim"
               showIcon
-             />
+            />
+          </div>
 
+          <div className="w-1/2">
+            <label className="block text-sm font-small mb-1">Kode</label>
+            <InputText
+              id="kode"
+              name="kode"
+              className="w-full"
+              placeholder="kode"
+            />
           </div>
         </div>
-        <div className="mb-3 p-2 border rounded-lg bg-gray-50"> {/*untuk tabel*/}
-        <div className="grid grid-cols-1 md:grid-cols-1 gap-1 mr-5">
-          <label className='block text-sm font-medium mt-1 '>Faktur</label>
-          <InputText
-            id = 'faktur'
-            name= 'faktur'
-            className='w-full'
-            placeholder='Faktur'
-          />
-        </div>
-      </div>
+         <div className="mb-3 p-2 border rounded-lg bg-white-50"> 
+  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+    <div>
+      <label className='block text-sm font-medium mb-1'>Faktur</label>
+      <InputText
+        id='faktur'
+        name='faktur'
+        className='w-full'
+        placeholder='Faktur'
+      />
+    </div>
+    <div>
+      <label className='block text-sm font-medium mb-1'>QTY</label>
+      <InputText
+        id='QTY'
+        name='QTY'
+        className='w-full'
+        placeholder='QTY'
+      />
+    </div>
+    <div>
+      <label className="block text-sm font-medium mb-1">Satuan</label>
+      <Dropdown
+        id='satuan'
+        name='satuan'
+        className="w-full"
+        placeholder="Pilih satuan"
+        optionLabel="label"
+        optionValue="value"
+        showClear
+      />
+    </div>
+  </div>
+</div>
      
 
       <DataTable
@@ -128,6 +163,8 @@ export default function MasterExportPage() {
         <Column field="satuan" header="SATUAN" />
         <Column field="username" header="USERNAME" />
       </DataTable>
+    </div>
+    </div>
     </div>
   );
 }

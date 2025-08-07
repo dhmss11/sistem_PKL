@@ -32,16 +32,9 @@ const initialFormState = {
 
 const StockPage = () => {
   const toastRef = useRef(null);
-<<<<<<< HEAD
   const [filterSatuan, setFilterSatuan] = useState('');
-=======
-  
-  // State for data
->>>>>>> b4adc4e7014ff79acd838515b63d2d5da67d7537
   const [stock, setStock] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  
-  // State for filters
   const [filters, setFilters] = useState({
     rak: '',
     satuan: ''

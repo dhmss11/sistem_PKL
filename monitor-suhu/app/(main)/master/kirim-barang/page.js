@@ -39,7 +39,7 @@ const fetchSatuan = useCallback(async () => {
   try {
     const res = await fetch("/api/satuan");
     const json = await res.json();
-    console.log("DATA SATUAN:", json); // Debug log
+    console.log("DATA SATUAN:", json);
 
     if (json.status === "00" && Array.isArray(json.data)) {
       const options = json.data.map((item) => ({
@@ -136,7 +136,7 @@ const fetchSatuan = useCallback(async () => {
           </div>
         </div>
 
-         <div className="mb-3 p-2 border rounded-lg bg-gray-50"> 
+         <div className="mb-3 p-2 border rounded-lg bg-white-50"> 
   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
     <div>
       <label className='block text-sm font-medium mb-1'>Faktur</label>
@@ -174,9 +174,6 @@ const fetchSatuan = useCallback(async () => {
   </div>
 </div>
 
-
-
-     <div className='mt-3'>
       <DataTable
         size="small"
         className="text-sm"
@@ -200,7 +197,7 @@ const fetchSatuan = useCallback(async () => {
     </div>
     </div>
     </div>
-    </div>
+    
 
   );
 }

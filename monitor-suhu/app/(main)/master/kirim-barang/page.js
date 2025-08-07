@@ -19,7 +19,6 @@ export default function MutasiKirimData() {
   const [satuanOptions, setSelectSatuan] = useState([]);
   const [satuanSelect, setSatuanSelect] = useState(null);
   
-  // Form data state
   const [formData, setFormData] = useState({
     tanggal: null,
     kode: '',
@@ -84,7 +83,7 @@ export default function MutasiKirimData() {
     try {
       console.log("Fetching kirim data...");
       
-      // Panggil API route Next.js (tanpa API_BASE_URL)
+      
       const res = await fetch('/api/kirimbarang', {
         method: 'GET',
         headers: {
@@ -95,7 +94,7 @@ export default function MutasiKirimData() {
       console.log("Response status:", res.status);
       console.log("Response ok:", res.ok);
 
-      // Cek apakah response berhasil
+      
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
       }
@@ -114,11 +113,11 @@ export default function MutasiKirimData() {
       console.log("Parsed JSON:", json);
 
       if (json.status === '00') {
-        // Handle data - bisa langsung array atau dalam property data
+        
         const rawData = Array.isArray(json.data) ? json.data : [];
         console.log("Raw data:", rawData);
         
-        // Format data untuk tabel
+       
         const formattedData = rawData.map((item, index) => ({
           id: item.id || index + 1,
           FAKTUR: item.FAKTUR || item.faktur || '-',
@@ -171,7 +170,6 @@ export default function MutasiKirimData() {
   };
 
   const handleSubmit = async () => {
-    // Validasi form
     if (!selectedFromGudang || !selectedToGudang || !formData.tanggal || 
         !formData.kode || !formData.faktur || !formData.qty || !satuanSelect) {
       toast.current?.show({
@@ -192,8 +190,6 @@ export default function MutasiKirimData() {
       });
       return;
     }
-
-    // Validasi QTY
     if (isNaN(parseFloat(formData.qty)) || parseFloat(formData.qty) <= 0) {
       toast.current?.show({
         severity: 'error',
@@ -242,7 +238,6 @@ export default function MutasiKirimData() {
           life: 3000
         });
         
-        // Reset form
         setSelectedFromGudang(null);
         setSelectedToGudang(null);
         setSatuanSelect(null);
@@ -253,7 +248,7 @@ export default function MutasiKirimData() {
           qty: ''
         });
         
-        // Refresh data
+       
         fetchKirimData();
       } else {
         toast.current?.show({
@@ -419,7 +414,10 @@ export default function MutasiKirimData() {
           <Column field="QTY" header="QTY" />
           <Column field="SATUAN" header="SATUAN" />
           <Column field="USERNAME" header="USER" />
-          <Column field="DATETIME" header="WAKTU" />
+          <Column field="DATETIME" header="DATETIME" body={(rowData) => {
+          const datetime = new Date(rowData.DATETIME);
+          return datetime.toLocaleString('id-ID');
+        }} />
           <Column field="STATUS" header="STATUS" />
         </DataTable>
       </div>

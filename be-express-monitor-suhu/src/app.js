@@ -13,8 +13,10 @@ import satuanStockRoutes from './routes/satuanStockRoutes.js';
 import rakRoutes from './routes/rakRoutes.js';
 import kartuStockRoutes from './routes/kartuStockRoutes.js';
 import golonganstock from './routes/golonganstock.js';
+import jenisGudangRoutes from './routes/jenisGudangRoutes.js';
 import kirimBarang from './routes/kirimBarangRoutes.js';
 import terimaBarang from './routes/terimaBarangRoutes.js';
+import { addJenisGudang } from './controllers/jenisGudangController.js';
 const app = express();
 
 const allowedOrigins = ['http://localhost:3000'];
@@ -49,6 +51,7 @@ app.use('/api/rak', rakRoutes);
 app.use('/api/satuan', satuanStockRoutes);
 app.use('/api/kartustock', kartuStockRoutes);
 app.use('/api/golonganstock',golonganstock);
+app.use('/api/jenis-gudang',jenisGudangRoutes);
 app.use('/api/kirimbarang', kirimBarang)
 app.use('/api/terimabarang', terimaBarang)
 app.get('/', [setResponseHeader], (req, res) => {

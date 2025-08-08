@@ -36,6 +36,11 @@ const AppMenu = () => {
                     icon: 'pi pi-fw pi-th-large',
                     to: '/kode/golonganstock'
                 },
+                {
+                    label: 'Jenis Gudang',
+                    icon: 'pi pi-clone',
+                    to: '/kode/jenis-gudang'
+                },
             ]
         },
         {

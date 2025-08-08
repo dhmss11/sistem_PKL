@@ -71,7 +71,10 @@ export const API_ENDPOINTS = {
     GET_ALL_TERIMA: `${API_URL}/terimabarang`,
     ADD_TERIMA: `${API_URL}/terimabarang/create`,
 
+    //JENIS GUDANG
+     GET_ALL_JENIS: `${API_URL}/jenis-gudang`,
+    ADD_JENIS: `${API_URL}/jenis-gudang/create`,
+    EDIT_JENIS: (id) => `${API_URL}/jenis-gudang/edit/${id}`,
+    DELETE_JENIS: (id) => `${API_URL}/jenis-gudang/delete/${id}`,
     
-
-
 };

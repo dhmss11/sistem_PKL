@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Toast } from 'primereact/toast';
@@ -11,6 +11,8 @@ import { InputText } from 'primereact/inputtext';
 
 export default function MasterImportPage() {
   const [Import, setImport] = useState([]);
+  const toastRef = useRef(null);
+  const [terimaData, setTerimaData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [gudangOptions, setGudangOptions] = useState([]);
   const [selectedFromGudang, setSelectedFromGudang] = useState(null);
@@ -33,25 +35,55 @@ export default function MasterImportPage() {
     }
   }, []);
 
-  const fetchExportData = async () => {
+  const fetchTerima = async () => {
     try {
-      const res = await fetch('/api/export');
+      console.log('Fetching data from /api/terimabarang...'); 
+      const res = await fetch('/api/terimabarang');
       const json = await res.json();
-      setExportData(json.data || []);
+      
+      console.log('Response status:', res.status); 
+      console.log('Response data:', json); 
+
+      if (json.status === '00') {
+        console.log('Data yang akan di-set:', json.data);
+        console.log('Jumlah data:', json.data?.length || 0);
+        setTerimaData(json.data || []); 
+      } else {
+        console.error('API Error:', json.status, json.message);
+        toastRef.current?.show({
+          severity: 'error',
+          summary: 'Error',
+          detail: json.message || 'Gagal mengambil data',
+          life: 3000
+        });
+      }
     } catch (err) {
-      console.error('Gagal ambil data export:', err);
+      console.error('Fetch error:', err);
+      toastRef.current?.show({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Gagal mengambil data mutasi',
+        life: 3000
+      });
     } finally {
       setLoading(false);
     }
-  };
+  }
+
+  // Debug useEffect to monitor data changes
+  useEffect(() => {
+    console.log('terimaData changed:', terimaData);
+    console.log('terimaData length:', terimaData?.length || 0);
+  }, [terimaData]);
 
   useEffect(() => {
-    fetchExportData();
+    fetchTerima();
     fetchGudang();
   }, [fetchGudang]);
 
     return (
     <div className="card">
+
       <Toast />
       <h2 className="text-xl font-bold mb-4">Kirim Barang</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -144,25 +176,34 @@ export default function MasterImportPage() {
   </div>
 </div>
      
-
       <DataTable
         size='small'
         className='text-sm'
-        value={Import}
+        value={terimaData}
+        loading={loading}
         paginator
         rows={10}
         scrollable
-    >
-        <Column field="faktur" header="FAKTUR" />
-        <Column field="faktur_kirim" header="FAKTUR_KIRIM" />
-        <Column field="tgl" header="TGL" />
-        <Column field="gudang_terima" header="GUDANG_TERIMA" />
-        <Column field="gudang_kirim" header="GUDANG_KIRIM" />
-        <Column field="kode" header="KODE" />
-        <Column field="qty" header="QTY" />
-        <Column field="satuan" header="SATUAN" />
-        <Column field="username" header="USERNAME" />
+        emptyMessage="Tidak ada data untuk ditampilkan"
+      >
+        <Column field="FAKTUR" header="FAKTUR" />
+        <Column field="FAKTUR_KIRIM" header="FAKTUR_KIRIM" />
+        <Column field="TGL" header="TGL" body={(rowData) => {
+          const date = new Date(rowData.TGL);
+          return date.toLocaleDateString('id-ID');
+        }} />
+        <Column field="GUDANG_TERIMA" header="GUDANG_TERIMA" />
+        <Column field="GUDANG_KIRIM" header="GUDANG_KIRIM" />
+        <Column field="KODE" header="KODE" />
+        <Column field="QTY" header="QTY" />
+        <Column field="SATUAN" header="SATUAN" />
+        <Column field="USERNAME" header="USERNAME" />
+        <Column field="DATETIME" header="DATETIME" body={(rowData) => {
+          const datetime = new Date(rowData.DATETIME);
+          return datetime.toLocaleString('id-ID');
+        }} />
       </DataTable>
+      
     </div>
     </div>
     </div>

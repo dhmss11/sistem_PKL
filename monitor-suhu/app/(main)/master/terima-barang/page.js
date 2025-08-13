@@ -10,7 +10,7 @@ import { Calendar } from 'primereact/calendar';
 import { InputText } from 'primereact/inputtext';
 
 export default function MutasiTerimaData() {
-  const toastRef = useRef(null); // Fixed typo: toasfRef -> toastRef
+  const toastRef = useRef(null);
   const [terimaData, setTerimaData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [gudangOptions, setGudangOptions] = useState([]);
@@ -36,17 +36,17 @@ export default function MutasiTerimaData() {
 
   const fetchTerima = async () => {
     try {
-      console.log('Fetching data from /api/terimabarang...'); // Debug log
+      console.log('Fetching data from /api/terimabarang...');
       const res = await fetch('/api/terimabarang');
       const json = await res.json();
       
-      console.log('Response status:', res.status); // Debug log
-      console.log('Response data:', json); // Debug log
+      console.log('Response status:', res.status); 
+      console.log('Response data:', json);
 
       if (json.status === '00') {
-        console.log('Data yang akan di-set:', json.data); // Debug log
-        console.log('Jumlah data:', json.data?.length || 0); // Debug log
-        setTerimaData(json.data || []); // Ensure it's always an array
+        console.log('Data yang akan di-set:', json.data);
+        console.log('Jumlah data:', json.data?.length || 0); 
+        setTerimaData(json.data || []);
       } else {
         console.error('API Error:', json.status, json.message);
         toastRef.current?.show({
@@ -69,7 +69,7 @@ export default function MutasiTerimaData() {
     }
   }
 
-  // Debug useEffect to monitor data changes
+
   useEffect(() => {
     console.log('terimaData changed:', terimaData);
     console.log('terimaData length:', terimaData?.length || 0);

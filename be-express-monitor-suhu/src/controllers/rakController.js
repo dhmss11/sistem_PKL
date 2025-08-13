@@ -5,7 +5,7 @@ import { datetime, status } from '../utils/general.js';
 
 export const fetchAllRak = async (req, res) => {
     try {
-        const data = await db('rak').select(['KODE', 'KETERANGAN']);
+        const data = await db('rak').select(['KODE', 'NAMA', 'KETERANGAN']);
 
         if (!data || data.length === 0) {
             return res.status(404).json({
@@ -35,9 +35,9 @@ export const fetchAllRak = async (req, res) => {
 
 export const addRak = async (req, res) => {
     try {
-        const {KODE, KETERANGAN} = req.body;
+        const {KODE, NAMA, KETERANGAN} = req.body;
 
-        await db ('rak').insert({ KODE, KETERANGAN});
+        await db ('rak').insert({ KODE, NAMA, KETERANGAN});
 
         return res.status(201).json({
             status: status.SUKSES,
@@ -57,10 +57,11 @@ export const addRak = async (req, res) => {
 
 export const editRak = async (req, res) => {
     const { KODE } = req.params;
+    const { NAMA }  = req.body;
     const { KETERANGAN } = req.body;
 
     try {
-        const updated = await db('rak').where({ KODE }).update({ KETERANGAN });
+        const updated = await db('rak').where({ KODE }).update({ NAMA, KETERANGAN});
 
         if (updated) {
             return res.json({

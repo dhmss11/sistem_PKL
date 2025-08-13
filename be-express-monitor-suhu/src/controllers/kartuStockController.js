@@ -2,12 +2,76 @@ import { db } from "../core/config/knex.js";
 import { datetime, status } from "../utils/general.js";
 
 /**
+ * ✅ Helper function untuk format tanggal ke MySQL format
+ */
+const formatDateForMySQL = (dateString) => {
+  if (!dateString) return null;
+  
+  // Jika sudah format YYYY-MM-DD, return as is
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+    return dateString;
+  }
+  
+  // Jika format ISO dengan timezone, convert ke YYYY-MM-DD
+  if (dateString.includes('T')) {
+    return dateString.split('T')[0];
+  }
+  
+  return dateString;
+};
+
+/**
+ * ✅ Helper function untuk format datetime ke MySQL format
+ */
+const formatDateTimeForMySQL = (datetimeString) => {
+  if (!datetimeString) return null;
+  
+  // Jika sudah format MySQL DATETIME, return as is
+  if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(datetimeString)) {
+    return datetimeString;
+  }
+  
+  // Jika format ISO, convert ke MySQL DATETIME
+  if (datetimeString.includes('T')) {
+    const date = new Date(datetimeString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+  }
+  
+  return datetimeString;
+};
+
+/**
+ * ✅ Helper function untuk sanitize data sebelum kirim ke database
+ */
+const sanitizeKartuStockData = (data) => {
+  const sanitized = { ...data };
+  
+  // Format TGL field
+  if (sanitized.TGL) {
+    sanitized.TGL = formatDateForMySQL(sanitized.TGL);
+  }
+  
+  // Format DATETIME field
+  if (sanitized.DATETIME) {
+    sanitized.DATETIME = formatDateTimeForMySQL(sanitized.DATETIME);
+  }
+  
+  return sanitized;
+};
+
+/**
  * Ambil semua data kartu stok
  */
 export const fetchAllKartuStock = async (req, res) => {
   try {
     const data = await db("kartustock").select([
-      "id",            // Pastikan ada kolom ID untuk identifikasi unik
+      "id",
       "STATUS",
       "FAKTUR",
       "TGL",
@@ -56,12 +120,18 @@ export const fetchAllKartuStock = async (req, res) => {
 };
 
 /**
- * Tambah data kartu stok baru
+ * ✅ FIXED: Tambah data kartu stok baru dengan sanitization
  */
 export const addKartuStock = async (req, res) => {
   try {
     const body = req.body;
-    await db("kartustock").insert(body);
+    
+    // ✅ Sanitize data sebelum insert
+    const sanitizedData = sanitizeKartuStockData(body);
+    
+    console.log('📝 Data yang akan di-insert:', sanitizedData); // Debug log
+    
+    await db("kartustock").insert(sanitizedData);
 
     return res.status(201).json({
       status: status.SUKSES,
@@ -80,14 +150,19 @@ export const addKartuStock = async (req, res) => {
 };
 
 /**
- * Edit data kartu stok berdasarkan ID
+ * ✅ FIXED: Edit data kartu stok dengan sanitization
  */
 export const editKartuStock = async (req, res) => {
   try {
     const { id } = req.params;
     const body = req.body;
 
-    const updated = await db("kartustock").where({ id }).update(body);
+    // ✅ Sanitize data sebelum update
+    const sanitizedData = sanitizeKartuStockData(body);
+    
+    console.log('📝 Data yang akan di-update:', sanitizedData); // Debug log
+
+    const updated = await db("kartustock").where({ id }).update(sanitizedData);
 
     if (!updated) {
       return res.status(404).json({

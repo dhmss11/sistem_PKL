@@ -1,6 +1,3 @@
-
-
-
 import express from 'express';
 import {
   fetchAllJenisGudang,
@@ -19,6 +16,3 @@ router.put('/edit/:id', editJenisGudang);
 router.delete('/delete/:id', deleteJenisGudang);
 
 export default router;
-
-
-

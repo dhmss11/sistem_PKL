@@ -81,7 +81,7 @@ const AppMenu = () => {
             items: [
                 {
                     label: 'Kartu Stock',
-                    icon: 'pi pi-fw pi-sync',
+                    icon: 'pi pi-fw pi-book',
                     to: '/laporan/kartustock'
                 }
             ]

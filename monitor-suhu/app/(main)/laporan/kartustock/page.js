@@ -156,45 +156,50 @@ const KartuStockPage = () => {
     <label htmlFor={field} className="block font-medium mb-1">{field}</label>
 
     {field === 'TGL' ? (
-      <Calendar
-        id={field}
-        name={field}
-        value={
-          form[field] && /^\d{4}-\d{2}-\d{2}$/.test(form[field])
-            ? new Date(`${form[field]}T00:00:00`)
-            : null
-        }
-        onChange={(e) => {
-          const date = e.value;
-          if (date instanceof Date && !isNaN(date)) {
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
-            const formatted = `${year}-${month}-${day}`;
+  <Calendar
+    id={field}
+    name={field}
+    value={
+      form[field] && /^\d{4}-\d{2}-\d{2}$/.test(form[field])
+        ? (() => {
+            // Parse tanggal dengan cara yang aman dari timezone
+            const [year, month, day] = form[field].split('-').map(Number);
+            return new Date(year, month - 1, day); // month - 1 karena JS month dimulai dari 0
+          })()
+        : null
+    }
+    onChange={(e) => {
+      const date = e.value;
+      if (date instanceof Date && !isNaN(date)) {
+        // Gunakan getFullYear, getMonth, getDate untuk menghindari timezone issues
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0'); 
+        const formatted = `${year}-${month}-${day}`;
 
-            setForm((prev) => ({ ...prev, [field]: formatted }));
-          } else {
-            setForm((prev) => ({ ...prev, [field]: '' }));
-          }
-        }}
-        dateFormat="yy-mm-dd"
-        showIcon
-        className="w-full"
-      />
-    ) : (
-      <InputText
-        id={field}
-        name={field}
-        value={form[field] ?? ''}
-        onChange={(e) =>
-          setForm((prev) => ({
-            ...prev,
-            [field]: e.target.value,
-          }))
-        }
-        className="w-full"
-      />
-    )}
+        setForm((prev) => ({ ...prev, [field]: formatted }));
+      } else {
+        setForm((prev) => ({ ...prev, [field]: '' }));
+      }
+    }}
+    dateFormat="yy-mm-dd"
+    showIcon
+    className="w-full"
+  />
+) : (
+  <InputText
+    id={field}
+    name={field}
+    value={form[field] ?? ''}
+    onChange={(e) =>
+      setForm((prev) => ({
+        ...prev,
+        [field]: e.target.value,
+      }))
+    }
+    className="w-full"
+  />
+)}
   </div>
 ))}
 

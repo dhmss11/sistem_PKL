@@ -16,6 +16,7 @@ const RakPage = () => {
     const [selectedRak, setSelectedRak] = useState(null);
     const [form, setForm] = useState({
         KODE: '',
+        NAMA: '',
         KETERANGAN: '',
     });
 
@@ -89,7 +90,7 @@ const RakPage = () => {
   };
 
   const resetForm = () => {
-    setForm({ KODE: '', KETERANGAN: '' });
+    setForm({ KODE: '', KETERANGAN: '',NAMA: '' });
     setDialogMode(null);
     setSelectedRak(null);
   };
@@ -118,6 +119,7 @@ const RakPage = () => {
         className="text-sm"
       >
         <Column field="KODE" header="Kode" />
+        <Column field="NAMA" header= "nama"/>
         <Column field="KETERANGAN" header="Keterangan" />
         <Column
           header="Aksi"
@@ -167,6 +169,18 @@ const RakPage = () => {
               className="w-full mt-2"
               required
               readOnly={dialogMode === 'edit'}
+            />
+          </div>
+
+          <div className="mb-3">
+            <label htmlFor="NAMA">NAMA</label>
+            <InputText
+              id="NAMA"
+              name="NAMA"
+              value={form.NAMA_RAK}
+              onChange={handleChange}
+              className="w-full mt-2"
+              required
             />
           </div>
 

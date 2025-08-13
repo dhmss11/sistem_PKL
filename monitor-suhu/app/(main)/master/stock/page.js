@@ -27,7 +27,9 @@ const initialFormState = {
   HJ: '',
   EXPIRED: '',
   TGL_MASUK: '',
-  BERAT: ''
+  BERAT: '',
+  QTY: '',
+  BARCODE: ''
 };
 
 const StockPage = () => {
@@ -347,7 +349,7 @@ const StockPage = () => {
         </div>
 
         {/* Basic text fields */}
-        {['KODE', 'KODE_TOKO', 'NAMA', 'JENIS'].map((field) => (
+        {['KODE', 'KODE_TOKO', 'NAMA', 'JENIS',].map((field) => (
           <div key={field} className="mb-3">
             <label htmlFor={field}>{field.replace(/_/g, ' ')}</label>
             <InputText
@@ -375,7 +377,7 @@ const StockPage = () => {
             optionValue="value"
           />
         </div>
-
+        
         {/* RAK */}
         <div className="mb-3">
           <label htmlFor="RAK">RAK</label>
@@ -421,7 +423,7 @@ const StockPage = () => {
         </div>
 
         {/* Numeric fields */}
-        {['ISI', 'DISCOUNT', 'HB', 'HJ', 'BERAT'].map((field) => (
+        {['ISI', 'DISCOUNT', 'HB', 'HJ', 'BERAT', 'QTY'].map((field) => (
           <div key={field} className="mb-3">
             <label htmlFor={field}>{field.replace(/_/g, ' ')}</label>
             <InputText

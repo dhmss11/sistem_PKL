@@ -1,10 +1,13 @@
-/* eslint-disable @next/next/no-img-element */
 'use client';
 
 import { Chart } from 'primereact/chart';
 import { DataTable } from 'primereact/datatable';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState, useRef } from 'react';
 import { LayoutContext } from '../../layout/context/layoutcontext';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '../(auth)/context/authContext';
+import { Button } from 'primereact/button';
+import { Toast } from 'primereact/toast';
 
 const lineData = {
     labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
@@ -31,7 +34,14 @@ const lineData = {
 const Dashboard = () => {
     const [products, setProducts] = useState([]);
     const [lineOptions, setLineOptions] = useState({});
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
     const { layoutConfig } = useContext(LayoutContext);
+    const router = useRouter();
+    const toast = useRef(null);
+    
+    const { user, loading, initialized, logout } = useAuth(); // Pastikan logout tersedia dari context
+    
+    const redirectedRef = useRef(false);
 
     const applyLightTheme = () => {
         const options = {
@@ -81,6 +91,67 @@ const Dashboard = () => {
         setLineOptions(options);
     };
 
+    // Handler untuk logout - menggunakan auth context
+    const handleLogout = async () => {
+        try {
+            setIsLoggingOut(true);
+            
+            // Gunakan logout function dari auth context
+            const result = await logout();
+            
+            if (result.success) {
+                // Show success message
+                toast.current?.show({
+                    severity: 'success',
+                    summary: 'Logout Berhasil',
+                    detail: result.message || 'Anda telah berhasil keluar dari sistem',
+                    life: 3000
+                });
+
+                // Delay redirect sedikit untuk menampilkan toast
+                setTimeout(() => {
+                    router.push('/auth/login');
+                }, 1000);
+
+            } else {
+                throw new Error(result.error || 'Logout gagal');
+            }
+
+        } catch (error) {
+            console.error('Logout error:', error);
+            toast.current?.show({
+                severity: 'error',
+                summary: 'Logout Gagal',
+                detail: error.message || 'Terjadi kesalahan saat logout',
+                life: 5000
+            });
+            
+            // Bahkan jika error, tetap redirect ke login
+            // karena user state mungkin sudah di-clear di context
+            setTimeout(() => {
+                router.push('/auth/login');
+            }, 2000);
+            
+        } finally {
+            setIsLoggingOut(false);
+        }
+    };
+
+    useEffect(() => {
+        console.log('🏠 Dashboard useEffect:', { 
+            initialized, 
+            loading, 
+            hasUser: !!user,
+            redirected: redirectedRef.current 
+        });
+
+        if (initialized && !loading && !user && !redirectedRef.current) {
+            console.log('🚨 Dashboard: Redirecting to login - no authenticated user');
+            redirectedRef.current = true;
+            router.push('/auth/login');
+        }
+    }, [initialized, loading, user, router]);
+
     useEffect(() => {
         if (layoutConfig.colorScheme === 'light') {
             applyLightTheme();
@@ -89,8 +160,63 @@ const Dashboard = () => {
         }
     }, [layoutConfig.colorScheme]);
 
+    if (!initialized || loading) {
+        return (
+            <div className="flex align-items-center justify-content-center" style={{ minHeight: '400px' }}>
+                <div className="text-center">
+                    <i className="pi pi-spin pi-spinner" style={{ fontSize: '2rem' }}></i>
+                    <p className="mt-3">Loading Dashboard...</p>
+                    <small className="text-500">
+                        Initialized: {initialized ? 'Yes' : 'No'} | 
+                        Loading: {loading ? 'Yes' : 'No'} | 
+                        User: {user?.username || 'None'}
+                    </small>
+                </div>
+            </div>
+        );
+    }
+
+    if (initialized && !loading && !user) {
+        return (
+            <div className="flex align-items-center justify-content-center" style={{ minHeight: '400px' }}>
+                <div className="text-center">
+                    <i className="pi pi-exclamation-triangle text-orange-500" style={{ fontSize: '3rem' }}></i>
+                    <h3 className="mt-3">Access Denied</h3>
+                    <p className="text-500">Redirecting to login...</p>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="grid">
+            <Toast ref={toast} />
+            
+            <div className="col-12">
+                <div className="card">
+                    <div className="flex justify-content-between align-items-center">
+                        <div>
+                            <h5>Selamat datang, {user.username}!</h5>
+                            <p>Role: {user.role}</p>
+                            <small className="text-500">
+                                Debug: ID={user.id} | Email={user.email} | 
+                                Auth Status: {initialized ? 'Initialized' : 'Pending'}
+                            </small>
+                        </div>
+                    </div>
+                        <Button
+                            id="logout"
+                            name="logout"
+                            label={isLoggingOut ? 'Logging out...' : 'Logout'}
+                            icon={isLoggingOut ? 'pi pi-spin pi-spinner' : 'pi pi-sign-out'}
+                            className="p-button-danger mt-5"
+                            loading={isLoggingOut}
+                            onClick={handleLogout}
+                            disabled={isLoggingOut}
+                        />
+                </div>
+            </div>
+
             {[{
                 label: "Orders", value: "152", icon: "pi-shopping-cart", bg: "bg-blue-100", color: "text-blue-500", subtitle: "24 new", note: "since last visit"
             }, {
@@ -117,7 +243,6 @@ const Dashboard = () => {
                 </div>
             ))}
 
-        
             {['Sehari', 'Seminggu', 'Sebulan'].map((periode, i) => (
                 <div className="col-12" key={i}>
                     <div className="card">

@@ -8,6 +8,7 @@ import { Button } from 'primereact/button';
 import { Dropdown } from 'primereact/dropdown';
 import { Calendar } from 'primereact/calendar';
 import { InputText } from 'primereact/inputtext';
+import { Dialog } from 'primereact/dialog';
 
 export default function MutasiKirimData() {
   const [kirimData, setKirimData] = useState([]);
@@ -25,6 +26,9 @@ export default function MutasiKirimData() {
     faktur: '',
     qty: ''
   });
+
+const [searchTerm, setSearchTerm] = useState('');
+const [showForm, setShowForm] = useState(false)
 
   const toast = useRef(null);
 
@@ -50,6 +54,11 @@ export default function MutasiKirimData() {
       });
     }
   }, []);
+
+  const handleSearch = () => {
+    console.log("Mencari Sesuatu:", searchTerm)
+    setShowForm(true);
+  }
 
   const fetchSatuan = useCallback(async () => {
     try {
@@ -330,17 +339,24 @@ export default function MutasiKirimData() {
               dateFormat="dd/mm/yy"
             />
           </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Kode</label>
+          <div className='p-inputgroup'>
             <InputText
               id="kode"
               name="kode"
               className="w-full"
               placeholder="Kode"
-              value={formData.kode}
-              onChange={(e) => handleInputChange('kode', e.target.value)}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <Button
+            id = 'searchkode'
+            name = 'searchkode'
+            icon = 'pi pi-search'
+            onClick={handleSearch}
+           
             />
           </div>
+
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
@@ -366,6 +382,11 @@ export default function MutasiKirimData() {
               onChange={(e) => handleInputChange('qty', e.target.value)}
               keyfilter="pnum"
             />
+            
+          </div>
+            <div className='d-flex align-items-center gap-2 mb-5'>
+            
+            
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Satuan</label>
@@ -394,7 +415,14 @@ export default function MutasiKirimData() {
           />
         </div>
       </div>
-
+      
+     <Dialog
+      header = 'form-search'
+      visible ={showForm}
+      style = {{width: '30vw'}}
+      onHide ={() => setShowForm(false)}
+     />
+     
       <div className='mt-3'>
         <DataTable
           size="small"

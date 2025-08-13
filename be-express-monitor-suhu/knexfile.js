@@ -10,6 +10,12 @@ const knexConfig = {
       user: String(process.env.DB_USERNAME) || "root",
       password: String(process.env.DB_PASSWORD) || "",
       database: String(process.env.DB_NAME) || "",
+      charset: 'utf8mb4'
+    },
+    pool: {
+      min: 2,
+      max: 10
+
     },
     migrations: {
       directory: "./src/migrations",

@@ -6,6 +6,7 @@ import 'primeflex/primeflex.css';
 import 'primeicons/primeicons.css';
 import '../styles/layout/layout.scss';
 import '../styles/demo/Demos.scss';
+import { AuthProvider } from './(auth)/context/authContext';
 
 export default function RootLayout({ children }) {
     return (
@@ -14,9 +15,11 @@ export default function RootLayout({ children }) {
                 <link id="theme-css" href={`/themes/lara-light-indigo/theme.css`} rel="stylesheet" />
             </head>
             <body>
+                <AuthProvider>
                 <PrimeReactProvider>
                     <LayoutProvider>{children}</LayoutProvider>
                 </PrimeReactProvider>
+                </AuthProvider>
             </body>
         </html>
     );

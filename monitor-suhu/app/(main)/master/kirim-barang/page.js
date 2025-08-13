@@ -51,7 +51,6 @@ export default function MutasiKirimData() {
     }
   }, []);
 
-
 const fetchSatuan = useCallback(async () => {
   try {
     const res = await fetch("/api/satuan");
@@ -73,8 +72,7 @@ const fetchSatuan = useCallback(async () => {
   }
 }, []);
 
-
-  const fetchKirimData = useCallback(async () => {
+const fetchKirimData = useCallback(async () => {
     setLoading(true);
     try {
       console.log("Fetching kirim data...");
@@ -94,8 +92,6 @@ const fetchSatuan = useCallback(async () => {
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
       }
-
-      // Cek content-type
       const contentType = res.headers.get('content-type');
       console.log("Content-Type:", contentType);
       
@@ -403,3 +399,4 @@ const fetchSatuan = useCallback(async () => {
 
   );
 }
+

@@ -105,15 +105,14 @@ export const addStock = async (req, res) => {
 };
 export const editStock = async (req, res) => {
   try {
-    const { id } = req.params; // ini asumsinya adalah KODE, bukan kolom id
-
+    const { id } = req.params; 
     const {
       gudang, KODE, KODE_TOKO, NAMA, JENIS, GOLONGAN,
       RAK, DOS, SATUAN, ISI, DISCOUNT, HB, HJ, BERAT
     } = req.body;
 
     await db('stock')
-      .where({ KODE: id }) // ganti ini ya
+      .where({ KODE: id }) 
       .update({
         gudang, KODE, KODE_TOKO, NAMA, JENIS, GOLONGAN,
         RAK, DOS, SATUAN, ISI, DISCOUNT, HB, HJ,BERAT
@@ -157,7 +156,7 @@ export const deleteStock = async (req, res) => {
     }
 
   } catch (error) {
-    console.error('❌ Gagal hapus stock:', error.message);
+    console.error('Gagal hapus stock:', error.message);
     return res.status(500).json({
       status: status.GAGAL,
       message: 'Gagal menghapus stock',
@@ -183,3 +182,49 @@ export const fetchStockBySatuan = async (req, res) => {
     return res.status(500).json({ status: '99', message: 'Gagal mengambil data' });
   }
 };
+
+
+export const getStockByGudang = async (req, res) => {
+  const { gudang } = req.params;
+
+  try {
+    const data = await db('stock')
+      .select('*')
+      .where('gudang', gudang);
+
+    return res.json({
+      status: status.SUKSES,
+      message: `Produk dari gudang '${gudang}' berhasil diambil`,
+      datetime: datetime(),
+      produk: data,
+    });
+  } catch (err) {
+    console.error('Error getProdukByGudang:', err);
+    return res.status(500).json({
+      status: status.GAGAL,
+      message: 'Gagal mengambil produk berdasarkan gudang',
+      datetime: datetime(),
+    });
+  }
+};
+
+export const getTotalColumnsStock = async (req, res) => {
+  try {
+    const data = await db('stock').count('* as total').first();
+
+    res.status(200).json({
+      status: status.SUKSES,
+      message: 'Berhasil menghitung jumlah baris stock',
+      datetime: datetime(),
+      total: data.total
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: status.ERROR,
+      message: 'Gagal menghitung jumlah baris stock',
+      datetime: datetime(),
+      error: err.message
+    });
+  }
+};
+

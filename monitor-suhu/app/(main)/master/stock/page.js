@@ -37,7 +37,7 @@ const StockPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [filters, setFilters] = useState({
     rak: '',
-    satuan: ''
+    satuan: '',
   });
   const [options, setOptions] = useState({
     rak: [],
@@ -105,9 +105,10 @@ const StockPage = () => {
       return [];
     } catch (error) {
       console.error("Form Gagal ambil nama gudang", error);
-      return [];
+      return [];  
     }
   }, []);
+
   const fetchStock = useCallback(async () => {
     setIsLoading(true);
     try {
@@ -132,14 +133,13 @@ const StockPage = () => {
     }
   }, []);
 
-  // Load all initial data
   useEffect(() => {
     const loadInitialData = async () => {
       const [rakData, satuanData, golonganData, gudangData] = await Promise.all([
         fetchDropdownData('rak'),
         fetchDropdownData('satuan'),
         fetchDropdownData('golonganstock'),
-        fetchGudang(),
+        fetchGudang(''),
         fetchStock()
       ]);
 
@@ -154,7 +154,6 @@ const StockPage = () => {
     loadInitialData();
   }, [fetchDropdownData, fetchGudang, fetchStock]);
 
-  // Filtered stock data using useMemo for performance
   const filteredStocks = useMemo(() => {
     let filtered = stock;
 
@@ -169,7 +168,6 @@ const StockPage = () => {
     return filtered;
   }, [stock, filters]);
 
-  // Filter handlers
   const handleFilterChange = useCallback((filterType, value) => {
     setFilters(prev => ({
       ...prev,
@@ -180,11 +178,11 @@ const StockPage = () => {
   const clearFilters = useCallback(() => {
     setFilters({
       rak: '',
-      satuan: ''
+      satuan: '',
+      gudang : ''
     });
   }, []);
 
-  // Form handlers
   const handleFormChange = useCallback((e) => {
     const { name, value } = e.target;
     setForm(prev => ({ ...prev, [name]: value }));
@@ -200,7 +198,6 @@ const StockPage = () => {
     setForm(prev => ({ ...prev, [name]: formattedDate }));
   }, []);
 
-  // CRUD operations
   const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -243,7 +240,6 @@ const StockPage = () => {
     if (formData.EXPIRED) {
       formData.EXPIRED = parseDateFromDB(formData.EXPIRED);
     }
-    
     setForm(formData);
   }, []);
 
@@ -269,7 +265,6 @@ const StockPage = () => {
     }
   }, [fetchStock]);
 
-  // Dialog functions
   const openAddDialog = useCallback(() => {
     setDialogMode('add');
     setForm(initialFormState);
@@ -282,7 +277,6 @@ const StockPage = () => {
     setSelectedStock(null);
   }, []);
 
-  // Render functions
   const renderCalendarInput = (name, label) => {
     let dateValue = null;
     if (form[name]) {
@@ -330,7 +324,7 @@ const StockPage = () => {
       style={{ width: '40rem' }}
     >
       <form onSubmit={handleSubmit}>
-        {/* Gudang */}
+
         <div className="mb-3">
           <label htmlFor="gudang">Gudang</label>
           <Dropdown
@@ -346,7 +340,6 @@ const StockPage = () => {
           />
         </div>
 
-        {/* Basic text fields */}
         {['KODE', 'KODE_TOKO', 'NAMA', 'JENIS'].map((field) => (
           <div key={field} className="mb-3">
             <label htmlFor={field}>{field.replace(/_/g, ' ')}</label>
@@ -360,7 +353,6 @@ const StockPage = () => {
           </div>
         ))}
 
-        {/* Golongan */}
         <div className="mb-3">
           <label htmlFor="GOLONGAN">Golongan</label>
           <Dropdown
@@ -376,7 +368,6 @@ const StockPage = () => {
           />
         </div>
 
-        {/* RAK */}
         <div className="mb-3">
           <label htmlFor="RAK">RAK</label>
           <Dropdown
@@ -392,7 +383,6 @@ const StockPage = () => {
           />
         </div>
 
-        {/* DOS */}
         <div className="mb-3">
           <label htmlFor="DOS">DOS</label>
           <InputText
@@ -404,7 +394,6 @@ const StockPage = () => {
           />
         </div>
 
-        {/* Satuan */}
         <div className="mb-3">
           <label htmlFor="SATUAN">Satuan</label>
           <Dropdown
@@ -420,7 +409,6 @@ const StockPage = () => {
           />
         </div>
 
-        {/* Numeric fields */}
         {['ISI', 'DISCOUNT', 'HB', 'HJ', 'BERAT'].map((field) => (
           <div key={field} className="mb-3">
             <label htmlFor={field}>{field.replace(/_/g, ' ')}</label>
@@ -434,7 +422,6 @@ const StockPage = () => {
           </div>
         ))}
 
-        {/* Date fields */}
         {renderCalendarInput('TGL_MASUK', 'Tanggal Masuk')}
         {renderCalendarInput('EXPIRED', 'Tanggal Expired')}
 
@@ -460,8 +447,7 @@ const StockPage = () => {
   return (
     <div className="card">
       <h3 className="text-xl font-semibold">Master Stock</h3>
-      
-      {/* Action buttons */}
+
       <div className="mb-4 flex gap-2">
         <Button
           label="Tambah Stock"
@@ -475,8 +461,6 @@ const StockPage = () => {
           onClick={clearFilters}
         />
       </div>
-
-      {/* Filters */}
       <div className="mb-4 p-3 border rounded-lg bg-gray-50">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div>
@@ -507,8 +491,6 @@ const StockPage = () => {
           </div>
         </div>
       </div>
-
-      {/* Data table */}
       <DataTable
         value={filteredStocks}
         paginator
@@ -561,3 +543,5 @@ const StockPage = () => {
 };
 
 export default StockPage;
+
+

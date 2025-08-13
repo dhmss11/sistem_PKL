@@ -25,20 +25,46 @@ const UserPage = () => {
   const [dialogMode, setDialogMode] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null);
   const [form, setForm] = useState(defaultForm);
+  const [roleOptions, setRoleOptions] = useState([]);
 
-  const fetchUser = async () => {
-    setIsLoading(true);
-    try {
-      const res = await fetch('/api/users');
-      const json = await res.json();
-      setUsers(json.data.users);
-    } catch (err) {
-      console.error(`Failed to fetch: ${err}`);
-      toastRef.current?.showToast('99', 'Gagal memuat data user');
-    } finally {
-      setIsLoading(false);
+const fetchRoles = async () => {
+  try {
+    const res = await fetch('/api/jenis-role');
+    const json = await res.json();
+
+    if (res.ok && Array.isArray(json.data)) {
+      // mapping data backend ke format primereact dropdown
+      const mapped = json.data.map((r) => ({
+        label: r.role, // label yang tampil
+        value: r.role, // value yang dikirim ke form
+      }));
+      setRoleOptions(mapped);
+    } else {
+      toastRef.current?.showToast('99', 'Gagal memuat role');
     }
-  };
+  } catch (err) {
+    console.error('Fetch role error:', err);
+    toastRef.current?.showToast('99', 'Gagal memuat role');
+  }
+};
+
+
+const fetchUser = async () => {
+  try {
+    const res = await fetch('/api/users');
+    const json = await res.json();
+
+    if (json.users && Array.isArray(json.users)) {
+      setUsers(json.users);
+    } else {
+      console.error('Format data API tidak sesuai:', json);
+    }
+  } catch (err) {
+    console.error('Error fetch user:', err);
+  }
+};
+
+
 
   const resetFormAndCloseDialog = () => {
     setForm(defaultForm);
@@ -136,6 +162,7 @@ const UserPage = () => {
 
   useEffect(() => {
     fetchUser();
+    fetchRoles();
   }, []);
 
   return (
@@ -164,11 +191,14 @@ const UserPage = () => {
         loading={isLoading}
         scrollable
       >
-        <Column field="username" header="Username" filter />
-        <Column field="email" header="Email" />
-        <Column field="no_hp" header="No HP" />
-        <Column field="role" header="Role" />
-        <Column
+
+          <Column field="username" header="Username" filter />
+          <Column field="email" header="Email" />
+       {/* kalau mau tampilkan, hati-hati sensitif */}
+          <Column field="no_hp" header="No HP" />
+          <Column field="role" header="Role" />
+          
+                <Column
           header="Aksi"
           body={(row) => (
             <div className="flex gap-2">
@@ -202,12 +232,13 @@ const UserPage = () => {
 
       <Dialog
       key={dialogMode}
-        header={dialogMode === 'add' ? 'Tambah User' : 'Edit User'}
-        visible={dialogMode !== null}
-        onHide={resetFormAndCloseDialog}
-        style={{ width: '30rem' }}
-        unmountOnHide
-      >
+      header={dialogMode === 'add' ? 'Tambah User' : 'Edit User'}
+      visible={dialogMode !== null}
+      style={{ width: '400px' }}
+      modal
+      onHide={() => setDialogMode(null)}
+    >
+
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -215,7 +246,7 @@ const UserPage = () => {
           }}
         >
           <div className="mb-3">
-            <label htmlFor="username">Nama User</label>
+            <label htmlFor="username">Username</label>
             <InputText
               id="username"
               name="username"
@@ -272,14 +303,13 @@ const UserPage = () => {
               id="role"
               name="role"
               value={form.role}
-              options={['user', 'admin', 'superadmin']}
+              options={roleOptions}
               onChange={(e) => setForm((prev) => ({ ...prev, role: e.value }))}
               className="w-full mt-3"
               placeholder="Pilih Role"
             />
           </div>
-
-          <div className="flex justify-end">
+            <div className="flex justify-end">
             <Button
               type="submit"
               label="Submit"
@@ -295,5 +325,6 @@ const UserPage = () => {
     </div>
   );
 };
+
 
 export default UserPage;

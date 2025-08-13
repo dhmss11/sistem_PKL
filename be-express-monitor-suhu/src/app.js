@@ -16,7 +16,7 @@ import golonganstock from './routes/golonganstock.js';
 import jenisGudangRoutes from './routes/jenisGudangRoutes.js';
 import kirimBarang from './routes/kirimBarangRoutes.js';
 import terimaBarang from './routes/terimaBarangRoutes.js';
-import { addJenisGudang } from './controllers/jenisGudangController.js';
+import jenisRoleRoutes from './routes/jenisRoleRoute.js'; 
 const app = express();
 
 const allowedOrigins = ['http://localhost:3000'];
@@ -54,6 +54,8 @@ app.use('/api/golonganstock',golonganstock);
 app.use('/api/jenis-gudang',jenisGudangRoutes);
 app.use('/api/kirimbarang', kirimBarang)
 app.use('/api/terimabarang', terimaBarang)
+app.use('/api/jenis-role', jenisRoleRoutes);
+
 app.get('/', [setResponseHeader], (req, res) => {
   return res.status(200).json(`Welcome to the server! ${new Date().toLocaleString()}`);
 });

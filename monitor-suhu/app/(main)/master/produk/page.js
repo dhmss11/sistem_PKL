@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState} from 'react';
 import { Button } from 'primereact/button';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
@@ -60,7 +60,6 @@ const kodeOptions = [
     {label:'MTH',value:'mth'}
 ];
 
-
 const fetchGudangList = async () => {
     try {
         const res = await fetch("/api/gudang/nama");
@@ -81,8 +80,6 @@ const fetchGudangList = async () => {
 useEffect(() => {
   fetchGudangList();
 }, []);
-
-
     const fetchProdukByGudang = async (gudang) => {
         if (!gudang) {
             console.warn('fetchProdukByGudang dipanggil tanpa gudang');
@@ -226,7 +223,6 @@ const handleSubmit = async (data) => {
             fetchProduk();       
         }, []);
 
-
     return (
         <div className="card">
             <h3 className="text-xl font-semibold">Master Produk</h3>
@@ -252,8 +248,7 @@ const handleSubmit = async (data) => {
                     });
                     }}
                 />
-
-                 <div className="mb-4">
+                <div className="mb-4">
                 <label htmlFor="filter-gudang" className="block mb-1">cari Gudang :</label>
                 <Dropdown
                     id="filter-gudang"

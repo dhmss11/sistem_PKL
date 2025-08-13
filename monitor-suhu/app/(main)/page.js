@@ -32,6 +32,8 @@ const Dashboard = () => {
     const [products, setProducts] = useState([]);
     const [lineOptions, setLineOptions] = useState({});
     const { layoutConfig } = useContext(LayoutContext);
+    const [totalStockColumns, setTotalStockColumns] = useState(null);
+    const [totalGudangColumns, setTotalGudangColumns] = useState(null);
 
     const applyLightTheme = () => {
         const options = {
@@ -89,12 +91,43 @@ const Dashboard = () => {
         }
     }, [layoutConfig.colorScheme]);
 
+
+    useEffect(() => {
+        const fetchTotalColumns = async () => {
+            try {
+                const res = await fetch('/api/stock/total');
+                if (!res.ok) throw new Error('GAGAL menggambil data total kolom stock');
+                const data = await res.json();
+                setTotalStockColumns(data.total);
+            } catch (error) {
+                console.error(error);
+                setTotalStockColumns('Error');
+            }
+        };
+        fetchTotalColumns();
+    }, []);
+
+    useEffect(() => {
+        const fetchTotalGudang = async () => {
+            try {
+                const res = await fetch('/api/gudang/total');
+                if (!res.ok) throw Error('gagal ambil total gudang');
+                const data = await res.json();
+                setTotalGudangColumns(data.total);
+            } catch (error) {
+                console.error(error);
+                setTotalGudangColumns('Error');
+            }
+        };
+        fetchTotalGudang();
+  }, []);
+
     return (
         <div className="grid">
             {[{
-                label: "Orders", value: "152", icon: "pi-shopping-cart", bg: "bg-blue-100", color: "text-blue-500", subtitle: "24 new", note: "since last visit"
+                label: "Orders",value: totalStockColumns ? totalStockColumns.toString() : "Loading...", icon: "pi-shopping-cart", bg: "bg-blue-100", color: "text-blue-500", note: "total since last month"
             }, {
-                label: "Revenue", value: "$2.100", icon: "pi-map-marker", bg: "bg-orange-100", color: "text-orange-500", subtitle: "%52+ ", note: "since last week"
+                label: "Gudang", value: totalGudangColumns ? totalGudangColumns.toString(): "Loading...", icon: "pi-building", bg: "bg-orange-100", color: "text-orange-500",  note: "since last week"
             }, {
                 label: "Customers", value: "28441", icon: "pi-inbox", bg: "bg-cyan-100", color: "text-cyan-500", subtitle: "520", note: "newly registered"
             }, {

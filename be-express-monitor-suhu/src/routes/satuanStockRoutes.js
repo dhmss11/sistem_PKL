@@ -3,7 +3,8 @@ import {
   fetchAllSatuan,
   addSatuan,
   editSatuan,
-  deleteSatuan
+  deleteSatuan,
+  
 } from '../controllers/satuanStockController.js';
 
 const router = express.Router();

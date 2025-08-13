@@ -1,10 +1,10 @@
 'use client';
 
+import React, { useEffect, useContext, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Ripple } from 'primereact/ripple';
 import { classNames } from 'primereact/utils';
-import React, { useEffect, useContext } from 'react';
 import { CSSTransition } from 'react-transition-group';
 import { MenuContext } from './context/menucontext';
 import { usePathname, useSearchParams } from 'next/navigation';
@@ -47,14 +47,18 @@ const AppMenuitem = (props) => {
         }
     };
 
+    const nodeRef = useRef(null); // ref untuk CSSTransition
+
     const subMenu = item?.items && item.visible !== false && (
         <CSSTransition
+            nodeRef={nodeRef}
             timeout={{ enter: 1000, exit: 450 }}
             classNames="layout-submenu"
             in={props.root ? true : active}
             key={item.label}
+            unmountOnExit
         >
-            <ul>
+            <ul ref={nodeRef}>
                 {item.items.map((child, i) => (
                     <AppMenuitem
                         item={child}

@@ -39,7 +39,7 @@ export const API_ENDPOINTS = {
   GET_DETAIL_GUDANG_BY_JENIS: (keterangan) => `${API_URL}/nama-gudang/detail/keterangan/${keterangan}`,
   GET_NAMA_GUDANG: `${API_URL}/nama-gudang/nama`,
   GET_PRODUK_BY_GUDANG: (gudang) => `${API_URL}/master-produk/gudang/${gudang}`,
-
+  GETTOTALGUDANG: `${API_URL}/nama-gudang/total`,
   GET_ALL_JENIS_GUDANG: `${API_URL}/golonganstock`,
   GET_ALL_KETERANGAN_STOCK: (keterangan) => `${API_URL}/golonganstock/keterangan/${keterangan}`,
 
@@ -50,6 +50,8 @@ export const API_ENDPOINTS = {
   EDIT_STOCK: (id) => `${API_URL}/stock/edit/${id}`,
   DELETE_STOCK: (id) => `${API_URL}/stock/delete/${id}`,
   GET_STOCK_BY_SATUAN: (satuan) => `${API_URL}/stock/satuan/${satuan}`,
+  GET_BY_GUDANG : (gudang) => `${API_URL}stock/gudang${gudang}`,
+  GET_TOTAL_COLUMNS_STOCK: `${API_URL}/stock/total`,
 
     // JENIS GUDANG
     GET_ALL_JENIS_GUDANG : `${API_URL}/golonganstock`,
@@ -77,4 +79,11 @@ export const API_ENDPOINTS = {
     EDIT_JENIS: (id) => `${API_URL}/jenis-gudang/edit/${id}`,
     DELETE_JENIS: (id) => `${API_URL}/jenis-gudang/delete/${id}`,
     
+
+    //jenis role
+    GET_ALL_JENIS_ROLE: `${API_URL}/jenis-role`,
+    GET_JENIS_ROLE_BY_ID: (id) => `${API_URL}/jenis-role/${id}`,
+    ADD_JENIS_ROLE: `${API_URL}/jenis-role/create`,
+    EDIT_JENIS_ROLE: (id) => `${API_URL}/jenis-role/update/${id}`,
+    DELETE_JENIS_ROLE: (id) => `${API_URL}/jenis-role/delete/${id}`,
 };

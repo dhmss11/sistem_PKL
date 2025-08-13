@@ -7,10 +7,6 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 };
-
-// ===========================
-// GET: Ambil semua jenis gudang
-// ===========================
 export async function GET() {
   try {
     const response = await Axios.get(API_ENDPOINTS.GET_ALL_JENIS);
@@ -42,9 +38,6 @@ export async function GET() {
   }
 }
 
-// ===========================
-// POST: Tambah jenis gudang
-// ===========================
 export async function POST(req) {
   try {
     const contentType = req.headers.get('content-type');
@@ -97,9 +90,6 @@ export async function POST(req) {
   }
 }
 
-// ===========================
-// OPTIONS: Untuk preflight CORS
-// ===========================
 export async function OPTIONS() {
   return NextResponse.json({}, { status: 200, headers: CORS_HEADERS });
 }

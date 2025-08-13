@@ -8,7 +8,7 @@ import {
 } from "../controllers/namaGudangController.js";
 import { fetchDetailGudangByJenis } from '../controllers/namaGudangController.js';
 import { fetchNamaGudangOnly } from "../controllers/namaGudangController.js";
-
+import { getTotalColumnsGudang } from "../controllers/namaGudangController.js";
 
 const router = Router();
 
@@ -19,5 +19,6 @@ router.delete('/delete/:id', destroyGudang);
 router.get('/jenis/:jenis', fetchGudangByJenis);
 router.get('/detail/keterangan/:keterangan', fetchDetailGudangByJenis);
 router.get('/nama',fetchNamaGudangOnly);
+router.get('/total', getTotalColumnsGudang);
 
 export default router;

@@ -379,6 +379,7 @@ const StockPage = () => {
         </div>
         
         {/* RAK */}
+
         <div className="mb-3">
           <label htmlFor="RAK">RAK</label>
           <Dropdown
@@ -394,7 +395,6 @@ const StockPage = () => {
           />
         </div>
 
-        {/* DOS */}
         <div className="mb-3">
           <label htmlFor="DOS">DOS</label>
           <InputText

@@ -8,6 +8,7 @@ import { Button } from 'primereact/button';
 import { Dropdown } from 'primereact/dropdown';
 import { Calendar } from 'primereact/calendar';
 import { InputText } from 'primereact/inputtext';
+import { Dialog } from 'primereact/dialog';
 
 export default function MutasiKirimData() {
   const [kirimData, setKirimData] = useState([]);
@@ -23,8 +24,12 @@ export default function MutasiKirimData() {
     tanggal: null,
     kode: '',
     faktur: '',
-    qty: ''
+    qty: '',
+    barcode: ''
   });
+
+  const [searchTerm, setSearchTerm] = useState('');
+  const [showForm, setShowForm] = useState(false);
 
   const toast = useRef(null);
 
@@ -50,6 +55,11 @@ export default function MutasiKirimData() {
       });
     }
   }, []);
+
+  const handleSearch = () => {
+    console.log("Mencari Sesuatu:", searchTerm)
+    setShowForm(true);
+  }
 
   const fetchSatuan = useCallback(async () => {
     try {
@@ -83,7 +93,6 @@ export default function MutasiKirimData() {
     try {
       console.log("Fetching kirim data...");
       
-      
       const res = await fetch('/api/kirimbarang', {
         method: 'GET',
         headers: {
@@ -94,7 +103,6 @@ export default function MutasiKirimData() {
       console.log("Response status:", res.status);
       console.log("Response ok:", res.ok);
 
-      
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
       }
@@ -113,11 +121,9 @@ export default function MutasiKirimData() {
       console.log("Parsed JSON:", json);
 
       if (json.status === '00') {
-        
         const rawData = Array.isArray(json.data) ? json.data : [];
         console.log("Raw data:", rawData);
         
-       
         const formattedData = rawData.map((item, index) => ({
           id: item.id || index + 1,
           FAKTUR: item.FAKTUR || item.faktur || '-',
@@ -126,6 +132,7 @@ export default function MutasiKirimData() {
           GUDANG_TERIMA: item.GUDANG_TERIMA || item.gudang_terima || item.KE || item.ke || '-',
           KODE: item.KODE || item.kode || '-',
           QTY: item.QTY || item.qty || 0,
+          BARCODE: item.BARCODE || item.barcode || '-',
           SATUAN: item.SATUAN || item.satuan || '-',
           USERNAME: item.USERNAME || item.username || item.user || '-',
           DATETIME: item.DATETIME || item.datetime || item.created_at || '-',
@@ -190,6 +197,7 @@ export default function MutasiKirimData() {
       });
       return;
     }
+    
     if (isNaN(parseFloat(formData.qty)) || parseFloat(formData.qty) <= 0) {
       toast.current?.show({
         severity: 'error',
@@ -210,6 +218,7 @@ export default function MutasiKirimData() {
         kode: formData.kode,
         faktur: formData.faktur,
         qty: parseFloat(formData.qty),
+        barcode: formData.barcode,
         satuan: satuanSelect
       };
 
@@ -245,10 +254,10 @@ export default function MutasiKirimData() {
           tanggal: null,
           kode: '',
           faktur: '',
-          qty: ''
+          qty: '',
+          barcode: '',
         });
         
-       
         fetchKirimData();
       } else {
         toast.current?.show({
@@ -330,20 +339,25 @@ export default function MutasiKirimData() {
               dateFormat="dd/mm/yy"
             />
           </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Kode</label>
+          <div className='p-inputgroup'>
             <InputText
               id="kode"
               name="kode"
               className="w-full"
               placeholder="Kode"
-              value={formData.kode}
-              onChange={(e) => handleInputChange('kode', e.target.value)}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <Button
+              id='searchkode'
+              name='searchkode'
+              icon='pi pi-search'
+              onClick={handleSearch}
             />
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 mb-3">
           <div>
             <label className='block text-sm font-medium mb-1'>Faktur</label>
             <InputText
@@ -365,6 +379,17 @@ export default function MutasiKirimData() {
               value={formData.qty}
               onChange={(e) => handleInputChange('qty', e.target.value)}
               keyfilter="pnum"
+            />
+          </div>
+          <div>
+            <label className='block text-sm font-medium mb-1'>BARCODE</label>
+            <InputText
+              id='barcode'
+              name='barcode'
+              className='w-full'
+              placeholder='BARCODE'
+              value={formData.barcode}
+              onChange={(e) => handleInputChange('barcode', e.target.value)}
             />
           </div>
           <div>
@@ -394,7 +419,14 @@ export default function MutasiKirimData() {
           />
         </div>
       </div>
-
+      
+      <Dialog
+        header='Form Search'
+        visible={showForm}
+        style={{width: '30vw'}}
+        onHide={() => setShowForm(false)}
+      />
+     
       <div className='mt-3'>
         <DataTable
           size="small"
@@ -412,12 +444,13 @@ export default function MutasiKirimData() {
           <Column field="GUDANG_TERIMA" header="KE GUDANG" />
           <Column field="KODE" header="KODE" />
           <Column field="QTY" header="QTY" />
+          <Column field="BARCODE" header="BARCODE"/>
           <Column field="SATUAN" header="SATUAN" />
           <Column field="USERNAME" header="USER" />
           <Column field="DATETIME" header="DATETIME" body={(rowData) => {
-          const datetime = new Date(rowData.DATETIME);
-          return datetime.toLocaleString('id-ID');
-        }} />
+            const datetime = new Date(rowData.DATETIME);
+            return datetime.toLocaleString('id-ID');
+          }} />
           <Column field="STATUS" header="STATUS" />
         </DataTable>
       </div>

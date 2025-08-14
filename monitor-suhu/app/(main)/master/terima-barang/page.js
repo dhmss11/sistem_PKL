@@ -69,7 +69,6 @@ export default function MutasiTerimaData() {
     }
   }
 
-
   useEffect(() => {
     console.log('terimaData changed:', terimaData);
     console.log('terimaData length:', terimaData?.length || 0);
@@ -165,6 +164,7 @@ export default function MutasiTerimaData() {
         <Column field="GUDANG_KIRIM" header="GUDANG_KIRIM" />
         <Column field="KODE" header="KODE" />
         <Column field="QTY" header="QTY" />
+        <Column field="BARCODE" header="BARCODE" />
         <Column field="SATUAN" header="SATUAN" />
         <Column field="USERNAME" header="USERNAME" />
         <Column field="DATETIME" header="DATETIME" body={(rowData) => {

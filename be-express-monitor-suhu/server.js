@@ -2,8 +2,9 @@ import { config } from "dotenv";
 import app from "./src/app.js";
 import { createRequire } from 'module';
 import http from 'http';
+import dotenv from 'dotenv'
 
-
+dotenv.config();
 config({ path: './.env' });
 
 const server = http.createServer(app);
@@ -16,19 +17,16 @@ process.on('uncaughtException', (err) => {
   process.exit(1);
 });
 
-// Start server
 server.listen(port, host, () => {
   console.log(`Server running on http://${host}:${port}`);
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
 });
 
-// Handle server errors
 server.on('error', (error) => {
   if (error.syscall !== 'listen') {
     throw error;
   }
 
-  // Handle specific listen errors with friendly messages
   switch (error.code) {
     case 'EACCES':
       console.error(`Port ${port} requires elevated privileges`);
@@ -43,7 +41,6 @@ server.on('error', (error) => {
   }
 });
 
-// Handle process termination
 process.on('SIGTERM', () => {
   console.log('SIGTERM received. Shutting down gracefully...');
   server.close(() => {

@@ -8,6 +8,7 @@ import { Button } from 'primereact/button';
 import { Dropdown } from 'primereact/dropdown';
 import { Calendar } from 'primereact/calendar';
 import { InputText } from 'primereact/inputtext';
+import { Dialog } from 'primereact/dialog';
 
 export default function MutasiKirimData() {
   const [kirimData, setKirimData] = useState([]);
@@ -25,6 +26,9 @@ export default function MutasiKirimData() {
     faktur: '',
     qty: ''
   });
+
+const [searchTerm, setSearchTerm] = useState('');
+const [showForm, setShowForm] = useState(false)
 
   const toast = useRef(null);
 
@@ -51,11 +55,24 @@ export default function MutasiKirimData() {
     }
   }, []);
 
+
 const fetchSatuan = useCallback(async () => {
   try {
     const res = await fetch("/api/satuan");
     const json = await res.json();
     console.log("DATA SATUAN:", json);
+
+  const handleSearch = () => {
+    console.log("Mencari Sesuatu:", searchTerm)
+    setShowForm(true);
+  }
+
+  const fetchSatuan = useCallback(async () => {
+    try {
+      const res = await fetch("/api/satuan");
+      const json = await res.json();
+      console.log("DATA SATUAN:", json);
+
 
     if (json.status === "00" && Array.isArray(json.data)) {
       const options = json.data.map((item) => ({
@@ -322,17 +339,24 @@ const fetchKirimData = useCallback(async () => {
               dateFormat="dd/mm/yy"
             />
           </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Kode</label>
+          <div className='p-inputgroup'>
             <InputText
               id="kode"
               name="kode"
               className="w-full"
               placeholder="Kode"
-              value={formData.kode}
-              onChange={(e) => handleInputChange('kode', e.target.value)}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <Button
+            id = 'searchkode'
+            name = 'searchkode'
+            icon = 'pi pi-search'
+            onClick={handleSearch}
+           
             />
           </div>
+
         </div>
 
 
@@ -346,6 +370,97 @@ const fetchKirimData = useCallback(async () => {
         className='w-full'
         placeholder='Faktur'
       />
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
+          <div>
+            <label className='block text-sm font-medium mb-1'>Faktur</label>
+            <InputText
+              id='faktur'
+              name='faktur'
+              className='w-full'
+              placeholder='Faktur'
+              value={formData.faktur}
+              onChange={(e) => handleInputChange('faktur', e.target.value)}
+            />
+          </div>
+          <div>
+            <label className='block text-sm font-medium mb-1'>QTY</label>
+            <InputText
+              id='qty'
+              name='qty'
+              className='w-full'
+              placeholder='QTY'
+              value={formData.qty}
+              onChange={(e) => handleInputChange('qty', e.target.value)}
+              keyfilter="pnum"
+            />
+            
+          </div>
+            <div className='d-flex align-items-center gap-2 mb-5'>
+            
+            
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Satuan</label>
+            <Dropdown
+              id='satuan'
+              name='satuan'
+              className="w-full"
+              placeholder="Pilih satuan"
+              options={satuanOptions}
+              value={satuanSelect}
+              onChange={(e) => setSatuanSelect(e.value)}
+              optionLabel="label"
+              optionValue="value"
+              showClear
+            />
+          </div>
+        </div>
+
+        <div className="flex justify-end">
+          <Button 
+            label="Simpan" 
+            icon="pi pi-check" 
+            onClick={handleSubmit}
+            loading={submitLoading}
+            className="p-button-success"
+          />
+        </div>
+      </div>
+      
+     <Dialog
+      header = 'form-search'
+      visible ={showForm}
+      style = {{width: '30vw'}}
+      onHide ={() => setShowForm(false)}
+     />
+     
+      <div className='mt-3'>
+        <DataTable
+          size="small"
+          className="text-sm"
+          value={kirimData}
+          paginator
+          rows={10}
+          loading={loading}
+          scrollable
+          emptyMessage="Tidak ada data yang ditemukan"
+        >
+          <Column field="FAKTUR" header="FAKTUR" />
+          <Column field="TGL" header="TANGGAL" />
+          <Column field="GUDANG_KIRIM" header="DARI GUDANG" />
+          <Column field="GUDANG_TERIMA" header="KE GUDANG" />
+          <Column field="KODE" header="KODE" />
+          <Column field="QTY" header="QTY" />
+          <Column field="SATUAN" header="SATUAN" />
+          <Column field="USERNAME" header="USER" />
+          <Column field="DATETIME" header="DATETIME" body={(rowData) => {
+          const datetime = new Date(rowData.DATETIME);
+          return datetime.toLocaleString('id-ID');
+        }} />
+          <Column field="STATUS" header="STATUS" />
+        </DataTable>
+      </div>
+
     </div>
     <div>
       <label className='block text-sm font-medium mb-1'>QTY</label>
@@ -396,7 +511,7 @@ const fetchKirimData = useCallback(async () => {
       </DataTable>
     </div>
     </div>
-
+      }
   );
 }
 

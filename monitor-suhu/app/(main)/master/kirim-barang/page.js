@@ -17,9 +17,9 @@ export default function MutasiKirimData() {
   const [gudangOptions, setGudangOptions] = useState([]);
   const [selectedFromGudang, setSelectedFromGudang] = useState(null);
   const [selectedToGudang, setSelectedToGudang] = useState(null);
-  const [satuanOptions, setSelectSatuan] = useState([]);
+  const [satuanOptions, setSatuanOptions] = useState([]);
   const [satuanSelect, setSatuanSelect] = useState(null);
-  
+
   const [formData, setFormData] = useState({
     tanggal: null,
     kode: '',
@@ -27,106 +27,53 @@ export default function MutasiKirimData() {
     qty: ''
   });
 
-const [searchTerm, setSearchTerm] = useState('');
-const [showForm, setShowForm] = useState(false)
+  const [searchTerm, setSearchTerm] = useState('');
+  const [showSearchDialog, setShowSearchDialog] = useState(false);
 
   const toast = useRef(null);
 
+  // Fetch Gudang
   const fetchGudang = useCallback(async () => {
     try {
       const res = await fetch("/api/gudang/nama");
       const json = await res.json();
 
       if (json.status === "00") {
-        const options = json.namaGudang.map(nama => ({
-          label: nama,
-          value: nama,
-        }));
+        const options = json.namaGudang.map(nama => ({ label: nama, value: nama }));
         setGudangOptions(options);
       }
     } catch (error) {
-      console.error("Form Gagal ambil nama gudang", error);
-      toast.current?.show({
-        severity: 'error',
-        summary: 'Error',
-        detail: 'Gagal mengambil data gudang',
-        life: 3000
-      });
+      console.error("Gagal ambil nama gudang", error);
+      toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Gagal mengambil data gudang', life: 3000 });
     }
   }, []);
 
-
-const fetchSatuan = useCallback(async () => {
-  try {
-    const res = await fetch("/api/satuan");
-    const json = await res.json();
-    console.log("DATA SATUAN:", json);
-
-  const handleSearch = () => {
-    console.log("Mencari Sesuatu:", searchTerm)
-    setShowForm(true);
-  }
-
+  // Fetch Satuan
   const fetchSatuan = useCallback(async () => {
     try {
       const res = await fetch("/api/satuan");
       const json = await res.json();
-      console.log("DATA SATUAN:", json);
-
-
-    if (json.status === "00" && Array.isArray(json.data)) {
-      const options = json.data.map((item) => ({
-        label: item.KODE,
-        value: item.KODE,
-      }));
-      setSelectSatuan(options);
-    } else {
-      console.warn("Data satuan tidak valid:", json);
-      setSelectSatuan([]);
+      if (json.status === "00" && Array.isArray(json.data)) {
+        const options = json.data.map(item => ({ label: item.KODE, value: item.KODE }));
+        setSatuanOptions(options);
+      } else {
+        setSatuanOptions([]);
+      }
+    } catch (error) {
+      console.error("Gagal ambil satuan", error);
+      setSatuanOptions([]);
     }
-  } catch (error) {
-    console.error("Form Gagal ambil satuan", error);
-  }
-}, []);
+  }, []);
 
-const fetchKirimData = useCallback(async () => {
+  // Fetch Data Kirim
+  const fetchKirimData = useCallback(async () => {
     setLoading(true);
     try {
-      console.log("Fetching kirim data...");
-      
-      
-      const res = await fetch('/api/kirimbarang', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      console.log("Response status:", res.status);
-      console.log("Response ok:", res.ok);
-
-      
-      if (!res.ok) {
-        throw new Error(`HTTP error! status: ${res.status}`);
-      }
-      const contentType = res.headers.get('content-type');
-      console.log("Content-Type:", contentType);
-      
-      if (!contentType || !contentType.includes('application/json')) {
-        const text = await res.text();
-        console.error('Response bukan JSON:', text);
-        throw new Error('Response is not JSON');
-      }
-
+      const res = await fetch('/api/kirimbarang');
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
       const json = await res.json();
-      console.log("Parsed JSON:", json);
-
       if (json.status === '00') {
-        
         const rawData = Array.isArray(json.data) ? json.data : [];
-        console.log("Raw data:", rawData);
-        
-       
         const formattedData = rawData.map((item, index) => ({
           id: item.id || index + 1,
           FAKTUR: item.FAKTUR || item.faktur || '-',
@@ -140,77 +87,49 @@ const fetchKirimData = useCallback(async () => {
           DATETIME: item.DATETIME || item.datetime || item.created_at || '-',
           STATUS: item.STATUS || item.status || 'Pending'
         }));
-
-        console.log("Formatted data:", formattedData);
         setKirimData(formattedData);
-        
-        if (formattedData.length === 0) {
-          console.log("No data found");
-        }
       } else {
-        console.error('API returned error:', json.message);
-        toast.current?.show({
-          severity: 'error',
-          summary: 'Error',
-          detail: json.message || 'Gagal mengambil data',
-          life: 3000
-        });
+        toast.current?.show({ severity: 'error', summary: 'Error', detail: json.message || 'Gagal mengambil data', life: 3000 });
         setKirimData([]);
       }
     } catch (error) {
       console.error('Error fetching kirim data:', error);
-      toast.current?.show({
-        severity: 'error',
-        summary: 'Error',
-        detail: `Gagal mengambil data: ${error.message}`,
-        life: 3000
-      });
+      toast.current?.show({ severity: 'error', summary: 'Error', detail: error.message, life: 3000 });
       setKirimData([]);
     } finally {
       setLoading(false);
     }
   }, []);
 
+  useEffect(() => {
+    fetchGudang();
+    fetchSatuan();
+    fetchKirimData();
+  }, [fetchGudang, fetchSatuan, fetchKirimData]);
+
   const handleInputChange = (field, value) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   const handleSubmit = async () => {
-    if (!selectedFromGudang || !selectedToGudang || !formData.tanggal || 
+    if (!selectedFromGudang || !selectedToGudang || !formData.tanggal ||
         !formData.kode || !formData.faktur || !formData.qty || !satuanSelect) {
-      toast.current?.show({
-        severity: 'error',
-        summary: 'Error',
-        detail: 'Semua field harus diisi!',
-        life: 3000
-      });
+      toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Semua field harus diisi!', life: 3000 });
       return;
     }
 
     if (selectedFromGudang === selectedToGudang) {
-      toast.current?.show({
-        severity: 'error',
-        summary: 'Error',
-        detail: 'Gudang asal dan tujuan tidak boleh sama!',
-        life: 3000
-      });
+      toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Gudang asal dan tujuan tidak boleh sama!', life: 3000 });
       return;
     }
+
     if (isNaN(parseFloat(formData.qty)) || parseFloat(formData.qty) <= 0) {
-      toast.current?.show({
-        severity: 'error',
-        summary: 'Error',
-        detail: 'QTY harus berupa angka yang valid dan lebih dari 0!',
-        life: 3000
-      });
+      toast.current?.show({ severity: 'error', summary: 'Error', detail: 'QTY harus valid dan lebih dari 0!', life: 3000 });
       return;
     }
 
     setSubmitLoading(true);
-    
+
     try {
       const payload = {
         gudangKirim: selectedFromGudang,
@@ -222,83 +141,51 @@ const fetchKirimData = useCallback(async () => {
         satuan: satuanSelect
       };
 
-      console.log('Submitting payload:', payload);
-
       const response = await fetch('/api/kirimbarang', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       const result = await response.json();
-      console.log('Submit result:', result);
 
       if (result.status === "00") {
-        toast.current?.show({
-          severity: 'success',
-          summary: 'Success',
-          detail: 'Data berhasil disimpan!',
-          life: 3000
-        });
-        
+        toast.current?.show({ severity: 'success', summary: 'Success', detail: 'Data berhasil disimpan!', life: 3000 });
+        // Reset form
         setSelectedFromGudang(null);
         setSelectedToGudang(null);
         setSatuanSelect(null);
-        setFormData({
-          tanggal: null,
-          kode: '',
-          faktur: '',
-          qty: ''
-        });
-        
-       
+        setFormData({ tanggal: null, kode: '', faktur: '', qty: '' });
         fetchKirimData();
       } else {
-        toast.current?.show({
-          severity: 'error',
-          summary: 'Error',
-          detail: result.message || 'Gagal menyimpan data!',
-          life: 3000
-        });
+        toast.current?.show({ severity: 'error', summary: 'Error', detail: result.message || 'Gagal menyimpan data!', life: 3000 });
       }
     } catch (error) {
       console.error('Error submitting data:', error);
-      toast.current?.show({
-        severity: 'error',
-        summary: 'Error',
-        detail: error.message || 'Terjadi kesalahan saat menyimpan data!',
-        life: 3000
-      });
+      toast.current?.show({ severity: 'error', summary: 'Error', detail: error.message, life: 3000 });
     } finally {
       setSubmitLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchKirimData();
-    fetchGudang();
-    fetchSatuan();
-  }, [fetchKirimData, fetchGudang, fetchSatuan]);
+  const handleSearch = () => {
+    // Contoh search berdasarkan kode
+    const filtered = kirimData.filter(item => item.KODE.includes(searchTerm));
+    setKirimData(filtered);
+  };
 
   return (
-    <div className="card">
+    <div className="card p-4">
       <Toast ref={toast} />
       <h2 className="text-xl font-bold mb-4">Kirim Barang</h2>
-      
+
+      {/* Form Input */}
       <div className="mb-4 p-4 border rounded-lg bg-gray-50">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
           <div>
             <label className="block text-sm font-medium mb-1">Dari Gudang</label>
             <Dropdown
-              id='darigudang'
-              name='darigudang'
-              className="w-full"
               placeholder="Pilih Gudang"
               options={gudangOptions}
               value={selectedFromGudang}
@@ -311,9 +198,6 @@ const fetchKirimData = useCallback(async () => {
           <div>
             <label className="block text-sm font-medium mb-1">Ke Gudang</label>
             <Dropdown
-              id='kegudang'
-              name='kegudang'
-              className="w-full"
               placeholder="Pilih Gudang"
               options={gudangOptions}
               value={selectedToGudang}
@@ -325,87 +209,54 @@ const fetchKirimData = useCallback(async () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
           <div>
             <label className="block text-sm font-medium mb-1">Tanggal</label>
             <Calendar
-              id="tanggal"
-              name="tanggal"
-              className="w-full"
               placeholder="Tanggal Kirim"
               value={formData.tanggal}
               onChange={(e) => handleInputChange('tanggal', e.value)}
               showIcon
               dateFormat="dd/mm/yy"
-            />
-          </div>
-          <div className='p-inputgroup'>
-            <InputText
-              id="kode"
-              name="kode"
               className="w-full"
-              placeholder="Kode"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            <Button
-            id = 'searchkode'
-            name = 'searchkode'
-            icon = 'pi pi-search'
-            onClick={handleSearch}
-           
             />
           </div>
-
-        </div>
-
-
-         <div className="mb-3 p-2 border rounded-lg bg-white-50"> 
-  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-    <div>
-      <label className='block text-sm font-medium mb-1'>Faktur</label>
-      <InputText
-        id='faktur'
-        name='faktur'
-        className='w-full'
-        placeholder='Faktur'
-      />
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
           <div>
-            <label className='block text-sm font-medium mb-1'>Faktur</label>
+            <label className="block text-sm font-medium mb-1">Kode</label>
+            <div className="p-inputgroup">
+              <InputText
+                placeholder="Kode"
+                value={formData.kode}
+                onChange={(e) => handleInputChange('kode', e.target.value)}
+              />
+              <Button icon="pi pi-search" onClick={handleSearch} />
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Faktur</label>
             <InputText
-              id='faktur'
-              name='faktur'
-              className='w-full'
-              placeholder='Faktur'
+              placeholder="Faktur"
               value={formData.faktur}
               onChange={(e) => handleInputChange('faktur', e.target.value)}
+              className="w-full"
             />
           </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
           <div>
-            <label className='block text-sm font-medium mb-1'>QTY</label>
+            <label className="block text-sm font-medium mb-1">QTY</label>
             <InputText
-              id='qty'
-              name='qty'
-              className='w-full'
-              placeholder='QTY'
+              placeholder="QTY"
               value={formData.qty}
               onChange={(e) => handleInputChange('qty', e.target.value)}
               keyfilter="pnum"
             />
-            
-          </div>
-            <div className='d-flex align-items-center gap-2 mb-5'>
-            
-            
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Satuan</label>
             <Dropdown
-              id='satuan'
-              name='satuan'
-              className="w-full"
-              placeholder="Pilih satuan"
+              placeholder="Pilih Satuan"
               options={satuanOptions}
               value={satuanSelect}
               onChange={(e) => setSatuanSelect(e.value)}
@@ -414,104 +265,56 @@ const fetchKirimData = useCallback(async () => {
               showClear
             />
           </div>
-        </div>
-
-        <div className="flex justify-end">
-          <Button 
-            label="Simpan" 
-            icon="pi pi-check" 
-            onClick={handleSubmit}
-            loading={submitLoading}
-            className="p-button-success"
-          />
+          <div className="flex items-end">
+            <Button
+              label="Simpan"
+              icon="pi pi-check"
+              onClick={handleSubmit}
+              loading={submitLoading}
+              className="p-button-success w-full"
+            />
+          </div>
         </div>
       </div>
-      
-     <Dialog
-      header = 'form-search'
-      visible ={showForm}
-      style = {{width: '30vw'}}
-      onHide ={() => setShowForm(false)}
-     />
-     
-      <div className='mt-3'>
-        <DataTable
-          size="small"
-          className="text-sm"
-          value={kirimData}
-          paginator
-          rows={10}
-          loading={loading}
-          scrollable
-          emptyMessage="Tidak ada data yang ditemukan"
-        >
-          <Column field="FAKTUR" header="FAKTUR" />
-          <Column field="TGL" header="TANGGAL" />
-          <Column field="GUDANG_KIRIM" header="DARI GUDANG" />
-          <Column field="GUDANG_TERIMA" header="KE GUDANG" />
-          <Column field="KODE" header="KODE" />
-          <Column field="QTY" header="QTY" />
-          <Column field="SATUAN" header="SATUAN" />
-          <Column field="USERNAME" header="USER" />
-          <Column field="DATETIME" header="DATETIME" body={(rowData) => {
-          const datetime = new Date(rowData.DATETIME);
-          return datetime.toLocaleString('id-ID');
-        }} />
-          <Column field="STATUS" header="STATUS" />
-        </DataTable>
-      </div>
 
-    </div>
-    <div>
-      <label className='block text-sm font-medium mb-1'>QTY</label>
-      <InputText
-        id='QTY'
-        name='QTY'
-        className='w-full'
-        placeholder='QTY'
-      />
-    </div>
-    <div>
-      <label className="block text-sm font-medium mb-1">Satuan</label>
-      <Dropdown
-        id='satuan'
-        name='satuan'
-        className="w-full"
-        placeholder="Pilih satuan"
-        options={satuanOptions}
-        value={satuanSelect}
-        onChange={(e) => setSatuanSelect(e.value)}
-        optionLabel="label"
-        optionValue="value"
-        showClear
-      />
-    </div>
-  </div>
-</div>
-
+      {/* Data Table */}
       <DataTable
-        size="small"
-        className="text-sm"
         value={kirimData}
         paginator
         rows={10}
         loading={loading}
         scrollable
+        className="text-sm"
+        emptyMessage="Tidak ada data yang ditemukan"
       >
         <Column field="FAKTUR" header="FAKTUR" />
         <Column field="TGL" header="TGL" />
-        <Column field="GUDANG_KIRIM" header="GUDANG_KIRIM" />
-        <Column field="GUDANG_TERIMA" header="GUDANG_TERIMA" />
+        <Column field="GUDANG_KIRIM" header="DARI GUDANG" />
+        <Column field="GUDANG_TERIMA" header="KE GUDANG" />
         <Column field="KODE" header="KODE" />
         <Column field="QTY" header="QTY" />
         <Column field="SATUAN" header="SATUAN" />
-        <Column field="USERNAME" header="USERNAME" />
-        <Column field="DATETIME" header="DATETIME" />
+        <Column field="USERNAME" header="USER" />
+        <Column
+          field="DATETIME"
+          header="DATETIME"
+          body={(rowData) => {
+            const datetime = new Date(rowData.DATETIME);
+            return datetime.toLocaleString('id-ID');
+          }}
+        />
         <Column field="STATUS" header="STATUS" />
       </DataTable>
+
+      {/* Dialog contoh search */}
+      <Dialog
+        header="Form Search"
+        visible={showSearchDialog}
+        style={{ width: '30vw' }}
+        onHide={() => setShowSearchDialog(false)}
+      >
+        {/* Isi form search bisa ditambahkan di sini */}
+      </Dialog>
     </div>
-    </div>
-      }
   );
 }
-

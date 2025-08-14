@@ -2,14 +2,9 @@ import { cookies } from 'next/headers';
 
 export async function POST(request) {
     try {
-        console.log('🚪 Logout API: Starting logout process...');
 
         const cookieStore = cookies();
         const token = cookieStore.get('token');
-
-        if (!token) {
-            console.log('⚠️ Logout API: No token found, but proceeding with logout');
-        }
 
         const response = new Response(
             JSON.stringify({ 
@@ -26,11 +21,11 @@ export async function POST(request) {
             }
         );
 
-        console.log('✅ Logout API: Cookie cleared successfully');
+        console.log('cookie cleared successfully');
         return response;
 
     } catch (error) {
-        console.error('❌ Logout API error:', error);
+        console.error('Logout API error:', error);
         
         return new Response(
             JSON.stringify({ 

@@ -6,10 +6,6 @@ export async function POST(req) {
     const body = await req.json();
     const { emailOrUsername, password } = body;
     
-    console.log('=== LOGIN ROUTE DEBUG ===');
-    console.log('Request body:', { emailOrUsername: !!emailOrUsername, password: !!password });
-    console.log('Headers:', Object.fromEntries(req.headers.entries()));
-    
     const res = await fetch(API_ENDPOINTS.LOGIN, {
       method: 'POST',
       headers: {
@@ -19,7 +15,6 @@ export async function POST(req) {
     });
 
     const data = await res.json();
-    console.log('Backend response status:', res.status);
     console.log('Backend response data:', { 
       message: data.message, 
       hasToken: !!data.token,
@@ -27,7 +22,7 @@ export async function POST(req) {
     });
     
     if (!res.ok) {
-      console.log('❌ Login failed at backend');
+      console.log('Login failed at backend');
       return NextResponse.json(data, { status: res.status });
     }
     
@@ -54,13 +49,13 @@ export async function POST(req) {
       secure: process.env.NODE_ENV === 'production',
     });
     
-    console.log('✅ Cookie set successfully');
+   
     console.log('Cookie value preview:', data.token.substring(0, 20) + '...');
     
     return response;
     
   } catch (error) {
-    console.error('❌ Login route error:', error);
+    console.error('Login route error:', error);
     return NextResponse.json(
       { status: '99', message: 'Internal Server Error: ' + error.message },
       { status: 500 }

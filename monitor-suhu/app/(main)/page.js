@@ -39,7 +39,7 @@ const Dashboard = () => {
     const router = useRouter();
     const toast = useRef(null);
     
-    const { user, loading, initialized, logout } = useAuth(); // Pastikan logout tersedia dari context
+    const { user, loading, initialized, logout } = useAuth(); 
     
     const redirectedRef = useRef(false);
 
@@ -91,16 +91,13 @@ const Dashboard = () => {
         setLineOptions(options);
     };
 
-    // Handler untuk logout - menggunakan auth context
     const handleLogout = async () => {
         try {
             setIsLoggingOut(true);
             
-            // Gunakan logout function dari auth context
             const result = await logout();
             
             if (result.success) {
-                // Show success message
                 toast.current?.show({
                     severity: 'success',
                     summary: 'Logout Berhasil',
@@ -108,7 +105,6 @@ const Dashboard = () => {
                     life: 3000
                 });
 
-                // Delay redirect sedikit untuk menampilkan toast
                 setTimeout(() => {
                     router.push('/auth/login');
                 }, 1000);
@@ -126,8 +122,6 @@ const Dashboard = () => {
                 life: 5000
             });
             
-            // Bahkan jika error, tetap redirect ke login
-            // karena user state mungkin sudah di-clear di context
             setTimeout(() => {
                 router.push('/auth/login');
             }, 2000);
@@ -138,7 +132,7 @@ const Dashboard = () => {
     };
 
     useEffect(() => {
-        console.log('🏠 Dashboard useEffect:', { 
+        console.log('Dashboard useEffect:', { 
             initialized, 
             loading, 
             hasUser: !!user,
@@ -146,7 +140,6 @@ const Dashboard = () => {
         });
 
         if (initialized && !loading && !user && !redirectedRef.current) {
-            console.log('🚨 Dashboard: Redirecting to login - no authenticated user');
             redirectedRef.current = true;
             router.push('/auth/login');
         }
@@ -180,9 +173,7 @@ const Dashboard = () => {
         return (
             <div className="flex align-items-center justify-content-center" style={{ minHeight: '400px' }}>
                 <div className="text-center">
-                    <i className="pi pi-exclamation-triangle text-orange-500" style={{ fontSize: '3rem' }}></i>
-                    <h3 className="mt-3">Access Denied</h3>
-                    <p className="text-500">Redirecting to login...</p>
+                    <p className="text-500">Redirecting to login</p>
                 </div>
             </div>
         );
@@ -198,10 +189,6 @@ const Dashboard = () => {
                         <div>
                             <h5>Selamat datang, {user.username}!</h5>
                             <p>Role: {user.role}</p>
-                            <small className="text-500">
-                                Debug: ID={user.id} | Email={user.email} | 
-                                Auth Status: {initialized ? 'Initialized' : 'Pending'}
-                            </small>
                         </div>
                     </div>
                         <Button

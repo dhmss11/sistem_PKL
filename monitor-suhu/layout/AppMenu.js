@@ -1,6 +1,4 @@
-/* eslint-disable @next/next/no-img-element */
-
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import AppMenuitem from './AppMenuitem';
 import { LayoutContext } from './context/layoutcontext';
 import { MenuProvider } from './context/menucontext';
@@ -8,86 +6,221 @@ import Link from 'next/link';
 
 const AppMenu = () => {
     const { layoutConfig } = useContext(LayoutContext);
+    const [userRole, setUserRole] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [mounted, setMounted] = useState(false);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    const fetchUserRole = async () => {
+        try {
+            console.log('Fetching user role...'); 
+            
+            const response = await fetch('/api/auth/verify', {
+                method: 'GET',
+                credentials: 'include', 
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+
+            console.log('Response status:', response.status); 
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log('Response data:', data); 
+                
+                const role = data.role || data.user?.role || data.payload?.role;
+                
+                if (role) {
+                    setUserRole(role);
+                    console.log('User role set to:', role);
+                } else {
+                    console.error('No role found in response:', data);
+                    setError('Role not found in response');
+                }
+            } else {
+                console.error('Response not ok:', response.statusText);
+                setError(`API Error: ${response.status} ${response.statusText}`);
+            }
+        } catch (error) {
+            console.error('Error fetching user role:', error);
+            setError(error.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        if (mounted) {
+            fetchUserRole();
+        }
+    }, [mounted]);
+
+    const canAccessItem = (item) => {
+        if (!item.roles) return true;
+        
+        if (!userRole) return false;
+        
+        return item.roles.includes(userRole);
+    };
+
+    const filterMenuItems = (items) => {
+        if (!items) return [];
+        return items.filter(item => canAccessItem(item));
+    };
 
     const model = [
         {
             label: 'Home',
-            items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', to: '/' }]
+            items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', to: '/' }],
+            roles: ['user', 'admin', 'superadmin'],
         },
-
-
-        
         {
             label: 'Kode',
             icon: 'pi pi-fw pi-sitemap',
+            roles: ['superadmin'],
             items: [
                 {
                     label: 'Rak',
                     icon: 'pi pi-fw pi-database',
-                    to: '/kode/rak'
+                    to: '/kode/rak',
+                    roles: ['superadmin']
                 },
-                {   label: 'Satuan Stock', 
+                {   
+                    label: 'Satuan Stock', 
                     icon: 'pi pi-list', 
-                    to: '/kode/satuanstock' 
+                    to: '/kode/satuanstock',
+                    roles: ['superadmin'] 
                 },
-
-                 {
+                {
                     label: 'Golongan Stock',
                     icon: 'pi pi-fw pi-th-large',
-                    to: '/kode/golonganstock'
+                    to: '/kode/golonganstock',
+                    roles: ['superadmin']
                 },
             ]
         },
         {
-
             label: 'Master',
             icon: 'pi pi-fw pi-sitemap',
+            roles: ['user', 'admin', 'superadmin'],
             items: [
                 {
-                   label: 'Gudang',
+                    label: 'Gudang',
                     icon: 'pi pi-fw pi-building',
-                    to: '/master/gudang'
+                    to: '/master/gudang',
+                    roles: ['superadmin']
                 },
                 {
                     label: 'Stock',
                     icon: 'pi pi-fw pi-box',
-                    to: '/master/stock'
+                    to: '/master/stock',
+                    roles: ['user', 'admin', 'superadmin']
                 },
                 {
                     label: 'Kirim Barang',
                     icon: 'pi pi-send',
-                    to: '/master/kirim-barang'
+                    to: '/master/kirim-barang',
+                    roles: ['user', 'admin', 'superadmin']
                 },
                 {
                     label: 'Terima Barang',
                     icon: 'pi pi-inbox',
-                    to: '/master/terima-barang'
+                    to: '/master/terima-barang',
+                    roles: ['user', 'admin', 'superadmin']
                 },
                 {
-                    label: 'Users',
+                    label: 'Users', 
                     icon: 'pi pi-users',
-                    to: '/master/user'
+                    to: '/master/user',
+                    roles: ['superadmin'] 
                 }
             ]
         },
         {
             label: 'Laporan',
             icon: 'pi pi-fw pi-chart-bar',
+            roles: ['user', 'admin', 'superadmin'],
             items: [
                 {
                     label: 'Kartu Stock',
                     icon: 'pi pi-fw pi-sync',
-                    to: '/laporan/kartustock'
+                    to: '/laporan/kartustock',
+                    roles: ['user', 'admin', 'superadmin']
                 }
             ]
         }
     ];
 
+    if (!mounted || loading) {
+        return (
+            <MenuProvider>
+                <ul className="layout-menu">
+                    <li style={{ padding: '1rem', color: '#666' }}>
+                        <i className="pi pi-spin pi-spinner" style={{ marginRight: '0.5rem' }}></i>
+                        Loading menu...
+                    </li>
+                </ul>
+            </MenuProvider>
+        );
+    }
+
+    if (error) {
+        return (
+            <MenuProvider>
+                <ul className="layout-menu">
+                    <li style={{ padding: '1rem', color: '#e74c3c' }}>
+                        <i className="pi pi-exclamation-triangle" style={{ marginRight: '0.5rem' }}></i>
+                        Error loading menu: {error}
+                    </li>
+                    <li style={{ padding: '0.5rem 1rem' }}>
+                        <button 
+                            onClick={fetchUserRole}
+                            style={{ 
+                                padding: '0.25rem 0.5rem', 
+                                backgroundColor: '#007bff', 
+                                color: 'white', 
+                                border: 'none', 
+                                borderRadius: '3px',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            Retry
+                        </button>
+                    </li>
+                </ul>
+            </MenuProvider>
+        );
+    }
+
+    const filteredModel = model.map(category => {
+        if (!canAccessItem(category)) {
+            return null;
+        }
+
+        const filteredItems = category.items ? filterMenuItems(category.items) : [];
+        
+        if (category.items && filteredItems.length === 0) {
+            return null;
+        }
+
+        return {
+            ...category,
+            items: filteredItems
+        };
+    }).filter(Boolean);
+
     return (
         <MenuProvider>
             <ul className="layout-menu">
-                {model.map((item, i) => {
-                    return !item?.seperator ? (
+                {process.env.NODE_ENV === 'development'}
+                
+                {filteredModel.map((item, i) => {
+                    return !item?.separator ? (
                         <AppMenuitem item={item} root={true} index={i} key={item.label} />
                     ) : (
                         <li className="menu-separator" key={`separator-${i}`}></li>

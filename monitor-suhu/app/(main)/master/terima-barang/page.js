@@ -9,8 +9,7 @@ import { Dropdown } from 'primereact/dropdown';
 import { Calendar } from 'primereact/calendar';
 import { InputText } from 'primereact/inputtext';
 
-export default function MasterImportPage() {
-  const [Import, setImport] = useState([]);
+export default function MutasiTerimaData() {
   const toastRef = useRef(null);
   const [terimaData, setTerimaData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -37,19 +36,12 @@ export default function MasterImportPage() {
 
   const fetchTerima = async () => {
     try {
-      console.log('Fetching data from /api/terimabarang...'); 
       const res = await fetch('/api/terimabarang');
       const json = await res.json();
-      
-      console.log('Response status:', res.status); 
-      console.log('Response data:', json); 
 
       if (json.status === '00') {
-        console.log('Data yang akan di-set:', json.data);
-        console.log('Jumlah data:', json.data?.length || 0);
-        setTerimaData(json.data || []); 
+        setTerimaData(json.data || []);
       } else {
-        console.error('API Error:', json.status, json.message);
         toastRef.current?.show({
           severity: 'error',
           summary: 'Error',
@@ -68,58 +60,50 @@ export default function MasterImportPage() {
     } finally {
       setLoading(false);
     }
-  }
-
-  // Debug useEffect to monitor data changes
-  useEffect(() => {
-    console.log('terimaData changed:', terimaData);
-    console.log('terimaData length:', terimaData?.length || 0);
-  }, [terimaData]);
+  };
 
   useEffect(() => {
     fetchTerima();
     fetchGudang();
   }, [fetchGudang]);
 
-    return (
+  return (
     <div className="card">
-
-      <Toast />
+      <Toast ref={toastRef} />
       <h2 className="text-xl font-bold mb-4">Kirim Barang</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-      {/* <div className="mb-4 p-3 border rounded-lg bg-gray-50"> */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
-          <div>
-            <label className="block text-sm font-medium mb-1">Dari Gudang</label>
-            <Dropdown
-              id='darigudang'
-              name='darigudang'
-              className="w-full"
-              placeholder="Pilih Gudang"
-              options={gudangOptions}
-              value={selectedFromGudang}
-              onChange={(e) => setSelectedFromGudang(e.value)}
-              optionLabel="label"
-              optionValue="value"
-              showClear
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Ke Gudang</label>
-            <Dropdown
-              id='kegudang'
-              name='kegudang'
-              className="w-full"
-              placeholder="Pilih Gudang"
-              options={gudangOptions}
-              value={selectedToGudang}
-              onChange={(e) => setSelectedToGudang(e.value)}
-              optionLabel="label"
-              optionValue="value"
-              showClear
-            />
-          </div>
-          <div className="flex gap-2">
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+        <div>
+          <label className="block text-sm font-medium mb-1">Dari Gudang</label>
+          <Dropdown
+            id='darigudang'
+            name='darigudang'
+            className="w-full"
+            placeholder="Pilih Gudang"
+            options={gudangOptions}
+            value={selectedFromGudang}
+            onChange={(e) => setSelectedFromGudang(e.value)}
+            optionLabel="label"
+            optionValue="value"
+            showClear
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1">Ke Gudang</label>
+          <Dropdown
+            id='kegudang'
+            name='kegudang'
+            className="w-full"
+            placeholder="Pilih Gudang"
+            options={gudangOptions}
+            value={selectedToGudang}
+            onChange={(e) => setSelectedToGudang(e.value)}
+            optionLabel="label"
+            optionValue="value"
+            showClear
+          />
+        </div>
+        <div className="flex gap-2">
           <div className="w-1/2">
             <label className="block text-sm font-medium mb-1">Tanggal</label>
             <Calendar
@@ -132,50 +116,52 @@ export default function MasterImportPage() {
           </div>
 
           <div className="w-1/2">
-            <label className="block text-sm font-small mb-1">Kode</label>
+            <label className="block text-sm font-medium mb-1">Kode</label>
             <InputText
               id="kode"
               name="kode"
               className="w-full"
-              placeholder="kode"
+              placeholder="Kode"
             />
           </div>
         </div>
-         <div className="mb-3 p-2 border rounded-lg bg-white-50"> 
-  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-    <div>
-      <label className='block text-sm font-medium mb-1'>Faktur</label>
-      <InputText
-        id='faktur'
-        name='faktur'
-        className='w-full'
-        placeholder='Faktur'
-      />
-    </div>
-    <div>
-      <label className='block text-sm font-medium mb-1'>QTY</label>
-      <InputText
-        id='QTY'
-        name='QTY'
-        className='w-full'
-        placeholder='QTY'
-      />
-    </div>
-    <div>
-      <label className="block text-sm font-medium mb-1">Satuan</label>
-      <Dropdown
-        id='satuan'
-        name='satuan'
-        className="w-full"
-        placeholder="Pilih satuan"
-        optionLabel="label"
-        optionValue="value"
-        showClear
-      />
-    </div>
-  </div>
-</div>
-     
+      </div>
+
+      <div className="mb-3 p-2 border rounded-lg bg-white">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label className='block text-sm font-medium mb-1'>Faktur</label>
+            <InputText
+              id='faktur'
+              name='faktur'
+              className='w-full'
+              placeholder='Faktur'
+            />
+          </div>
+          <div>
+            <label className='block text-sm font-medium mb-1'>QTY</label>
+            <InputText
+              id='QTY'
+              name='QTY'
+              className='w-full'
+              placeholder='QTY'
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Satuan</label>
+            <Dropdown
+              id='satuan'
+              name='satuan'
+              className="w-full"
+              placeholder="Pilih satuan"
+              optionLabel="label"
+              optionValue="value"
+              showClear
+            />
+          </div>
+        </div>
+      </div>
+
       <DataTable
         size='small'
         className='text-sm'
@@ -196,6 +182,7 @@ export default function MasterImportPage() {
         <Column field="GUDANG_KIRIM" header="GUDANG_KIRIM" />
         <Column field="KODE" header="KODE" />
         <Column field="QTY" header="QTY" />
+        <Column field="BARCODE" header="BARCODE" />
         <Column field="SATUAN" header="SATUAN" />
         <Column field="USERNAME" header="USERNAME" />
         <Column field="DATETIME" header="DATETIME" body={(rowData) => {
@@ -203,9 +190,6 @@ export default function MasterImportPage() {
           return datetime.toLocaleString('id-ID');
         }} />
       </DataTable>
-      
-    </div>
-    </div>
     </div>
   );
 }

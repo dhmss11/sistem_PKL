@@ -12,7 +12,7 @@ export async function GET() {
             data: response.data.data,
         });
     } catch (error) {
-        console.error('Error GET mutasi:', error.message);
+        console.error('Err or GET mutasi:', error.message);
         return NextResponse.json(
             {
                 status: '01', 

@@ -23,6 +23,9 @@ import jenisRoleRoutes from './routes/jenisRoleRoute.js';
 
 dotenv.config();
 
+import { addJenisGudang } from './controllers/jenisGudangController.js';
+
+dotenv.config();
 
 const app = express();
 
@@ -75,19 +78,14 @@ app.use('/api/stock', stockRoutes);
 app.use('/api/rak', rakRoutes);
 app.use('/api/satuan', satuanStockRoutes);
 app.use('/api/kartustock', kartuStockRoutes);
-
 app.use('/api/golonganstock',golonganstock);
 app.use('/api/jenis-gudang',jenisGudangRoutes);
 app.use('/api/kirimbarang', kirimBarang)
 app.use('/api/terimabarang', terimaBarang)
 app.use('/api/jenis-role', jenisRoleRoutes);
-
-
 app.use('/api/golonganstock', golonganstock);
 app.use('/api/kirimbarang', kirimBarang);
 app.use('/api/terimabarang', terimaBarang);
-
-// Default route
 
 app.get('/', [setResponseHeader], (req, res) => {
   return res.status(200).json({

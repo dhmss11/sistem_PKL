@@ -19,7 +19,9 @@ export const fetchAllStock = async (req, res) => {
             'HJ',
             'EXPIRED',
             'TGL_MASUK',
-            'BERAT'
+            'BERAT',
+            'QTY',
+            'BARCODE'
         ]);
 
        if (!data || data.length === 0) {
@@ -66,7 +68,9 @@ export const addStock = async (req, res) => {
             HJ,
             EXPIRED,
             TGL_MASUK,
-            BERAT
+            BERAT,
+            QTY,
+            BARCODE
         } = req.body;
 
         await db('stock').insert({
@@ -85,7 +89,9 @@ export const addStock = async (req, res) => {
             HJ,
             EXPIRED,
             TGL_MASUK,
-            BERAT
+            BERAT, 
+            QTY,
+            BARCODE
         });
 
         return res.status(201).json({
@@ -108,14 +114,14 @@ export const editStock = async (req, res) => {
     const { id } = req.params; 
     const {
       gudang, KODE, KODE_TOKO, NAMA, JENIS, GOLONGAN,
-      RAK, DOS, SATUAN, ISI, DISCOUNT, HB, HJ, BERAT
+      RAK, DOS, SATUAN, ISI, DISCOUNT, HB, HJ, BERAT, QTY,
     } = req.body;
 
     await db('stock')
       .where({ KODE: id }) 
       .update({
         gudang, KODE, KODE_TOKO, NAMA, JENIS, GOLONGAN,
-        RAK, DOS, SATUAN, ISI, DISCOUNT, HB, HJ,BERAT
+        RAK, DOS, SATUAN, ISI, DISCOUNT, HB, HJ,BERAT, QTY,
       });
 
     return res.json({

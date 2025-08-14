@@ -7,10 +7,10 @@ const AppMenu = () => {
     const { layoutConfig } = useContext(LayoutContext);
 
     const [openMenu, setOpenMenu] = useState({
-        kode: true, 
+        kode: true,
         master: true,
-        laporan : true,
-        users : true
+        laporan: true,
+        users: true
     });
 
     const toggleMenu = (key) => {
@@ -44,38 +44,38 @@ const AppMenu = () => {
                     { label: 'Rak', icon: 'pi pi-fw pi-database', to: '/kode/rak' },
                     { label: 'Satuan Stock', icon: 'pi pi-list', to: '/kode/satuanstock' },
                     { label: 'Golongan Stock', icon: 'pi pi-fw pi-th-large', to: '/kode/golonganstock' }
-
                 ]
                 : []
         },
-                {
-        label: (
-            <div className="flex align-items-center w-full">
-            <span>Master</span>
-            {arrowButton('master', openMenu.master)}
-            </div>
-        ),
-        items: openMenu.master
-            ? [
-                { label: 'Gudang', icon: 'pi pi-fw pi-building', to: '/master/gudang' },
-                { label: 'Produk', icon: 'pi pi-fw pi-box', to: '/master/stock' },
-                { label: 'Kirim Barang', icon: 'pi pi-send', to: '/master/kirim-barang' },
-                { label: 'Terima Barang', icon: 'pi pi-inbox', to: '/master/terima-barang' },
-                {
-                label: (
-                    <div className="flex align-items-center w-full">
-                    <span>Users</span>
-                    </div>
-                ),
-                items: openMenu.users
-                    ? [
-                        { label: 'Users', icon: 'pi pi-users', to: '/master/user' },
-                        { label: 'Role', icon : 'pi pi-shield' , to : '/master/jenis-role'}
-                    ]
-                    : []
-                }
-            ]
-            : []
+        {
+            label: (
+                <div className="flex align-items-center w-full">
+                    <span>Master</span>
+                    {arrowButton('master', openMenu.master)}
+                </div>
+            ),
+            items: openMenu.master
+                ? [
+                    { label: 'Gudang', icon: 'pi pi-fw pi-building', to: '/master/gudang' },
+                    { label: 'Produk', icon: 'pi pi-fw pi-box', to: '/master/stock' },
+                    { label: 'Kirim Barang', icon: 'pi pi-send', to: '/master/kirim-barang' },
+                    { label: 'Terima Barang', icon: 'pi pi-inbox', to: '/master/terima-barang' },
+                    {
+                        label: (
+                            <div className="flex align-items-center w-full">
+                                <span>Users</span>
+                                {arrowButton('users', openMenu.users)}
+                            </div>
+                        ),
+                        items: openMenu.users
+                            ? [
+                                { label: 'Users', icon: 'pi pi-users', to: '/master/user' },
+                                { label: 'Role', icon: 'pi pi-shield', to: '/master/jenis-role' }
+                            ]
+                            : []
+                    }
+                ]
+                : []
         },
         {
             label: (
@@ -84,24 +84,24 @@ const AppMenu = () => {
                     {arrowButton('laporan', openMenu.laporan)}
                 </div>
             ),
-            items: openMenu.laporan 
-            ?[
-                { label: 'Kartu Stock', icon: 'pi pi-folder', to: '/laporan/kartustock' }
-            ]
-            :[]
+            items: openMenu.laporan
+                ? [
+                    { label: 'Kartu Stock', icon: 'pi pi-folder', to: '/laporan/kartustock' }
+                ]
+                : []
         }
     ];
 
     return (
         <MenuProvider>
             <ul className="layout-menu">
-                {model.map((item, i) => {
-                    return !item?.seperator ? (
+                {model.map((item, i) =>
+                    !item?.seperator ? (
                         <AppMenuitem item={item} root={true} index={i} key={i} />
                     ) : (
                         <li className="menu-separator" key={`separator-${i}`}></li>
-                    );
-                })}
+                    )
+                )}
             </ul>
         </MenuProvider>
     );

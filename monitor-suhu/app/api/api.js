@@ -72,19 +72,13 @@ export const API_ENDPOINTS = {
 
     GET_ALL_TERIMA: `${API_URL}/terimabarang`,
     ADD_TERIMA: `${API_URL}/terimabarang/create`,
-
-
-    //JENIS GUDANG
-     GET_ALL_JENIS: `${API_URL}/jenis-gudang`,
+    GET_ALL_JENIS: `${API_URL}/jenis-gudang`,
     ADD_JENIS: `${API_URL}/jenis-gudang/create`,
     EDIT_JENIS: (id) => `${API_URL}/jenis-gudang/edit/${id}`,
     DELETE_JENIS: (id) => `${API_URL}/jenis-gudang/delete/${id}`,
-
     LOGIN: `${API_URL}/auth/login`,
     VERIFY: `${API_URL}/auth/verify`,
 
-
-    //jenis role
     GET_ALL_JENIS_ROLE: `${API_URL}/jenis-role`,
     GET_JENIS_ROLE_BY_ID: (id) => `${API_URL}/jenis-role/${id}`,
     ADD_JENIS_ROLE: `${API_URL}/jenis-role/create`,

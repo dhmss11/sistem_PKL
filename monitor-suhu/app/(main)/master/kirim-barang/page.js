@@ -24,11 +24,15 @@ export default function MutasiKirimData() {
     tanggal: null,
     kode: '',
     faktur: '',
-    qty: ''
+    qty: '',
+    barcode: ''
   });
 
   const [searchTerm, setSearchTerm] = useState('');
   const [showSearchDialog, setShowSearchDialog] = useState(false);
+
+  const [showForm, setShowForm] = useState(false);
+
 
   const toast = useRef(null);
 
@@ -69,11 +73,40 @@ export default function MutasiKirimData() {
   const fetchKirimData = useCallback(async () => {
     setLoading(true);
     try {
+
       const res = await fetch('/api/kirimbarang');
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+      console.log("Fetching kirim data...");
+      
+      const res = await fetch('/api/kirimbarang', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      console.log("Response status:", res.status);
+      console.log("Response ok:", res.ok);
+
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+
+      // Cek content-type
+      const contentType = res.headers.get('content-type');
+      console.log("Content-Type:", contentType);
+      
+      if (!contentType || !contentType.includes('application/json')) {
+        const text = await res.text();
+        console.error('Response bukan JSON:', text);
+        throw new Error('Response is not JSON');
+      }
       const json = await res.json();
       if (json.status === '00') {
         const rawData = Array.isArray(json.data) ? json.data : [];
+
+        console.log("Raw data:", rawData);
+        
         const formattedData = rawData.map((item, index) => ({
           id: item.id || index + 1,
           FAKTUR: item.FAKTUR || item.faktur || '-',
@@ -82,6 +115,7 @@ export default function MutasiKirimData() {
           GUDANG_TERIMA: item.GUDANG_TERIMA || item.gudang_terima || item.KE || item.ke || '-',
           KODE: item.KODE || item.kode || '-',
           QTY: item.QTY || item.qty || 0,
+          BARCODE: item.BARCODE || item.barcode || '-',
           SATUAN: item.SATUAN || item.satuan || '-',
           USERNAME: item.USERNAME || item.username || item.user || '-',
           DATETIME: item.DATETIME || item.datetime || item.created_at || '-',
@@ -122,6 +156,7 @@ export default function MutasiKirimData() {
       toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Gudang asal dan tujuan tidak boleh sama!', life: 3000 });
       return;
     }
+    
 
     if (isNaN(parseFloat(formData.qty)) || parseFloat(formData.qty) <= 0) {
       toast.current?.show({ severity: 'error', summary: 'Error', detail: 'QTY harus valid dan lebih dari 0!', life: 3000 });
@@ -138,6 +173,7 @@ export default function MutasiKirimData() {
         kode: formData.kode,
         faktur: formData.faktur,
         qty: parseFloat(formData.qty),
+        barcode: formData.barcode,
         satuan: satuanSelect
       };
 
@@ -157,6 +193,14 @@ export default function MutasiKirimData() {
         setSelectedToGudang(null);
         setSatuanSelect(null);
         setFormData({ tanggal: null, kode: '', faktur: '', qty: '' });
+        setFormData({
+          tanggal: null,
+          kode: '',
+          faktur: '',
+          qty: '',
+          barcode: '',
+        });
+        
         fetchKirimData();
       } else {
         toast.current?.show({ severity: 'error', summary: 'Error', detail: result.message || 'Gagal menyimpan data!', life: 3000 });
@@ -221,6 +265,22 @@ export default function MutasiKirimData() {
               className="w-full"
             />
           </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+          <div>
+            <label className="block text-sm font-medium mb-1">Tanggal</label>
+              placeholder="Kode"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            <Button
+              id='searchkode'
+              name='searchkode'
+              icon='pi pi-search'
+              onClick={handleSearch}
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 mb-3">
           <div>
             <label className="block text-sm font-medium mb-1">Kode</label>
             <div className="p-inputgroup">
@@ -254,6 +314,17 @@ export default function MutasiKirimData() {
             />
           </div>
           <div>
+            <label className='block text-sm font-medium mb-1'>BARCODE</label>
+            <InputText
+              id='barcode'
+              name='barcode'
+              className='w-full'
+              placeholder='BARCODE'
+              value={formData.barcode}
+              onChange={(e) => handleInputChange('barcode', e.target.value)}
+            />
+          </div>
+          <div>
             <label className="block text-sm font-medium mb-1">Satuan</label>
             <Dropdown
               placeholder="Pilih Satuan"
@@ -276,7 +347,6 @@ export default function MutasiKirimData() {
           </div>
         </div>
       </div>
-
       {/* Data Table */}
       <DataTable
         value={kirimData}
@@ -315,6 +385,51 @@ export default function MutasiKirimData() {
       >
         {/* Isi form search bisa ditambahkan di sini */}
       </Dialog>
+        <div className="flex justify-end">
+          <Button 
+            label="Simpan" 
+            icon="pi pi-check" 
+            onClick={handleSubmit}
+            loading={submitLoading}
+            className="p-button-success"
+          />
+        </div>
+      </div>
+      
+      <Dialog
+        header='Form Search'
+        visible={showForm}
+        style={{width: '30vw'}}
+        onHide={() => setShowForm(false)}
+      />
+     
+      <div className='mt-3'>
+        <DataTable
+          size="small"
+          className="text-sm"
+          value={kirimData}
+          paginator
+          rows={10}
+          loading={loading}
+          scrollable
+          emptyMessage="Tidak ada data yang ditemukan"
+        >
+          <Column field="FAKTUR" header="FAKTUR" />
+          <Column field="TGL" header="TANGGAL" />
+          <Column field="GUDANG_KIRIM" header="DARI GUDANG" />
+          <Column field="GUDANG_TERIMA" header="KE GUDANG" />
+          <Column field="KODE" header="KODE" />
+          <Column field="QTY" header="QTY" />
+          <Column field="BARCODE" header="BARCODE"/>
+          <Column field="SATUAN" header="SATUAN" />
+          <Column field="USERNAME" header="USER" />
+          <Column field="DATETIME" header="DATETIME" body={(rowData) => {
+            const datetime = new Date(rowData.DATETIME);
+            return datetime.toLocaleString('id-ID');
+          }} />
+          <Column field="STATUS" header="STATUS" />
+        </DataTable>
+      </div>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { Button } from 'primereact/button';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
@@ -8,437 +8,199 @@ import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
 import { Dropdown } from 'primereact/dropdown';
 import { Calendar } from 'primereact/calendar';
-import { format, parseISO } from 'date-fns';
 import ToastNotifier from '@/app/components/ToastNotifier';
 
-const initialFormState = {
-  gudang: '',
-  KODE: '',
-  KODE_TOKO: '',
-  NAMA: '',
-  JENIS: '',
-  GOLONGAN: '',
-  RAK: '',
-  DOS: '',
-  SATUAN: '',
-  ISI: '',
-  DISCOUNT: '',
-  HB: '',
-  HJ: '',
-  EXPIRED: '',
-  TGL_MASUK: '',
-  BERAT: ''
+const defaultForm = {
+  STATUS: '', FAKTUR: '', TGL: '', GUDANG: '', KODE: '', QTY: '', DEBET: '', KREDIT: '',
+  HARGA: '', DISCITEM: '', DISCFAKTUR1: '', DISCFAKTUR2: '', HP: '', KETERANGAN: '',
+  DATETIME: '', USERNAME: '', URUT: '', SATUAN: '', PPN: ''
 };
 
-const StockPage = () => {
+const fieldLabels = Object.keys(defaultForm);
+
+const KartuStockPage = () => {
   const toastRef = useRef(null);
-  const [filterSatuan, setFilterSatuan] = useState('');
-  const [stock, setStock] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [filters, setFilters] = useState({
-    rak: '',
-    satuan: '',
-  });
-  const [options, setOptions] = useState({
-    rak: [],
-    satuan: [],
-    gudang: [],
-    golongan: []
-  });
+  const [dataKartuStock, setDataKartuStock] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [form, setForm] = useState(defaultForm);
   const [dialogMode, setDialogMode] = useState(null);
-  const [selectedStock, setSelectedStock] = useState(null);
-  const [form, setForm] = useState(initialFormState);
-  const formatDateToDB = (date) => {
-    if (!date) return '';
-    const d = new Date(date);
-    if (isNaN(d.getTime())) return '';
+  const [gudangOptions, setGudangOptions] = useState([]);
 
-    const jakartaDate = new Date(d.getTime() + (7 * 60 * 60 * 1000));
-    const year = jakartaDate.getUTCFullYear();
-    const month = String(jakartaDate.getUTCMonth() + 1).padStart(2, '0');
-    const day = String(jakartaDate.getUTCDate()).padStart(2, '0');
-    
-    return `${year}-${month}-${day}`;
-  };
-
-  const parseDateFromDB = (dateString) => {
-    if (!dateString) return '';
+  const fetchKartuStock = useCallback(async () => {
+    setLoading(true);
     try {
-      const parsedDate = parseISO(dateString);
-      return format(parsedDate, 'yyyy-MM-dd');
-    } catch (error) {
-      console.error('Invalid date string:', error);
-      return '';
-    }
-  };
-  const fetchDropdownData = useCallback(async (endpoint, labelField = 'KETERANGAN') => {
-    try {
-      const res = await fetch(`/api/${endpoint}`);
+      const res = await fetch('/api/kartustock');
       const json = await res.json();
-      
       if (json.status === '00') {
-        return json.data.map(item => ({
-          value: item.KODE,
-          label: item[labelField] || item.KETERANGAN || item.NAMA
-        }));
+        setDataKartuStock(json.data);
       } else {
-        toastRef.current?.showToast(json.status, json.message || `Gagal memuat data ${endpoint}`);
-        return [];
+        toastRef.current?.showToast(json.status, json.message);
       }
-    } catch (err) {
-      console.error(`Error fetching ${endpoint}:`, err);
-      toastRef.current?.showToast('99', `Gagal memuat data ${endpoint}`);
-      return [];
+    } catch {
+      toastRef.current?.showToast('99', 'Gagal memuat data kartu stok');
+    } finally {
+      setLoading(false);
     }
   }, []);
+
   const fetchGudang = useCallback(async () => {
     try {
       const res = await fetch("/api/gudang/nama");
       const json = await res.json();
-
       if (json.status === "00") {
-        return json.namaGudang.map(nama => ({
-          label: nama,
-          value: nama,
-        }));
-      }
-      return [];
-    } catch (error) {
-      console.error("Form Gagal ambil nama gudang", error);
-      return [];  
-    }
-  }, []);
-
-  const fetchStock = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const res = await fetch('/api/stock');
-      const json = await res.json();
-      
-      if (json.status === '00') {
-        const processedData = json.data.map(item => ({
-          ...item,
-          TGL_MASUK: parseDateFromDB(item.TGL_MASUK),
-          EXPIRED: parseDateFromDB(item.EXPIRED)
-        }));
-        setStock(processedData);
+        const options = json.namaGudang.map(nama => ({ value: nama, label: nama }));
+        setGudangOptions(options);
       } else {
-        toastRef.current?.showToast(json.status, json.message);
+        setGudangOptions([]);
       }
-    } catch (err) {
-      console.error('Error fetching stock:', err);
-      toastRef.current?.showToast('99', 'Gagal memuat data stock');
-    } finally {
-      setIsLoading(false);
+    } catch {
+      setGudangOptions([]);
     }
   }, []);
 
   useEffect(() => {
-    const loadInitialData = async () => {
-      const [rakData, satuanData, golonganData, gudangData] = await Promise.all([
-        fetchDropdownData('rak'),
-        fetchDropdownData('satuan'),
-        fetchDropdownData('golonganstock'),
-        fetchGudang(''),
-        fetchStock()
-      ]);
+    fetchGudang();
+    fetchKartuStock();
+  }, [fetchGudang, fetchKartuStock]);
 
-      setOptions({
-        rak: rakData,
-        satuan: satuanData,
-        golongan: golonganData,
-        gudang: gudangData
-      });
-    };
-
-    loadInitialData();
-  }, [fetchDropdownData, fetchGudang, fetchStock]);
-
-  const filteredStocks = useMemo(() => {
-    let filtered = stock;
-
-    if (filters.rak) {
-      filtered = filtered.filter(item => item.RAK === filters.rak);
-    }
-
-    if (filters.satuan) {
-      filtered = filtered.filter(item => item.SATUAN === filters.satuan);
-    }
-
-    return filtered;
-  }, [stock, filters]);
-
-  const handleFilterChange = useCallback((filterType, value) => {
-    setFilters(prev => ({
-      ...prev,
-      [filterType]: value
-    }));
-  }, []);
-
-  const clearFilters = useCallback(() => {
-    setFilters({
-      rak: '',
-      satuan: '',
-      gudang : ''
-    });
-  }, []);
-
-  const handleFormChange = useCallback((e) => {
+  const handleChange = (e) => {
     const { name, value } = e.target;
     setForm(prev => ({ ...prev, [name]: value }));
-  }, []);
+  };
 
-  const handleCalendarChange = useCallback((name, value) => {
-    if (!value) {
-      setForm(prev => ({ ...prev, [name]: '' }));
-      return;
-    }
-    
-    const formattedDate = formatDateToDB(value);
-    setForm(prev => ({ ...prev, [name]: formattedDate }));
-  }, []);
+  const handleCalendarChange = (name, value) => {
+    if (!value) return setForm(prev => ({ ...prev, [name]: '' }));
+    const formatted = value.toISOString().split('T')[0];
+    setForm(prev => ({ ...prev, [name]: formatted }));
+  };
 
-  const handleSubmit = useCallback(async (e) => {
-    e.preventDefault();
-    setIsLoading(true);
-    
+  const handleSubmit = async () => {
+    const isEdit = dialogMode === 'edit';
+    const endpoint = isEdit ? `/api/kartustock/${form.id}` : '/api/kartustock';
+    const method = isEdit ? 'PUT' : 'POST';
+
     try {
-      const method = dialogMode === 'add' ? 'POST' : 'PUT';
-      const url = dialogMode === 'add' ? '/api/stock' : `/api/stock/${selectedStock.KODE}`;
-      
-      const res = await fetch(url, {
+      const res = await fetch(endpoint, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form)
       });
-      
       const json = await res.json();
-
       if (res.ok && json.status === '00') {
-        toastRef.current?.showToast(json.status, json.message);
-        await fetchStock();
-        closeDialog();
+        toastRef.current?.showToast('00', isEdit ? 'Berhasil mengedit data' : 'Berhasil menambah data');
+        fetchKartuStock();
+        setDialogMode(null);
+        setForm(defaultForm);
       } else {
-        toastRef.current?.showToast(json.status || '99', json.message || 'Gagal menyimpan data');
+        toastRef.current?.showToast('99', json.message || 'Gagal menyimpan data');
       }
-    } catch (err) {
-      console.error('Submit error:', err);
-      toastRef.current?.showToast('error', err.message || 'Terjadi kesalahan saat menyimpan data');
-    } finally {
-      setIsLoading(false);
+    } catch {
+      toastRef.current?.showToast('99', 'Terjadi kesalahan saat menyimpan');
     }
-  }, [dialogMode, form, selectedStock, fetchStock]);
-
-  const handleEdit = useCallback((row) => {
-    setDialogMode('edit');
-    setSelectedStock(row);
-    
-    const formData = { ...row };
-    if (formData.TGL_MASUK) {
-      formData.TGL_MASUK = parseDateFromDB(formData.TGL_MASUK);
-    }
-    if (formData.EXPIRED) {
-      formData.EXPIRED = parseDateFromDB(formData.EXPIRED);
-    }
-    setForm(formData);
-  }, []);
-
-  const handleDelete = useCallback(async (data) => {
-    if (!window.confirm('Apakah Anda yakin ingin menghapus data ini?')) return;
-    
-    setIsLoading(true);
-    try {
-      const res = await fetch(`/api/stock/${data.KODE}`, { method: 'DELETE' });
-      const json = await res.json();
-
-      if (res.ok && json.status === '00') {
-        toastRef.current?.showToast(json.status, json.message);
-        await fetchStock();
-      } else {
-        toastRef.current?.showToast(json.status || '99', json.message || 'Gagal menghapus data');
-      }
-    } catch (err) {
-      console.error('Delete error:', err);
-      toastRef.current?.showToast('error', err.message || 'Terjadi kesalahan saat menghapus data');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [fetchStock]);
-
-  const openAddDialog = useCallback(() => {
-    setDialogMode('add');
-    setForm(initialFormState);
-    setSelectedStock(null);
-  }, []);
-
-  const closeDialog = useCallback(() => {
-    setDialogMode(null);
-    setForm(initialFormState);
-    setSelectedStock(null);
-  }, []);
-
-  const renderCalendarInput = (name, label) => {
-    let dateValue = null;
-    if (form[name]) {
-      const dateString = form[name] + 'T12:00:00';
-      dateValue = new Date(dateString);
-      
-      if (isNaN(dateValue.getTime())) {
-        dateValue = null;
-      }
-    }
-
-    return (
-      <div className="mb-3">
-        <label htmlFor={name}>{label}</label>
-        <Calendar
-          id={name}
-          name={name}
-          value={dateValue}
-          onChange={(e) => handleCalendarChange(name, e.value)}
-          dateFormat="yy-mm-dd"
-          showIcon
-          className="w-full mt-2"
-          placeholder={`Pilih ${label}`}
-        />
-      </div>
-    );
   };
 
-  const renderDateColumn = (rowData, field) => {
-    const dateValue = rowData[field];
-    if (!dateValue) return '-';
+  const handleEdit = (row) => {
+    setForm({ ...row });
+    setDialogMode('edit');
+  };
+
+  const handleDelete = async (row) => {
+    if (!window.confirm('Apakah Anda yakin ingin menghapus data ini?')) return;
     try {
-      const date = new Date(dateValue + 'T12:00:00');
-      return date.toLocaleDateString('id-ID');
-    } catch (e) {
-      return dateValue;
+      const res = await fetch(`/api/kartustock/${row.id}`, { method: 'DELETE' });
+      const json = await res.json();
+      if (res.ok && json.status === '00') {
+        toastRef.current?.showToast('00', 'Data berhasil dihapus');
+        fetchKartuStock();
+      } else {
+        toastRef.current?.showToast('99', json.message || 'Gagal menghapus data');
+      }
+    } catch {
+      toastRef.current?.showToast('99', 'Gagal menghapus data');
     }
   };
 
   const renderDialogForm = () => (
     <Dialog
-      header={dialogMode === 'add' ? 'Tambah Stock' : 'Edit Stock'}
+      header={dialogMode === 'add' ? 'Tambah Data Kartu Stok' : 'Edit Data Kartu Stok'}
       visible={!!dialogMode}
-      onHide={closeDialog}
+      onHide={() => setDialogMode(null)}
       style={{ width: '40rem' }}
     >
-      <form onSubmit={handleSubmit}>
-
-        <div className="mb-3">
-          <label htmlFor="gudang">Gudang</label>
-          <Dropdown
-            id="gudang"
-            name="gudang"
-            value={form.gudang}
-            options={options.gudang}
-            onChange={handleFormChange}
-            placeholder="Pilih Gudang"
-            className="w-full mt-2"
-            optionLabel="label"
-            optionValue="value"
-          />
-        </div>
-
-        {['KODE', 'KODE_TOKO', 'NAMA', 'JENIS'].map((field) => (
-          <div key={field} className="mb-3">
-            <label htmlFor={field}>{field.replace(/_/g, ' ')}</label>
-            <InputText
-              id={field}
-              name={field}
-              value={form[field] || ''}
-              onChange={handleFormChange}
-              className="w-full mt-2"
-            />
-          </div>
-        ))}
-
-        <div className="mb-3">
-          <label htmlFor="GOLONGAN">Golongan</label>
-          <Dropdown
-            id="GOLONGAN"
-            name="GOLONGAN"
-            value={form.GOLONGAN}
-            options={options.golongan}
-            onChange={handleFormChange}
-            className="w-full mt-2"
-            placeholder="Pilih Golongan"
-            optionLabel="label"
-            optionValue="value"
-          />
-        </div>
-
-        <div className="mb-3">
-          <label htmlFor="RAK">RAK</label>
-          <Dropdown
-            id="RAK"
-            name="RAK"
-            value={form.RAK}
-            options={options.rak}
-            onChange={handleFormChange}
-            className="w-full mt-2"
-            placeholder="Pilih RAK"
-            optionLabel="label"
-            optionValue="value"
-          />
-        </div>
-
-        <div className="mb-3">
-          <label htmlFor="DOS">DOS</label>
-          <InputText
-            id="DOS"
-            name="DOS"
-            value={form.DOS || ''}
-            onChange={handleFormChange}
-            className="w-full mt-2"
-          />
-        </div>
-
-        <div className="mb-3">
-          <label htmlFor="SATUAN">Satuan</label>
-          <Dropdown
-            id="SATUAN"
-            name="SATUAN"
-            value={form.SATUAN}
-            options={options.satuan}
-            onChange={handleFormChange}
-            className="w-full mt-2"
-            placeholder="Pilih Satuan"
-            optionLabel="label"
-            optionValue="value"
-          />
-        </div>
-
-        {['ISI', 'DISCOUNT', 'HB', 'HJ', 'BERAT'].map((field) => (
-          <div key={field} className="mb-3">
-            <label htmlFor={field}>{field.replace(/_/g, ' ')}</label>
-            <InputText
-              id={field}
-              name={field}
-              value={form[field] || ''}
-              onChange={handleFormChange}
-              className="w-full mt-2"
-            />
-          </div>
-        ))}
-
-        {renderCalendarInput('TGL_MASUK', 'Tanggal Masuk')}
-        {renderCalendarInput('EXPIRED', 'Tanggal Expired')}
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleSubmit();
+        }}
+      >
+        {fieldLabels.map((field) => {
+          if (field === 'STATUS') {
+            return (
+              <div key={field} className="mb-3">
+                <label htmlFor={field}>Status</label>
+                <Dropdown
+                  id={field}
+                  name={field}
+                  value={form[field]}
+                  options={[{ label: 'Masuk', value: 'MASUK' }, { label: 'Keluar', value: 'KELUAR' }]}
+                  onChange={(e) => setForm(prev => ({ ...prev, [field]: e.value }))}
+                  placeholder="Pilih Status"
+                  className="w-full mt-2"
+                />
+              </div>
+            );
+          }
+          if (field === 'GUDANG') {
+            return (
+              <div key={field} className="mb-3">
+                <label htmlFor={field}>Gudang</label>
+                <Dropdown
+                  id={field}
+                  name={field}
+                  value={form[field]}
+                  options={gudangOptions}
+                  onChange={(e) => setForm(prev => ({ ...prev, [field]: e.value }))}
+                  placeholder="Pilih Gudang"
+                  className="w-full mt-2"
+                  optionLabel="label"
+                  optionValue="value"
+                />
+              </div>
+            );
+          }
+          if (field === 'TGL') {
+            return (
+              <div key={field} className="mb-3">
+                <label htmlFor={field}>Tanggal</label>
+                <Calendar
+                  id={field}
+                  name={field}
+                  value={form[field] ? new Date(form[field] + 'T00:00:00') : null}
+                  onChange={(e) => handleCalendarChange(field, e.value)}
+                  dateFormat="yy-mm-dd"
+                  showIcon
+                  className="w-full mt-2"
+                />
+              </div>
+            );
+          }
+          return (
+            <div key={field} className="mb-3">
+              <label htmlFor={field}>{field}</label>
+              <InputText
+                id={field}
+                name={field}
+                value={form[field] || ''}
+                onChange={handleChange}
+                className="w-full mt-2"
+              />
+            </div>
+          );
+        })}
 
         <div className="flex justify-end gap-2">
-          <Button 
-            type="button" 
-            label="Batal" 
-            severity="secondary" 
-            onClick={closeDialog}
-          />
-          <Button 
-            type="submit" 
-            label="Simpan" 
-            severity="primary" 
-            icon="pi pi-save" 
-            loading={isLoading}
-          />
+          <Button type="button" label="Batal" severity="secondary" onClick={() => setDialogMode(null)} />
+          <Button type="submit" label="Simpan" severity="primary" icon="pi pi-save" />
         </div>
       </form>
     </Dialog>
@@ -446,91 +208,28 @@ const StockPage = () => {
 
   return (
     <div className="card">
-      <h3 className="text-xl font-semibold">Master Stock</h3>
+      <h3 className="text-xl font-semibold mb-4">Kartu Stok</h3>
 
-      <div className="mb-4 flex gap-2">
-        <Button
-          label="Tambah Stock"
-          icon="pi pi-plus"
-          onClick={openAddDialog}
-        />
-        <Button
-          label="Reset Filter"
-          icon="pi pi-refresh"
-          severity="secondary"
-          onClick={clearFilters}
-        />
-      </div>
-      <div className="mb-4 p-3 border rounded-lg bg-gray-50">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <div>
-            <label className="block text-sm font-medium mb-1">Filter RAK</label>
-            <Dropdown
-              value={filters.rak}
-              options={options.rak}
-              onChange={(e) => handleFilterChange('rak', e.value)}
-              className="w-full"
-              placeholder="Pilih RAK "
-              optionLabel="label"
-              optionValue="value"
-              showClear
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Filter Satuan</label>
-            <Dropdown
-              value={filters.satuan}
-              options={options.satuan}
-              onChange={(e) => handleFilterChange('satuan', e.value)}
-              className="w-full"
-              placeholder="Pilih Satuan"
-              optionLabel="label"
-              optionValue="value"
-              showClear
-            />
-          </div>
-        </div>
-      </div>
-      <DataTable
-        value={filteredStocks}
-        paginator
-        rows={10}
-        loading={isLoading}
-        scrollable
-        size="small"
-        emptyMessage="Tidak ada data stock"
-      >
-        {Object.keys(initialFormState)
-          .filter(key => key !== 'BERAT')
-          .map(key => (
-            <Column 
-              key={key} 
-              field={key} 
-              header={key.replace(/_/g, ' ')}
-              body={key === 'TGL_MASUK' || key === 'EXPIRED' ? 
-                (rowData) => renderDateColumn(rowData, key) : undefined
-              }
-            />
-          ))}
-          
+      <Button
+        label="Tambah Data"
+        icon="pi pi-plus"
+        className="mb-3"
+        onClick={() => {
+          setForm(defaultForm);
+          setDialogMode('add');
+        }}
+      />
+
+      <DataTable value={dataKartuStock} paginator rows={10} loading={loading} scrollable size="small">
+        {fieldLabels.map((field) => (
+          <Column key={field} field={field} header={field} />
+        ))}
         <Column
           header="Aksi"
-          body={(row) => (
+          body={(rowData) => (
             <div className="flex gap-2">
-              <Button
-                icon="pi pi-pencil"
-                size="small"
-                severity="warning"
-                onClick={() => handleEdit(row)}
-                tooltip="Edit"
-              />
-              <Button
-                icon="pi pi-trash"
-                size="small"
-                severity="danger"
-                onClick={() => handleDelete(row)}
-                tooltip="Hapus"
-              />
+              <Button icon="pi pi-pencil" size="small" severity="warning" onClick={() => handleEdit(rowData)} />
+              <Button icon="pi pi-trash" size="small" severity="danger" onClick={() => handleDelete(rowData)} />
             </div>
           )}
         />
@@ -542,6 +241,4 @@ const StockPage = () => {
   );
 };
 
-export default StockPage;
-
-
+export default KartuStockPage;

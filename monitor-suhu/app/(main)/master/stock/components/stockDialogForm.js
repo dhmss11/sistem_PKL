@@ -40,6 +40,7 @@ const StockTable = ({ data = [], loading = false, onEdit, onDelete }) => {
       <Column field="EXPIRED" header="Expired" />
       <Column field="TGL_MASUK" header="Tanggal Masuk" />
       <Column field="BERAT" header="Berat" />
+      <Column field="BARCODE" header="barcode"/>
       <Column
         header="Aksi"
         body={(row) => (

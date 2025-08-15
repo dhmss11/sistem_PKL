@@ -114,14 +114,14 @@ export const editStock = async (req, res) => {
     const { id } = req.params; 
     const {
       gudang, KODE, KODE_TOKO, NAMA, JENIS, GOLONGAN,
-      RAK, DOS, SATUAN, ISI, DISCOUNT, HB, HJ, BERAT, QTY,
+      RAK, DOS, SATUAN, ISI, DISCOUNT, HB, HJ, BERAT, QTY
     } = req.body;
 
     await db('stock')
       .where({ KODE: id }) 
       .update({
         gudang, KODE, KODE_TOKO, NAMA, JENIS, GOLONGAN,
-        RAK, DOS, SATUAN, ISI, DISCOUNT, HB, HJ,BERAT, QTY,
+        RAK, DOS, SATUAN, ISI, DISCOUNT, HB, HJ,BERAT, QTY
       });
 
     return res.json({

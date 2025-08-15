@@ -19,24 +19,26 @@ export default function MutasiKirimData() {
   const [selectedToGudang, setSelectedToGudang] = useState(null);
   const [satuanOptions, setSatuanOptions] = useState([]);
   const [satuanSelect, setSatuanSelect] = useState(null);
-
+  const [visible, setVisible] = useState(false);
+  const [produkList, setProdukList] = useState([]);
+  const searchButtonRef = useRef(null);
   const [formData, setFormData] = useState({
     tanggal: null,
     kode: '',
     faktur: '',
     qty: '',
-    barcode: ''
+    barcode: '',
+    nama: '',
+    harga: '',
   });
+    
 
   const [searchTerm, setSearchTerm] = useState('');
   const [showSearchDialog, setShowSearchDialog] = useState(false);
 
   const [showForm, setShowForm] = useState(false);
-
-
   const toast = useRef(null);
 
-  // Fetch Gudang
   const fetchGudang = useCallback(async () => {
     try {
       const res = await fetch("/api/gudang/nama");
@@ -50,9 +52,39 @@ export default function MutasiKirimData() {
       console.error("Gagal ambil nama gudang", error);
       toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Gagal mengambil data gudang', life: 3000 });
     }
-  }, []);
+  }, []); 
 
-  // Fetch Satuan
+  const fetchProduk = useCallback(async () => {
+    try {
+      const res = await fetch("/api/stock");
+      const json = await res.json();
+
+      if (json.status === "00") {
+        const data = json.data.map(item => ({
+          label: `${item.kode} - ${item.nama}`,
+          value: {
+            id: item.id,
+            KODE: item.kode,
+            BARCODE: item.barcode,
+            NAMA: item.nama,
+            HARGA: item.harga,
+            QTY: item.qty
+          }
+        }));
+        setProdukList(data);
+      }
+    } catch (error) {
+      console.error("gagal ambil data produk:", error);
+      toast.current?.show({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'gagal menggambil data produk',
+        life:3000
+      });
+    }
+  },[visible]);
+
+
   const fetchSatuan = useCallback(async () => {
     try {
       const res = await fetch("/api/satuan");
@@ -68,78 +100,84 @@ export default function MutasiKirimData() {
       setSatuanOptions([]);
     }
   }, []);
+const fetchKirimData = useCallback(async () => {
+  try {
+    console.log("Fetching kirim data...");
+    const res = await fetch('/api/kirimbarang', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
 
-  // Fetch Data Kirim
-  const fetchKirimData = useCallback(async () => {
-    setLoading(true);
-    try {
+    console.log("Response status:", res.status);
+    console.log("Response ok:", res.ok);
 
-      const res = await fetch('/api/kirimbarang');
-      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-      console.log("Fetching kirim data...");
-      
-      const res = await fetch('/api/kirimbarang', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      console.log("Response status:", res.status);
-      console.log("Response ok:", res.ok);
-
-      if (!res.ok) {
-        throw new Error(`HTTP error! status: ${res.status}`);
-      }
-
-      // Cek content-type
-      const contentType = res.headers.get('content-type');
-      console.log("Content-Type:", contentType);
-      
-      if (!contentType || !contentType.includes('application/json')) {
-        const text = await res.text();
-        console.error('Response bukan JSON:', text);
-        throw new Error('Response is not JSON');
-      }
-      const json = await res.json();
-      if (json.status === '00') {
-        const rawData = Array.isArray(json.data) ? json.data : [];
-
-        console.log("Raw data:", rawData);
-        
-        const formattedData = rawData.map((item, index) => ({
-          id: item.id || index + 1,
-          FAKTUR: item.FAKTUR || item.faktur || '-',
-          TGL: item.TGL || item.tanggal || item.tgl || '-',
-          GUDANG_KIRIM: item.GUDANG_KIRIM || item.gudang_kirim || item.DARI || item.dari || '-',
-          GUDANG_TERIMA: item.GUDANG_TERIMA || item.gudang_terima || item.KE || item.ke || '-',
-          KODE: item.KODE || item.kode || '-',
-          QTY: item.QTY || item.qty || 0,
-          BARCODE: item.BARCODE || item.barcode || '-',
-          SATUAN: item.SATUAN || item.satuan || '-',
-          USERNAME: item.USERNAME || item.username || item.user || '-',
-          DATETIME: item.DATETIME || item.datetime || item.created_at || '-',
-          STATUS: item.STATUS || item.status || 'Pending'
-        }));
-        setKirimData(formattedData);
-      } else {
-        toast.current?.show({ severity: 'error', summary: 'Error', detail: json.message || 'Gagal mengambil data', life: 3000 });
-        setKirimData([]);
-      }
-    } catch (error) {
-      console.error('Error fetching kirim data:', error);
-      toast.current?.show({ severity: 'error', summary: 'Error', detail: error.message, life: 3000 });
-      setKirimData([]);
-    } finally {
-      setLoading(false);
+    if (!res.ok) {
+      throw new Error(`HTTP error! status: ${res.status}`);
     }
-  }, []);
+    const contentType = res.headers.get('content-type');
+    console.log("Content-Type:", contentType);
+
+    if (!contentType || !contentType.includes('application/json')) {
+      const text = await res.text();
+      console.error('Response bukan JSON:', text);
+      throw new Error('Response is not JSON');
+    }
+
+    const json = await res.json();
+    if (json.status === '00') {
+      const rawData = Array.isArray(json.data) ? json.data : [];
+
+      console.log("Raw data:", rawData);
+
+      const formattedData = rawData.map((item, index) => ({
+        id: item.id || index + 1,
+        FAKTUR: item.FAKTUR || item.faktur || '-',
+        TGL: item.TGL || item.tanggal || item.tgl || '-',
+        GUDANG_KIRIM: item.GUDANG_KIRIM || item.gudang_kirim || item.DARI || item.dari || '-',
+        GUDANG_TERIMA: item.GUDANG_TERIMA || item.gudang_terima || item.KE || item.ke || '-',
+        KODE: item.KODE || item.kode || '-',
+        QTY: item.QTY || item.qty || 0,
+        BARCODE: item.BARCODE || item.barcode || '-',
+        SATUAN: item.SATUAN || item.satuan || '-',
+        USERNAME: item.USERNAME || item.username || item.user || '-',
+        DATETIME: item.DATETIME || item.datetime || item.created_at || '-',
+        STATUS: item.STATUS || item.status || 'Pending'
+      }));
+      setKirimData(formattedData);
+    } else {
+      toast.current?.show({
+        severity: 'error',
+        summary: 'Error',
+        detail: json.message || 'Gagal mengambil data',
+        life: 3000
+      });
+      setKirimData([]);
+    }
+  } catch (error) {
+    console.error('Error fetching kirim data:', error);
+    toast.current?.show({
+      severity: 'error',
+      summary: 'Error',
+      detail: error.message,
+      life: 3000
+    });
+    setKirimData([]);
+  } finally {
+    setLoading(false);
+  }
+}, []);
+
 
   useEffect(() => {
     fetchGudang();
     fetchSatuan();
     fetchKirimData();
+    fetchProduk();
   }, [fetchGudang, fetchSatuan, fetchKirimData]);
+
+
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -188,7 +226,6 @@ export default function MutasiKirimData() {
 
       if (result.status === "00") {
         toast.current?.show({ severity: 'success', summary: 'Success', detail: 'Data berhasil disimpan!', life: 3000 });
-        // Reset form
         setSelectedFromGudang(null);
         setSelectedToGudang(null);
         setSatuanSelect(null);
@@ -214,17 +251,16 @@ export default function MutasiKirimData() {
   };
 
   const handleSearch = () => {
-    // Contoh search berdasarkan kode
     const filtered = kirimData.filter(item => item.KODE.includes(searchTerm));
     setKirimData(filtered);
   };
-
+ 
+  
   return (
     <div className="card p-4">
       <Toast ref={toast} />
       <h2 className="text-xl font-bold mb-4">Kirim Barang</h2>
 
-      {/* Form Input */}
       <div className="mb-4 p-4 border rounded-lg bg-gray-50">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
           <div>
@@ -265,22 +301,7 @@ export default function MutasiKirimData() {
               className="w-full"
             />
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
-          <div>
-            <label className="block text-sm font-medium mb-1">Tanggal</label>
-              placeholder="Kode"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            <Button
-              id='searchkode'
-              name='searchkode'
-              icon='pi pi-search'
-              onClick={handleSearch}
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 mb-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
           <div>
             <label className="block text-sm font-medium mb-1">Kode</label>
             <div className="p-inputgroup">
@@ -313,17 +334,49 @@ export default function MutasiKirimData() {
               keyfilter="pnum"
             />
           </div>
-          <div>
-            <label className='block text-sm font-medium mb-1'>BARCODE</label>
-            <InputText
-              id='barcode'
-              name='barcode'
-              className='w-full'
-              placeholder='BARCODE'
-              value={formData.barcode}
-              onChange={(e) => handleInputChange('barcode', e.target.value)}
+           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
+      <div>
+        <label className="block text-sm font-medium mb-1">BARCODE</label>
+        <div className="p-inputgroup">
+          <InputText
+            id="barcode"
+            name="barcode"
+            placeholder="BARCODE"
+            value={formData.barcode}
+            onChange={(e) => setFormData({ ...formData, barcode: e.target.value })}
+          />
+          <Button
+            icon="pi pi-search"
+            onClick={() => setVisible(true)}
+            ref={searchButtonRef}
+          />
+        </div>
+
+        <Dialog
+          header="Pilih Produk"
+          visible={visible}
+          style={{ width: '40vw' }}
+          onHide={() => setVisible(false)}
+          position="center" 
+          
+        >
+          <DataTable value={produkList} paginator rows={5} size="small">
+            <Column field="KODE" header="KODE" />
+            <Column field="BARCODE" header="BARCODE" />
+            <Column field="NAMA" header="NAMA" />
+            <Column field="QTY" header="QTY" />
+            <Column field="HARGA" header="HARGA" body={(row) => `Rp ${(row.HARGA ?? 0).toLocaleString()}`} />
+            
+            <Column
+              header="AKSI"
+              body={(row) => (
+                <Button label="Pilih" icon="pi pi-check" onClick={() => handleSelect(row)} />
+              )}
             />
-          </div>
+          </DataTable>
+        </Dialog>
+      </div>
+    </div>
           <div>
             <label className="block text-sm font-medium mb-1">Satuan</label>
             <Dropdown
@@ -336,46 +389,9 @@ export default function MutasiKirimData() {
               showClear
             />
           </div>
-          <div className="flex items-end">
-            <Button
-              label="Simpan"
-              icon="pi pi-check"
-              onClick={handleSubmit}
-              loading={submitLoading}
-              className="p-button-success w-full"
-            />
-          </div>
         </div>
       </div>
-      {/* Data Table */}
-      <DataTable
-        value={kirimData}
-        paginator
-        rows={10}
-        loading={loading}
-        scrollable
-        className="text-sm"
-        emptyMessage="Tidak ada data yang ditemukan"
-      >
-        <Column field="FAKTUR" header="FAKTUR" />
-        <Column field="TGL" header="TGL" />
-        <Column field="GUDANG_KIRIM" header="DARI GUDANG" />
-        <Column field="GUDANG_TERIMA" header="KE GUDANG" />
-        <Column field="KODE" header="KODE" />
-        <Column field="QTY" header="QTY" />
-        <Column field="SATUAN" header="SATUAN" />
-        <Column field="USERNAME" header="USER" />
-        <Column
-          field="DATETIME"
-          header="DATETIME"
-          body={(rowData) => {
-            const datetime = new Date(rowData.DATETIME);
-            return datetime.toLocaleString('id-ID');
-          }}
-        />
-        <Column field="STATUS" header="STATUS" />
-      </DataTable>
-
+      
       {/* Dialog contoh search */}
       <Dialog
         header="Form Search"

@@ -3,7 +3,6 @@ import jwt from 'jsonwebtoken';
 
 export async function GET(request) {
   try {
-    // Get token from cookies
     const token = request.cookies.get('token')?.value;
 
     if (!token) {
@@ -13,7 +12,6 @@ export async function GET(request) {
       );
     }
 
-    // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     return NextResponse.json({

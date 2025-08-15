@@ -17,15 +17,12 @@ const LoginPage = () => {
 
     useEffect(() => {
         if (user) {
-            console.log('✅ User already logged in, redirecting to dashboard');
             router.push('/');
         }
     }, [user, router]);
 
     const login = async (emailOrUsername, password) => {
         try {
-            console.log('🔑 Attempting login...');
-            
             const res = await fetch('/api/auth/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -34,8 +31,7 @@ const LoginPage = () => {
             });
             
             const data = await res.json();
-            
-            console.log('🔑 Login response:', {
+                console.log('🔑 Login response:', {
                 status: res.status,
                 ok: res.ok,
                 message: data.message,
@@ -44,7 +40,6 @@ const LoginPage = () => {
             });
 
             setTimeout(() => {
-                console.log('🍪 Cookies after login:', document.cookie);
             }, 500);
             
             return {
@@ -54,7 +49,7 @@ const LoginPage = () => {
             };
             
         } catch (error) {
-            console.error('❌ Login error:', error);
+            console.error('Login error:', error);
             return { 
                 ok: false, 
                 status: 500, 
@@ -72,14 +67,12 @@ const LoginPage = () => {
             const result = await login(emailOrUsername, password);
             
             if (result.ok && result.status === 200) {
-                setMessage('Login berhasil! Mengalihkan...');
+                setMessage('Login berhasil!');
                 
                 setTimeout(async () => {
-                    console.log('🔄 Re-checking auth after login...');
                     await checkAuth();
                     
                     setTimeout(() => {
-                        console.log('➡️ Redirecting to dashboard...');
                         router.push('/');
                     }, 500);
                 }, 1000);
@@ -87,10 +80,10 @@ const LoginPage = () => {
             } else {
                 const errorMessage = result.data.message || `Login gagal (${result.status})`;
                 setMessage(errorMessage);
-                console.error('❌ Login failed:', errorMessage);
+                console.error('Login failed:', errorMessage);
             }
         } catch (error) {
-            console.error('❌ Submit error:', error);
+            console.error('Submit error:', error);
             setMessage('Terjadi kesalahan saat login: ' + error.message);
         } finally {
             setLoading(false);
@@ -120,7 +113,6 @@ const LoginPage = () => {
                                 </h3>
                                 
                                 <div className="mb-3 text-xs text-500">
-                                    Debug: Cookies = {document.cookie ? 'Present' : 'None'}
                                 </div>
                                 
                                 {message && (
@@ -170,7 +162,7 @@ const LoginPage = () => {
                                     
                                     <div className="col-12 mt-3">
                                         <Button 
-                                            label={loading ? "Sedang masuk..." : "Login"} 
+                                            label={loading ? "Logging" : "Login"} 
                                             className="w-full" 
                                             type="submit" 
                                             loading={loading}
@@ -183,7 +175,7 @@ const LoginPage = () => {
                         
                         <div className="hidden md:block md:col-6 h-full">
                             <img 
-                                src="https://preview.redd.it/mas-amba-nyobain-snack-indo-v0-8vfq12nltche1.jpeg?width=554&format=pjpg&auto=webp&s=c76285ad34b29f212ea2731a45298a75255d3b06" 
+                                src="https://uniglobal.cn/assets/img/warehouse/contact.jpg" 
                                 className="w-full h-full object-cover" 
                                 alt="cover" 
                             />

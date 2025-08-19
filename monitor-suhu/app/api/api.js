@@ -1,13 +1,17 @@
+// app/api/api.js
 export const API_URL = process.env.API_URL;
 
 export const API_ENDPOINTS = {
+  // User endpoints
   GET_ALL_USERS: `${API_URL}/users`,
   GET_USER_BY_ID: (id) => `${API_URL}/users/${id}`,
   ADD_USER: `${API_URL}/users/create`,
   EDIT_USER: (id) => `${API_URL}/users/edit/${id}`,
   DELETE_USER: (id) => `${API_URL}/users/delete/${id}`,
+  UPDATE_USER: `${API_URL}/users/update`, // Tambahan untuk update profile
+  CHANGE_PASSWORD: `${API_URL}/users/change-password`,
 
-
+  // Rak endpoints
   GET_ALL_RAK: `${API_URL}/rak`,
   GET_RAK_BY_KODE: (kode) => `${API_URL}/rak/${kode}`,
   ADD_RAK: `${API_URL}/rak/create`,
@@ -15,6 +19,7 @@ export const API_ENDPOINTS = {
   DELETE_RAK: (kode) => `${API_URL}/rak/delete/${kode}`,
   GET_PRODUK_BY_RAK: (kode) => `${API_URL}/rak/${kode}/produk`,
 
+  // Satuan endpoints
   GET_ALL_SATUAN: `${API_URL}/satuan`,
   GET_SATUAN_BY_KODE: (kode) => `${API_URL}/satuan/${kode}`,
   ADD_SATUAN: `${API_URL}/satuan/create`,
@@ -22,14 +27,14 @@ export const API_ENDPOINTS = {
   DELETE_SATUAN: (kode) => `${API_URL}/satuan/delete/${kode}`,
   GET_PRODUK_BY_SATUAN: (kode) => `${API_URL}/satuan/${kode}/produk`,
 
-
+  // Master Produk endpoints
   GETALLPRODUK: `${API_URL}/master-produk`,
   GETPRODUKBYID: (id) => `${API_URL}/master-produk/${id}`,
   ADDPRODUK: `${API_URL}/master-produk/create`,
   EDITPRODUK: (id) => `${API_URL}/master-produk/edit/${id}`,
   DELETEPRODUK: (id) => `${API_URL}/master-produk/delete/${id}`,
 
- 
+  // Gudang endpoints
   GETALLGUDANG: `${API_URL}/nama-gudang`,
   GETGUDANGBYID: (id) => `${API_URL}/nama-gudang/${id}`,
   ADDGUDANG: `${API_URL}/nama-gudang/create`,
@@ -39,12 +44,19 @@ export const API_ENDPOINTS = {
   GET_DETAIL_GUDANG_BY_JENIS: (keterangan) => `${API_URL}/nama-gudang/detail/keterangan/${keterangan}`,
   GET_NAMA_GUDANG: `${API_URL}/nama-gudang/nama`,
   GET_PRODUK_BY_GUDANG: (gudang) => `${API_URL}/master-produk/gudang/${gudang}`,
+<<<<<<< Updated upstream
   GETTOTALGUDANG: `${API_URL}/nama-gudang/total`,
+=======
+  
+  // Golongan Stock endpoints
+>>>>>>> Stashed changes
   GET_ALL_JENIS_GUDANG: `${API_URL}/golonganstock`,
   GET_ALL_KETERANGAN_STOCK: (keterangan) => `${API_URL}/golonganstock/keterangan/${keterangan}`,
+  ADD_GOLONGAN_STOCK: `${API_URL}/golonganstock/create`,
+  EDIT_JENIS_GUDANG: (kode) => `${API_URL}/golonganstock/edit/${kode}`,
+  DELETE_JENIS_GUDANG: (kode) => `${API_URL}/golonganstock/delete/${kode}`,
 
-
-  // STOCK
+  // Stock endpoints
   GET_ALL_STOCK: `${API_URL}/stock`,
   ADD_STOCK: `${API_URL}/stock/add`,
   EDIT_STOCK: (id) => `${API_URL}/stock/edit/${id}`,
@@ -53,7 +65,37 @@ export const API_ENDPOINTS = {
   GET_BY_GUDANG : (gudang) => `${API_URL}stock/gudang${gudang}`,
   GET_TOTAL_COLUMNS_STOCK: `${API_URL}/stock/total`,
 
+  // Kartu Stock endpoints
+  GET_ALL_KARTUSTOCK: `${API_URL}/kartustock`,
+  ADD_KARTUSTOCK: `${API_URL}/kartustock/add`,
+  EDIT_KARTUSTOCK: (id) => `${API_URL}/kartustock/edit/${id}`,
+  DELETE_KARTUSTOCK: (id) => `${API_URL}/kartustock/${id}`,
+
+  // Kirim Barang endpoints
+  GET_ALL_KIRIM: `${API_URL}/kirimbarang`,
+  ADD_KIRIM: `${API_URL}/kirimbarang/create`,
+
+  // Terima Barang endpoints
+  GET_ALL_TERIMA: `${API_URL}/terimabarang`,
+  ADD_TERIMA: `${API_URL}/terimabarang/create`,
+
+  // Jenis Gudang endpoints
+  GET_ALL_JENIS: `${API_URL}/jenis-gudang`,
+  ADD_JENIS: `${API_URL}/jenis-gudang/create`,
+  EDIT_JENIS: (id) => `${API_URL}/jenis-gudang/edit/${id}`,
+  DELETE_JENIS: (id) => `${API_URL}/jenis-gudang/delete/${id}`,
+
+  // Auth endpoints
+  LOGIN: `${API_URL}/auth/login`,
+  VERIFY: `${API_URL}/auth/verify`,
+  LOGOUT: `${API_URL}/auth/logout`,
+  REFRESH_TOKEN: `${API_URL}/auth/refresh`,
+
+  // Profile endpoints (untuk compatibility dengan halaman profil)
+  GET_PROFILE: `${API_URL}/users/profile`,
+  UPDATE_PROFILE: `${API_URL}/users/profile`,
   
+<<<<<<< Updated upstream
     GET_ALL_JENIS_GUDANG : `${API_URL}/golonganstock`,
     GET_ALL_KETERANGAN_STOCK: (keterangan) => `${API_URL}/golonganstock/keterangan/${keterangan}`,
     ADD_GOLONGAN_STOCK: `${API_URL}/golonganstock/create`,
@@ -85,3 +127,8 @@ export const API_ENDPOINTS = {
     EDIT_JENIS_ROLE: (id) => `${API_URL}/jenis-role/update/${id}`,
     DELETE_JENIS_ROLE: (id) => `${API_URL}/jenis-role/delete/${id}`,
 };
+=======
+  // Upload endpoints
+  UPLOAD_IMAGE: `${API_URL}/upload/image`,
+};
+>>>>>>> Stashed changes

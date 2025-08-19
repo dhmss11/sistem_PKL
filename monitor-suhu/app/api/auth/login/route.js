@@ -14,7 +14,7 @@ export async function POST(req) {
       body: JSON.stringify({ emailOrUsername, password }),
     });
 
-    const data = await res.json();
+    const data = await res.json();``
     console.log('Backend response data:', { 
       message: data.message, 
       hasToken: !!data.token,
@@ -27,7 +27,7 @@ export async function POST(req) {
     }
     
     if (!data.token) {
-      console.log('❌ No token in response');
+      console.log(' No token in response');
       return NextResponse.json(
         { message: 'Token tidak ditemukan dalam response' }, 
         { status: 500 }

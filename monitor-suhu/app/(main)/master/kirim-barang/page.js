@@ -30,7 +30,6 @@ export default function MutasiKirimData() {
     FAKTUR: '',
     QTY: '',
     BARCODE: '',
-    NAMA: '',
     harga: '',
     GUDANG_KIRIM: null,
     GUDANG_TERIMA: null,
@@ -55,6 +54,7 @@ export default function MutasiKirimData() {
     return date;
   };
 
+  // Fixed: Add proper dependencies or empty arrays
   const fetchGudang = useCallback(async () => {
     try {
       const res = await fetch("/api/gudang/nama");
@@ -68,7 +68,7 @@ export default function MutasiKirimData() {
       console.error("Gagal ambil nama gudang", error);
       toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Gagal mengambil data gudang', life: 3000 });
     }
-  }, []); 
+  }, []);
 
   const fetchProduk = useCallback(async () => {
     try {
@@ -176,12 +176,13 @@ export default function MutasiKirimData() {
     }
   }, []);
 
+  // Fixed: Remove the problematic dependencies from useEffect
   useEffect(() => {
     fetchGudang();
     fetchSatuan();
     fetchKirimData();
     fetchProduk();
-  }, [fetchGudang, fetchSatuan, fetchKirimData, fetchProduk]);
+  }, []); // Empty dependency array - runs only once on mount
 
   const handleInputChange = (field, value) => {
     console.log(`Setting ${field} to:`, value);
@@ -488,7 +489,8 @@ export default function MutasiKirimData() {
           loading={loading}
           scrollable
           emptyMessage="Tidak ada data yang ditemukan"
-        > <Column field='NAMA' header="NAMA"/>
+        >
+          <Column field='NAMA' header="NAMA"/>
           <Column field="FAKTUR" header="FAKTUR" />
           <Column field="TGL" header="TANGGAL" />
           <Column field="GUDANG_KIRIM" header="DARI GUDANG" />

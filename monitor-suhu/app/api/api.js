@@ -44,12 +44,9 @@ export const API_ENDPOINTS = {
   GET_DETAIL_GUDANG_BY_JENIS: (keterangan) => `${API_URL}/nama-gudang/detail/keterangan/${keterangan}`,
   GET_NAMA_GUDANG: `${API_URL}/nama-gudang/nama`,
   GET_PRODUK_BY_GUDANG: (gudang) => `${API_URL}/master-produk/gudang/${gudang}`,
-<<<<<<< Updated upstream
   GETTOTALGUDANG: `${API_URL}/nama-gudang/total`,
-=======
   
   // Golongan Stock endpoints
->>>>>>> Stashed changes
   GET_ALL_JENIS_GUDANG: `${API_URL}/golonganstock`,
   GET_ALL_KETERANGAN_STOCK: (keterangan) => `${API_URL}/golonganstock/keterangan/${keterangan}`,
   ADD_GOLONGAN_STOCK: `${API_URL}/golonganstock/create`,
@@ -71,31 +68,25 @@ export const API_ENDPOINTS = {
   EDIT_KARTUSTOCK: (id) => `${API_URL}/kartustock/edit/${id}`,
   DELETE_KARTUSTOCK: (id) => `${API_URL}/kartustock/${id}`,
 
-  // Kirim Barang endpoints
   GET_ALL_KIRIM: `${API_URL}/kirimbarang`,
   ADD_KIRIM: `${API_URL}/kirimbarang/create`,
 
-  // Terima Barang endpoints
   GET_ALL_TERIMA: `${API_URL}/terimabarang`,
   ADD_TERIMA: `${API_URL}/terimabarang/create`,
 
-  // Jenis Gudang endpoints
   GET_ALL_JENIS: `${API_URL}/jenis-gudang`,
   ADD_JENIS: `${API_URL}/jenis-gudang/create`,
   EDIT_JENIS: (id) => `${API_URL}/jenis-gudang/edit/${id}`,
   DELETE_JENIS: (id) => `${API_URL}/jenis-gudang/delete/${id}`,
 
-  // Auth endpoints
   LOGIN: `${API_URL}/auth/login`,
   VERIFY: `${API_URL}/auth/verify`,
   LOGOUT: `${API_URL}/auth/logout`,
   REFRESH_TOKEN: `${API_URL}/auth/refresh`,
 
-  // Profile endpoints (untuk compatibility dengan halaman profil)
   GET_PROFILE: `${API_URL}/users/profile`,
   UPDATE_PROFILE: `${API_URL}/users/profile`,
   
-<<<<<<< Updated upstream
     GET_ALL_JENIS_GUDANG : `${API_URL}/golonganstock`,
     GET_ALL_KETERANGAN_STOCK: (keterangan) => `${API_URL}/golonganstock/keterangan/${keterangan}`,
     ADD_GOLONGAN_STOCK: `${API_URL}/golonganstock/create`,
@@ -126,9 +117,8 @@ export const API_ENDPOINTS = {
     ADD_JENIS_ROLE: `${API_URL}/jenis-role/create`,
     EDIT_JENIS_ROLE: (id) => `${API_URL}/jenis-role/update/${id}`,
     DELETE_JENIS_ROLE: (id) => `${API_URL}/jenis-role/delete/${id}`,
-};
-=======
-  // Upload endpoints
-  UPLOAD_IMAGE: `${API_URL}/upload/image`,
-};
->>>>>>> Stashed changes
+    
+    
+    UPLOAD_IMAGE: `${API_URL}/upload/image`,
+  };
+

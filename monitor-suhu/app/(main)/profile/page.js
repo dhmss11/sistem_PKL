@@ -12,12 +12,15 @@ import { ProgressSpinner } from 'primereact/progressspinner';
 import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
 import { FileUpload } from 'primereact/fileupload';
 import { Badge } from 'primereact/badge';
+import { useAuth } from '@/app/(auth)/context/authContext';
 
 const ProfilePage = () => {
   const toast = useRef(null);
   const fileUploadRef = useRef(null);
   
-  const [loading, setLoading] = useState(true);
+    const { user, setUser, loading: authLoading } = useAuth();
+  
+  const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [userInfo, setUserInfo] = useState({});
@@ -35,52 +38,28 @@ const ProfilePage = () => {
     { label: 'User', value: 'user', icon: 'pi pi-user' }
   ];
 
-  // Validasi email
   const isValidEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
 
-  // Validasi nomor HP
   const isValidPhone = (phone) => {
     const phoneRegex = /^(\+62|62|0)[0-9]{9,13}$/;
     return phoneRegex.test(phone);
   };
 
-  // Fetch user data dari API
-  const fetchUserData = useCallback(async () => {
-    try {
-      setLoading(true);
-      
-      // Karena menggunakan httpOnly cookie, user ID akan diambil di backend
-      // Tidak perlu mengirim ID secara eksplisit
-      const response = await fetch('/api/users/profile');
-      const result = await response.json();
-      
-      if (response.ok && result.status === '00') {
-        setUserInfo(result.data);
-        setOriginalUserInfo({ ...result.data });
-        
-        // Set profile image jika ada
-        if (result.data.profile_image) {
-          setProfileImage(result.data.profile_image);
-        }
-      } else {
-        showToast('error', 'Error', result.message || 'Gagal mengambil data user');
-      }
-    } catch (error) {
-      console.error('Fetch error:', error);
-      showToast('error', 'Error', 'Terjadi kesalahan saat mengambil data');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
   useEffect(() => {
-    fetchUserData();
-  }, [fetchUserData]);
+    if (user && !authLoading) {
+      console.log('📝 ProfilePage: Initializing user data from context', user.username);
+      setUserInfo(user);
+      setOriginalUserInfo({ ...user });
+      
+      if (user.profile_image) {
+        setProfileImage(user.profile_image);
+      }
+    }
+  }, [user, authLoading]);
 
-  // Helper untuk menampilkan toast
   const showToast = (severity, summary, detail) => {
     toast.current?.show({
       severity,
@@ -90,7 +69,6 @@ const ProfilePage = () => {
     });
   };
 
-  // Validasi form sebelum save
   const validateForm = () => {
     if (!userInfo.username?.trim()) {
       showToast('error', 'Validasi Error', 'Username tidak boleh kosong');
@@ -118,7 +96,6 @@ const ProfilePage = () => {
   const handleSaveProfile = async () => {
     if (!validateForm()) return;
 
-    // Konfirmasi sebelum save
     confirmDialog({
       message: 'Apakah Anda yakin ingin menyimpan perubahan profil?',
       header: 'Konfirmasi',
@@ -150,6 +127,9 @@ const ProfilePage = () => {
             showToast('success', 'Berhasil', result.message || 'Profil berhasil diperbarui');
             setEditMode(false);
             setOriginalUserInfo({ ...userInfo });
+            
+            console.log('🔄 ProfilePage: Updating user data in context');
+            setUser(userInfo);
           } else {
             showToast('error', 'Error', result.message || 'Gagal memperbarui profil');
           }
@@ -197,7 +177,6 @@ const ProfilePage = () => {
       return false;
     }
 
-    // Validasi password strength
     const strongPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/.test(passwordData.newPassword);
     if (!strongPassword) {
       showToast('warn', 'Peringatan', 'Gunakan password yang kuat (huruf besar, kecil, angka, dan simbol)');
@@ -254,13 +233,11 @@ const ProfilePage = () => {
   const handleImageUpload = (event) => {
     const file = event.files[0];
     if (file) {
-      // Validasi ukuran file (max 2MB)
       if (file.size > 2 * 1024 * 1024) {
         showToast('error', 'Error', 'Ukuran file maksimal 2MB');
         return;
       }
 
-      // Validasi tipe file
       if (!file.type.startsWith('image/')) {
         showToast('error', 'Error', 'File harus berupa gambar');
         return;
@@ -274,7 +251,6 @@ const ProfilePage = () => {
     }
   };
 
-  // Check if there are changes
   const hasChanges = () => {
     return JSON.stringify(userInfo) !== JSON.stringify(originalUserInfo);
   };
@@ -288,11 +264,13 @@ const ProfilePage = () => {
     return config[role] || config.user;
   };
 
-  if (loading) {
+  if (authLoading || !user) {
     return (
       <div className="flex flex-column align-items-center justify-content-center" style={{ minHeight: '400px' }}>
         <ProgressSpinner style={{ width: '50px', height: '50px' }} strokeWidth="4" />
-        <p className="mt-3 text-600">Memuat data profil...</p>
+        <p className="mt-3 text-600">
+          {authLoading ? 'Memuat data autentikasi...' : 'Memuat data profil...'}
+        </p>
       </div>
     );
   }
@@ -304,7 +282,6 @@ const ProfilePage = () => {
       
       <div className="col-12">
         <div className="card">
-          {/* Header */}
           <div className="flex align-items-center justify-content-between mb-4">
             <div>
               <h3 className="m-0 text-900">Profil Pengguna</h3>
@@ -332,11 +309,9 @@ const ProfilePage = () => {
           </div>
 
           <div className="grid">
-            {/* Profile Picture & Basic Info */}
             <div className="col-12 md:col-4">
               <Card className="h-full">
                 <div className="flex flex-column align-items-center text-center">
-                  {/* Profile Image */}
                   <div className="relative mb-3">
                     <Avatar 
                       image={profileImage}
@@ -401,7 +376,6 @@ const ProfilePage = () => {
               </Card>
             </div>
 
-            {/* Personal Information */}
             <div className="col-12 md:col-8">
               <Card title="Informasi Personal" className="h-full">
                 <div className="grid">
@@ -440,11 +414,11 @@ const ProfilePage = () => {
                     </label>
                     <InputText 
                       id="no_hp"
-                      value={userInfo.no_hp || ''}
+                      value={userInfo.no_hp}
                       onChange={(e) => setUserInfo({...userInfo, no_hp: e.target.value})}
                       disabled={!editMode}
                       className="w-full"
-                      placeholder="08xxxxxxxxxx"
+                     
                     />
                   </div>
 
@@ -452,16 +426,17 @@ const ProfilePage = () => {
                     <label htmlFor="role" className="block text-900 font-medium mb-2">
                       Role <span className="text-red-500">*</span>
                     </label>
-                    <Dropdown 
+                    <InputText 
                       id="role"
                       value={userInfo.role}
                       options={roleOptions}
                       onChange={(e) => setUserInfo({...userInfo, role: e.value})}
-                      disabled={!editMode}
+                      disabled
                       className="w-full"
                       placeholder="Pilih Role"
                       optionLabel="label"
                       optionValue="value"
+                     
                     />
                   </div>
                 </div>
@@ -482,7 +457,6 @@ const ProfilePage = () => {
         </div>
       </div>
 
-      {/* Change Password Section */}
       <div className="col-12">
         <Card title="Keamanan Akun" className="mt-4">
           <div className="mb-3">

@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useEffect, useContext, useRef } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Ripple } from 'primereact/ripple';
 import { classNames } from 'primereact/utils';
@@ -65,7 +64,7 @@ const AppMenuitem = (props) => {
                         index={i}
                         className={child.badgeClass}
                         parentKey={key}
-                        key={child.label}
+                        key={child.label||i}
                     />
                 ))}
             </ul>

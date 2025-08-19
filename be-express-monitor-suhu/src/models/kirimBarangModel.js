@@ -5,6 +5,7 @@ import { db } from "../core/config/knex";
 export const getAllMutasi = () => {
     return db('mutasigudang_ke').select([
             'ID',
+            'NAMA',
             'FAKTUR',
             'TGL',
             'GUDANG_KIRIM',

@@ -5,7 +5,7 @@ import { datetime, status } from '../utils/general.js';
 
 export const fetchAllRak = async (req, res) => {
     try {
-        const data = await db('rak').select(['KODE', 'NAMA', 'KETERANGAN']);
+        const data = await db('rak').select(['KODE','KETERANGAN']);
 
         if (!data || data.length === 0) {
             return res.status(404).json({

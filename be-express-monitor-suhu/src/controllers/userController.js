@@ -5,32 +5,27 @@ import { datetime, status } from "../utils/general.js";
 import { hashPassword } from "../utils/hash.js";
 import { db } from "../core/config/knex.js";
 
+
 export const fetchAllUsers = async (req, res) => {
   try {
-    const users = await getAllUsers();
+    const users = await db('users').select('*');
 
-    if (users.length === 0) {
-    return res.status(404).json({
-      status: status.NOT_FOUND,
-      message: "Data user kosong",
-      datetime: datetime(),
+    res.status(200).json({
+      status: 200,
+      message: 'Data user berhasil diambil',
+      users,
+      datetime: new Date().toISOString()
     });
-  }
-
-  return res.status(200).json({
-    status: status.SUKSES,
-    message: "Data user berhasil didapatkan",
-    datetime: datetime(),
-    users,
-  });
-  } catch (error) {
+  } catch (err) {
+    console.error(err);
     res.status(500).json({
-      status: status.GAGAL,
-      message: `Terjadi kesalahan pada server: ${error.message}`,
-      datetime: datetime(),
+      status: 500,
+      message: 'Gagal mengambil data user',
+      users: []
     });
   }
 };
+
 
 export const createNewUser = async (req, res) => {
   try {

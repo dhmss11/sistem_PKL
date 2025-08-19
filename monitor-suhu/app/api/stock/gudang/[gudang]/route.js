@@ -9,9 +9,11 @@ export async function GET(request, { params }) {
   }
 
   try {
-    const res = await axios.get(API_ENDPOINTS.GET_PRODUK_BY_GUDANG(gudang));
+    const res = await axios.get(API_ENDPOINTS.GET_BY_GUDANG(gudang));
     return Response.json(res.data);
   } catch (err) {
     return Response.json({ status: '99', message: 'Gagal mengambil data' }, { status: 500 });
   }
 }
+
+

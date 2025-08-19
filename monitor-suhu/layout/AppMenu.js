@@ -102,11 +102,6 @@ const AppMenu = () => {
                     to: '/kode/golonganstock',
                     roles: ['superadmin']
                 },
-                {
-                    label: 'Jenis Gudang',
-                    icon: 'pi pi-clone',
-                    to: '/kode/jenis-gudang'
-                },
             ]
         },
         {
@@ -143,6 +138,12 @@ const AppMenu = () => {
                     icon: 'pi pi-users',
                     to: '/master/user',
                     roles: ['superadmin'] 
+                },
+                {
+                    label : 'Jenis Role',
+                    icon : 'pi pi-shield',
+                    to : '/master/jenis-role',
+                    roles : ['superadmin']
                 }
             ]
         },
@@ -153,7 +154,7 @@ const AppMenu = () => {
             items: [
                 {
                     label: 'Kartu Stock',
-                    icon: 'pi pi-fw pi-book',
+                    icon: 'pi pi-fw pi-sync',
                     to: '/laporan/kartustock',
                     roles: ['user', 'admin', 'superadmin']
                 }

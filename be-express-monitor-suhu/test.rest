@@ -1,5 +1,0 @@
-POST /api/auth/login
-{
-  "name": "timoty",
-  "password": "admin123"
-}

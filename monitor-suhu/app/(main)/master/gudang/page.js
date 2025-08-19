@@ -6,6 +6,7 @@ import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
+import { Dropdown } from 'primereact/dropdown';
 import ToastNotifier from '@/app/components/ToastNotifier';
 
 const defaultForm = {
@@ -18,11 +19,17 @@ const defaultForm = {
 const GudangPage = () => {
   const toastRef = useRef(null);
   const [gudangList, setGudangList] = useState([]);
-  const [dialogMode, setDialogMode] = useState(null); // 'add' or 'edit'
+  const [dialogMode, setDialogMode] = useState(null); 
   const [selectedGudang, setSelectedGudang] = useState(null);
   const [form, setForm] = useState(defaultForm);
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [jenisGudangList, setJenisGudangList] = useState([
+  { label: 'Gudang Bahan Baku', value: 'Gudang Bahan Baku' },
+  { label: 'Gudang Barang Jadi', value: 'Gudang Barang Jadi' },
+  { label: 'Gudang Transit', value: 'Gudang Pendingin' },
+]);
+
 
  const fetchGudang = async () => {
   setIsLoading(true);
@@ -41,6 +48,7 @@ const GudangPage = () => {
     setIsLoading(false);
   }
 };
+
 
 
   useEffect(() => {
@@ -191,7 +199,7 @@ const GudangPage = () => {
         visible={dialogMode !== null}
         onHide={resetFormAndCloseDialog}
         style={{ width: '30rem' }}
-        unmountOnHide
+     
       >
         <form
           onSubmit={(e) => {
@@ -236,16 +244,19 @@ const GudangPage = () => {
           </div>
 
           <div className="mb-3">
-            <label htmlFor="KETERANGAN">Keterangan</label>
-            <InputText
-              id="KETERANGAN"
-              name="KETERANGAN"
-              value={form.KETERANGAN}
-              onChange={handleChange}
-              className="w-full mt-2"
-              placeholder="Keterangan"
-            />
-          </div>
+          <label htmlFor="KETERANGAN">Jenis Gudang</label>
+          <Dropdown
+            id="KETERANGAN"
+            name="KETERANGAN"
+            value={form.KETERANGAN} 
+            options={jenisGudangList}
+            onChange={(e) => setForm(prev => ({ ...prev, KETERANGAN: e.value }))}
+            className="w-full mt-2"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Pilih Jenis Gudang"
+          />
+        </div>
 
           <div className="flex justify-end">
             <Button

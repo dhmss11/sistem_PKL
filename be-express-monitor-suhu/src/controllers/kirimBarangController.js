@@ -5,6 +5,7 @@ import { datetime, status } from "../utils/general.js";
 export const fetchAllMutasi = async (req, res ) => {
     try {
         const data = await db('mutasigudang_ke').select([
+            'NAMA',
             'FAKTUR',
             'TGL',
             'GUDANG_KIRIM',
@@ -48,6 +49,7 @@ export const fetchAllMutasi = async (req, res ) => {
 export const addMutasi = async (req, res) => {
     try{
         const {
+            NAMA,
             FAKTUR,
             TGL,
             GUDANG_KIRIM,
@@ -62,6 +64,7 @@ export const addMutasi = async (req, res) => {
         } = req.body
 
         await db ('mutasigudang_ke').insert({
+            NAMA,
             FAKTUR,
             TGL,
             GUDANG_KIRIM,

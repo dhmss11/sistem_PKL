@@ -243,3 +243,23 @@ export const fetchNamaGudangOnly = async (req, res) => {
     });
   }
 };
+
+export const getTotalColumnsGudang = async (req, res) => {
+  try {
+    const data = await db('nama_gudang').count('* as total').first();
+
+    res.status(200).json({
+      status: status.SUKSES,
+      message: 'Berhasil menghitung jumlah baris gudang',
+      datetime: datetime(),
+      total: data.total
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: status.ERROR,
+      message: 'Gagal menghitung jumlah baris gudang',
+      datetime: datetime(),
+      error: err.message
+    });
+  }
+};

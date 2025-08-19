@@ -1,6 +1,9 @@
 import { z } from 'zod';
 
 export const addMutasiKirimSchema = z.object({
+    NAMA: z
+    .string({required_error: 'nama wajib diisi'})
+    .min(2, 'nama tidak boleh kosong'), 
     FAKTUR: z
     .string({required_error: 'faktur wajib diisi'})
     .min(8, 'faktur tidak boleh kosong'),

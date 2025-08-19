@@ -36,19 +36,12 @@ export default function MutasiTerimaData() {
 
   const fetchTerima = async () => {
     try {
-      console.log('Fetching data from /api/terimabarang...');
       const res = await fetch('/api/terimabarang');
       const json = await res.json();
-      
-      console.log('Response status:', res.status); 
-      console.log('Response data:', json);
 
       if (json.status === '00') {
-        console.log('Data yang akan di-set:', json.data);
-        console.log('Jumlah data:', json.data?.length || 0); 
         setTerimaData(json.data || []);
       } else {
-        console.error('API Error:', json.status, json.message);
         toastRef.current?.show({
           severity: 'error',
           summary: 'Error',
@@ -67,12 +60,7 @@ export default function MutasiTerimaData() {
     } finally {
       setLoading(false);
     }
-  }
-
-  useEffect(() => {
-    console.log('terimaData changed:', terimaData);
-    console.log('terimaData length:', terimaData?.length || 0);
-  }, [terimaData]);
+  };
 
   useEffect(() => {
     fetchTerima();
@@ -82,14 +70,9 @@ export default function MutasiTerimaData() {
   return (
     <div className="card">
       <Toast ref={toastRef} />
-      <h2 className="text-xl font-bold mb-4">Terima Barang</h2>
-      
-      {/* Debug info - remove in production */}
-      <div className="mb-2 p-2 bg-blue-50 border border-blue-200 rounded text-sm">
-      
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+      <h2 className="text-xl font-bold mb-4">Kirim Barang</h2>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
         <div>
           <label className="block text-sm font-medium mb-1">Dari Gudang</label>
           <Dropdown
@@ -120,27 +103,62 @@ export default function MutasiTerimaData() {
             showClear
           />
         </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">Tanggal</label>
-          <Calendar
-            id='tanggal'
-            name='tanggal'
-            className='w-full'
-            placeholder='Tanggal Kirim'
-            showIcon
-          />
+        <div className="flex gap-2">
+          <div className="w-1/2">
+            <label className="block text-sm font-medium mb-1">Tanggal</label>
+            <Calendar
+              id="tanggal"
+              name="tanggal"
+              className="w-full"
+              placeholder="Tanggal Kirim"
+              showIcon
+            />
+          </div>
+
+          <div className="w-1/2">
+            <label className="block text-sm font-medium mb-1">Kode</label>
+            <InputText
+              id="kode"
+              name="kode"
+              className="w-full"
+              placeholder="Kode"
+            />
+          </div>
         </div>
       </div>
-      
-      <div className="mb-3 p-2 border rounded-lg bg-gray-50">
-        <div className="grid grid-cols-1 md:grid-cols-1 gap-1 mr-5">
-          <label className='block text-sm font-medium mt-1'>Faktur</label>
-          <InputText
-            id='faktur'
-            name='faktur'
-            className='w-full'
-            placeholder='Faktur'
-          />
+
+      <div className="mb-3 p-2 border rounded-lg bg-white">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label className='block text-sm font-medium mb-1'>Faktur</label>
+            <InputText
+              id='faktur'
+              name='faktur'
+              className='w-full'
+              placeholder='Faktur'
+            />
+          </div>
+          <div>
+            <label className='block text-sm font-medium mb-1'>QTY</label>
+            <InputText
+              id='QTY'
+              name='QTY'
+              className='w-full'
+              placeholder='QTY'
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Satuan</label>
+            <Dropdown
+              id='satuan'
+              name='satuan'
+              className="w-full"
+              placeholder="Pilih satuan"
+              optionLabel="label"
+              optionValue="value"
+              showClear
+            />
+          </div>
         </div>
       </div>
 
@@ -172,7 +190,6 @@ export default function MutasiTerimaData() {
           return datetime.toLocaleString('id-ID');
         }} />
       </DataTable>
-      
     </div>
   );
 }

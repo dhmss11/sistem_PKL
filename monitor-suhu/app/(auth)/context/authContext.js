@@ -12,7 +12,7 @@ export const AuthProvider = ({ children }) => {
         if (loading && initialized) return;
         
         try {
-            console.log('🔍 AuthContext: Checking authentication...');
+            console.log('AuthContext: Checking authentication...');
             setLoading(true);
             
             const response = await fetch('/api/auth/verify', {
@@ -89,7 +89,7 @@ export const AuthProvider = ({ children }) => {
 
             if (response.ok) {
                 const data = await response.json();
-                console.log('✅ AuthContext: Login successful', data.user?.username);
+                console.log('AuthContext: Login successful', data.user?.username);
                 setUser(data.user);
                 return { success: true, user: data.user };
             } else {
@@ -98,7 +98,7 @@ export const AuthProvider = ({ children }) => {
             }
             
         } catch (error) {
-            console.error('❌ AuthContext: Login error', error);
+            console.error('AuthContext: Login error', error);
             setUser(null);
             return { success: false, error: error.message };
         } finally {
@@ -113,7 +113,7 @@ export const AuthProvider = ({ children }) => {
     }, [initialized, checkAuth]);
 
     useEffect(() => {
-        console.log('📊 AuthContext state:', {
+        console.log(' AuthContext state:', {
             hasUser: !!user,
             loading,
             initialized,

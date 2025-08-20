@@ -1,4 +1,5 @@
-'use client'
+'use client';
+
 import { useEffect, useRef, useState } from 'react';
 import { Button } from 'primereact/button';
 import { DataTable } from 'primereact/datatable';
@@ -6,74 +7,76 @@ import { Column } from 'primereact/column';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
 import ToastNotifier from '@/app/components/ToastNotifier';
-
+export const dynamic = "force-dynamic";
 
 const RakPage = () => {
-    const toastRef = useRef(null);
-    const [rak, setRak] = useState([]);
-    const [isLoading, setIsLoading] = useState(false);
-    const [dialogMode, setDialogMode] = useState(null);
-    const [selectedRak, setSelectedRak] = useState(null);
-    const [form, setForm] = useState({
-        KODE: '',
-        NAMA: '',
-        KETERANGAN: '',
-    });
+  const toastRef = useRef(null);
+  const [rak, setRak] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [dialogMode, setDialogMode] = useState(null); // 'add' | 'edit' | null
+  const [selectedRak, setSelectedRak] = useState(null);
+  const [form, setForm] = useState({
+    KODE: '',
+    NAMA: '',
+    KETERANGAN: '',
+  });
 
-    useEffect(() => {
-        fetchRak();
-    },[]);
+  // ambil data saat pertama render
+  useEffect(() => {
+    fetchRak();
+  }, []);
 
-    const fetchRak = async () => {
-        setIsLoading(true);
-        try {
-            const res = await fetch('/api/rak');
-            const json = await res.json();
+  const fetchRak = async () => {
+    setIsLoading(true);
+    try {
+      const res = await fetch('/api/rak');
+      const json = await res.json();
 
-            if (json.status === '00') {
-                setRak(json.data);
-            } else {
-                toastRef.current?.showToast(json.status, json.message);
-            }
-        } catch (err) {
-            toastRef.current?.showToast('99','gagal menggambil data rak');
-        } finally {
-            setIsLoading(false);
-        }
-    };
+      if (json.status === '00') {
+        setRak(json.data);
+      } else {
+        toastRef.current?.showToast(json.status, json.message);
+      }
+    } catch (err) {
+      toastRef.current?.showToast('99', 'Gagal mengambil data rak');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setForm((prev) => ({ ...prev, [name]: value }));
-    };
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
 
-    const handleSubmit = async () => {
-        setIsLoading(true);
-        try {
-            const url = dialogMode === 'add' ? '/api/rak' : `/api/rak/${selectedRak.KODE}`;
-            const method = dialogMode === 'add' ? 'POST' : 'PUT';
+  const handleSubmit = async () => {
+    setIsLoading(true);
+    try {
+      const url =
+        dialogMode === 'add' ? '/api/rak' : `/api/rak/${selectedRak.KODE}`;
+      const method = dialogMode === 'add' ? 'POST' : 'PUT';
 
-            const res = await fetch(url, {
-                method,
-                headers: { 'Content-Type': 'application/json'},
-                body: JSON.stringify(form),
-            });
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
 
-            const json = await res.json();
-            toastRef.current?.showToast(json.status, json.message);
+      const json = await res.json();
+      toastRef.current?.showToast(json.status, json.message);
 
-            if (json.status === '00') {
-                await fetchRak();
-                resetForm();
-            }
-        } catch (err) {
-             toastRef.current?.showToast('99', 'Gagal menyimpan data rak');
-        } finally {
-        setIsLoading(false);
-        }
-    };
+      if (json.status === '00') {
+        await fetchRak();
+        resetForm();
+      }
+    } catch (err) {
+      toastRef.current?.showToast('99', 'Gagal menyimpan data rak');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    const handleDelete = async (item) => {
+  const handleDelete = async (item) => {
     if (!confirm(`Hapus rak "${item.KODE}"?`)) return;
     try {
       const res = await fetch(`/api/rak/${item.KODE}`, { method: 'DELETE' });
@@ -90,11 +93,12 @@ const RakPage = () => {
   };
 
   const resetForm = () => {
-    setForm({ KODE: '', KETERANGAN: '',NAMA: '' });
+    setForm({ KODE: '', NAMA: '', KETERANGAN: '' });
     setDialogMode(null);
     setSelectedRak(null);
   };
-   return (
+
+  return (
     <div className="card">
       <h3 className="text-xl font-semibold mb-4">Rak</h3>
 
@@ -104,7 +108,7 @@ const RakPage = () => {
           icon="pi pi-plus"
           onClick={() => {
             setDialogMode('add');
-            setForm({ KODE: '', KETERANGAN: '' });
+            setForm({ KODE: '', NAMA: '', KETERANGAN: '' });
           }}
         />
       </div>
@@ -119,7 +123,7 @@ const RakPage = () => {
         className="text-sm"
       >
         <Column field="KODE" header="Kode" />
-        <Column field="NAMA" header= "nama"/>
+        <Column field="NAMA" header="Nama" />
         <Column field="KETERANGAN" header="Keterangan" />
         <Column
           header="Aksi"
@@ -173,11 +177,11 @@ const RakPage = () => {
           </div>
 
           <div className="mb-3">
-            <label htmlFor="NAMA">NAMA</label>
+            <label htmlFor="NAMA">Nama</label>
             <InputText
               id="NAMA"
               name="NAMA"
-              value={form.NAMA_RAK}
+              value={form.NAMA}
               onChange={handleChange}
               className="w-full mt-2"
               required
@@ -197,15 +201,19 @@ const RakPage = () => {
           </div>
 
           <div className="flex justify-end">
-            <Button type="submit" label="Simpan" icon="pi pi-save" severity="success" />
+            <Button
+              type="submit"
+              label="Simpan"
+              icon="pi pi-save"
+              severity="success"
+            />
           </div>
         </form>
       </Dialog>
 
       <ToastNotifier ref={toastRef} />
     </div>
-   );
+  );
 };
 
 export default RakPage;
-

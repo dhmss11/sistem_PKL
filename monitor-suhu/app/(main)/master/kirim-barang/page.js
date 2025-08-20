@@ -1,5 +1,6 @@
 'use client';
 
+export const fetchCache = "force-no-store";
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';

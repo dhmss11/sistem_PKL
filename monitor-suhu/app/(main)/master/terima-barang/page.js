@@ -8,6 +8,7 @@ import { Button } from 'primereact/button';
 import { Dropdown } from 'primereact/dropdown';
 import { Calendar } from 'primereact/calendar';
 import { InputText } from 'primereact/inputtext';
+export const dynamic = "force-dynamic";
 
 export default function MutasiTerimaData() {
   const toastRef = useRef(null);

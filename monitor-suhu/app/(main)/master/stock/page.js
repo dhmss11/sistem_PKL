@@ -10,6 +10,7 @@ import { Dropdown } from 'primereact/dropdown';
 import { Calendar } from 'primereact/calendar';
 import { format, parseISO } from 'date-fns';
 import ToastNotifier from '@/app/components/ToastNotifier';
+export const dynamic = "force-dynamic";
 
 const initialFormState = {
   gudang: '',

@@ -1,4 +1,6 @@
 'use client';
+
+export const dynamic = "force-dynamic";
 import { useEffect, useRef, useState } from 'react';
 import { Button } from 'primereact/button';
 import { DataTable } from 'primereact/datatable';

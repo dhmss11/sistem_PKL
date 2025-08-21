@@ -1,6 +1,6 @@
 // src/controllers/authController.js
 import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
+import jwt, { decode } from 'jsonwebtoken';
 import { 
   getUserByEmail, 
   getUserByUsername, 
@@ -14,7 +14,7 @@ import {
 
 const generateToken = (user) => {
   return jwt.sign(
-    { id: user.id, email: user.email, username: user.username, role: user.role },
+    { id: user.id, email: user.email, username: user.username, role: user.role, no_hp: user.no_hp},
     process.env.JWT_SECRET,
   );
 };
@@ -159,6 +159,7 @@ export const verify = async (req, res) => {
         email: decoded.email,
         username: decoded.username,
         role: decoded.role,
+        no_hp: decoded.no_hp,
       },
     });
   } catch (error) {

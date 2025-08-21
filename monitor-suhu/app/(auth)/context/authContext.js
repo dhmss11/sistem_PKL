@@ -9,42 +9,38 @@ export const AuthProvider = ({ children }) => {
     const [initialized, setInitialized] = useState(false);
 
     const checkAuth = useCallback(async () => {
-        if (loading && initialized) return;
+    try {
+        console.log('AuthContext: Checking authentication...');
+        setLoading(true);
         
-        try {
-            console.log('AuthContext: Checking authentication...');
-            setLoading(true);
-            
-            const response = await fetch('/api/auth/verify', {
-                method: 'GET',
-                credentials: 'include',
-                headers: {
-                    'Cache-Control': 'no-cache',
-                }
-            });
-
-            console.log('🔍 Auth check response:', response.status);
-
-            if (response.ok) {
-                const data = await response.json();
-                console.log('✅ AuthContext: Auth check successful', data.user?.username);
-                setUser(data.user);
-            } else {
-                console.log('❌ AuthContext: Auth check failed', response.status);
-                setUser(null);
+        const response = await fetch('/api/auth/verify', {
+            method: 'GET',
+            credentials: 'include',
+            headers: {
+                'Cache-Control': 'no-cache',
             }
-        } catch (error) {
-            console.error('❌ AuthContext: Auth check error', error);
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            console.log('🔍 Verify response data:', data.user);
+            setUser(data.user);
+        } else {
+            console.log('Auth check failed', response.status);
             setUser(null);
-        } finally {
-            setLoading(false);
-            setInitialized(true);
         }
-    }, [loading, initialized]);
+    } catch (error) {
+        console.error('Auth check error', error);
+        setUser(null);
+    } finally {
+        setLoading(false);
+        setInitialized(true);
+    }
+}, []);
 
     const logout = useCallback(async () => {
         try {
-            console.log('🚪 AuthContext: Starting logout process...');
+            console.log('Starting logout process...');
             
             const response = await fetch('/api/auth/logout', {
                 method: 'POST',
@@ -65,7 +61,7 @@ export const AuthProvider = ({ children }) => {
             }
             
         } catch (error) {
-            console.error('❌ AuthContext: Logout error', error);
+            console.error('Logout error', error);
             
             setUser(null);
             
@@ -76,7 +72,7 @@ export const AuthProvider = ({ children }) => {
     const login = useCallback(async (credentials) => {
         try {
             setLoading(true);
-            console.log('🔐 AuthContext: Starting login process...');
+            console.log('Starting login process...');
             
             const response = await fetch('/api/auth/login', {
                 method: 'POST',

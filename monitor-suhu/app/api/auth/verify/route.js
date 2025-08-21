@@ -1,4 +1,3 @@
-// app/api/auth/verify/route.js
 import jwt from 'jsonwebtoken';
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
@@ -12,14 +11,14 @@ export async function GET() {
     
     if (!token) {
       return NextResponse.json(
-        { message: 'Tidak ada token' }, 
+        { message: 'Tidak ada token' },
         { status: 401 }
       );
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     
-    console.log('Token berhasil diverifikasi untuk user:', decoded.id);
+    console.log('🔍 Isi decoded token:', decoded);
     
     return NextResponse.json({
       ok: true,
@@ -28,13 +27,13 @@ export async function GET() {
         email: decoded.email,
         username: decoded.username,
         role: decoded.role,
+        no_hp: decoded.no_hp 
       },
     });
-    
   } catch (error) {
     console.error('Verify error:', error);
     return NextResponse.json(
-      { message: 'Token tidak valid' }, 
+      { message: 'Token tidak valid' },
       { status: 401 }
     );
   }

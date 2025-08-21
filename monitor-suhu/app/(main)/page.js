@@ -33,17 +33,13 @@ const lineData = {
 const Dashboard = () => {
     const [products, setProducts] = useState([]);
     const [lineOptions, setLineOptions] = useState({});
-    const [isLoggingOut, setIsLoggingOut] = useState(false);
     const { layoutConfig } = useContext(LayoutContext);
-
     const [totalStockColumns, setTotalStockColumns] = useState(null);
     const [totalGudangColumns, setTotalGudangColumns] = useState(null);
-    const router = useRouter();
     const toast = useRef(null);
     
     const { user, loading, initialized, logout } = useAuth(); 
     
-    const redirectedRef = useRef(false);
 
 
     const applyLightTheme = () => {
@@ -93,61 +89,6 @@ const Dashboard = () => {
 
         setLineOptions(options);
     };
-
-    const handleLogout = async () => {
-        try {
-            setIsLoggingOut(true);
-            
-            const result = await logout();
-            
-            if (result.success) {
-                toast.current?.show({
-                    severity: 'success',
-                    summary: 'Logout Berhasil',
-                    detail: result.message || 'Anda telah berhasil keluar dari sistem',
-                    life: 3000
-                });
-
-                setTimeout(() => {
-                    router.push('/auth/login');
-                }, 1000);
-
-            } else {
-                throw new Error(result.error || 'Logout gagal');
-            }
-
-        } catch (error) {
-            console.error('Logout error:', error);
-            toast.current?.show({
-                severity: 'error',
-                summary: 'Logout Gagal',
-                detail: error.message || 'Terjadi kesalahan saat logout',
-                life: 5000
-            });
-            
-            setTimeout(() => {
-                router.push('/auth/login');
-            }, 2000);
-            
-        } finally {
-            setIsLoggingOut(false);
-        }
-    };
-
-    useEffect(() => {
-        console.log('Dashboard useEffect:', { 
-            initialized, 
-            loading, 
-            hasUser: !!user,
-            redirected: redirectedRef.current 
-        });
-
-        if (initialized && !loading && !user && !redirectedRef.current) {
-            redirectedRef.current = true;
-            router.push('/auth/login');
-        }
-    }, [initialized, loading, user, router]);
-
     useEffect(() => {
         if (layoutConfig.colorScheme === 'light') {
             applyLightTheme();
@@ -223,19 +164,9 @@ const Dashboard = () => {
                     <div className="flex justify-content-between align-items-center">
                         <div>
                             <h5>Selamat datang, {user.username}!</h5>
-                            <p>Role: {user.role}</p>
                         </div>
                     </div>
-                        <Button
-                            id="logout"
-                            name="logout"
-                            label={isLoggingOut ? 'Logging out...' : 'Logout'}
-                            icon={isLoggingOut ? 'pi pi-spin pi-spinner' : 'pi pi-sign-out'}
-                            className="p-button-danger mt-5"
-                            loading={isLoggingOut}
-                            onClick={handleLogout}
-                            disabled={isLoggingOut}
-                        />
+                        
                 </div>
             </div>
 

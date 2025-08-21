@@ -17,7 +17,7 @@ import golonganstock from './routes/golonganstock.js';
 import jenisGudangRoutes from './routes/jenisGudangRoutes.js';
 import kirimBarang from './routes/kirimBarangRoutes.js';
 import terimaBarang from './routes/terimaBarangRoutes.js';
-
+import mutasiGudangRoutes from "./routes/mutasiGudangRoutes.js";
 import jenisRoleRoutes from './routes/jenisRoleRoute.js'; 
 
 
@@ -86,6 +86,7 @@ app.use('/api/jenis-role', jenisRoleRoutes);
 app.use('/api/golonganstock', golonganstock);
 app.use('/api/kirimbarang', kirimBarang);
 app.use('/api/terimabarang', terimaBarang);
+app.use("/api/mutasi", mutasiGudangRoutes);
 
 app.get('/', [setResponseHeader], (req, res) => {
   return res.status(200).json({

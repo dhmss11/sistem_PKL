@@ -15,7 +15,6 @@ export const fetchAllMutasi = async (req, res ) => {
             'BARCODE',
             'SATUAN',
             'USERNAME',
-            'DATETIME'
         ]);
         
         if (!data || data.length === 0) {

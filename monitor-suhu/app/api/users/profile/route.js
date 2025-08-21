@@ -19,6 +19,7 @@ const getUserIdFromCookie = async () => {
       username: decoded.username,
       email: decoded.email,
       role: decoded.role,
+      no_hp: decoded.no_hp || null,
       error: null
     };
     

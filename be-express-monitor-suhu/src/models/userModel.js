@@ -1,7 +1,7 @@
 import { db } from '../core/config/knex.js';
 
 export const getAllUsers = () => {
-  return db('users').select('id', 'email', 'username', 'no_hp', 'role', 'profile_image');
+  return db('users').select('id', 'email', 'username', 'no_hp', 'role');
 };
 
 export const getUserByEmail = (email) => {
@@ -40,7 +40,7 @@ export const updatePassword = (id, password) => {
 };
 
 export const updateProfile = (id, data) => {
-  const allowedFields = ['username', 'no_hp', 'profile_image'];
+  const allowedFields = ['username', 'no_hp'];
   const updateData = {};
   
   allowedFields.forEach(field => {

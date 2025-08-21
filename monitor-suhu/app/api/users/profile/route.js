@@ -1,27 +1,25 @@
-// app/api/users/profile/route.js
 import { Axios } from '@/utils/axios';
 import { API_ENDPOINTS } from '../../api';
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import jwt from 'jsonwebtoken';
 
-// Helper function untuk mengambil user ID dari cookie
 const getUserIdFromCookie = async () => {
   try {
     const cookieStore = await cookies();
-    const token = cookieStore.get('token')?.value; // Menggunakan 'token' sesuai verify route Anda
+    const token = cookieStore.get('token')?.value; 
     
     if (!token) {
       return { error: 'No token found', userId: null };
     }
     
-    // Decode JWT token sesuai struktur Anda
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     return {
-      userId: decoded.id, // Menggunakan 'id' sesuai struktur JWT Anda
+      userId: decoded.id, 
       username: decoded.username,
       email: decoded.email,
       role: decoded.role,
+      no_hp: decoded.no_hp,
       error: null
     };
     
@@ -34,7 +32,7 @@ const getUserIdFromCookie = async () => {
   }
 };
 
-// Validasi helper functions
+
 const isValidEmail = (email) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
@@ -103,7 +101,6 @@ export const PUT = async (req) => {
     const body = await req.json();
     const { username, email, no_hp, role } = body;
 
-    // Validasi input
     if (!username || !email) {
       return NextResponse.json({
         status: '99',
@@ -112,20 +109,10 @@ export const PUT = async (req) => {
       }, { status: 400 });
     }
 
-    // Email validation
     if (!isValidEmail(email)) {
       return NextResponse.json({
         status: '99',
         message: 'Format email tidak valid',
-        data: {}
-      }, { status: 400 });
-    }
-
-    // Phone validation (optional)
-    if (no_hp && !isValidPhone(no_hp)) {
-      return NextResponse.json({
-        status: '99',
-        message: 'Format nomor telepon tidak valid (contoh: 08123456789)',
         data: {}
       }, { status: 400 });
     }
@@ -149,7 +136,6 @@ export const PUT = async (req) => {
   } catch (err) {
     console.error('PUT /api/users/profile error:', err?.response?.data || err.message);
     
-    // Handle specific error cases dari backend
     if (err?.response?.status === 400) {
       return NextResponse.json({
         status: '99',

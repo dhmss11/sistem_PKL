@@ -3,8 +3,6 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Card } from 'primereact/card';
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
-import { Password } from 'primereact/password';
-import { Dropdown } from 'primereact/dropdown';
 import { Toast } from 'primereact/toast';
 import { Avatar } from 'primereact/avatar';
 import { Divider } from 'primereact/divider';
@@ -13,30 +11,75 @@ import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
 import { FileUpload } from 'primereact/fileupload';
 import { Badge } from 'primereact/badge';
 import { useAuth } from '@/app/(auth)/context/authContext';
+import { useRouter } from 'next/navigation';
 
 const ProfilePage = () => {
   const toast = useRef(null);
   const fileUploadRef = useRef(null);
-  
-    const { user, setUser, loading: authLoading } = useAuth();
-  
+  const { user, setUser, initialized, logout,  loading: authLoading} = useAuth();
+  const redirectedRef = useRef(false);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [userInfo, setUserInfo] = useState({});
   const [originalUserInfo, setOriginalUserInfo] = useState({});
-  const [passwordData, setPasswordData] = useState({
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: ''
-  });
   const [profileImage, setProfileImage] = useState(null);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const router = useRouter();  
+   const handleLogout = async () => {
+          try {
+              setIsLoggingOut(true);
+              
+              const result = await logout();
+              
+              if (result.success) {
+                  toast.current?.show({
+                      severity: 'success',
+                      summary: 'Logout Berhasil',
+                      detail: result.message || 'Anda telah berhasil keluar dari sistem',
+                      life: 3000
+                  });
+  
+                  setTimeout(() => {
+                      router.push('/auth/login');
+                  }, 1000);
+  
+              } else {
+                  throw new Error(result.error || 'Logout gagal');
+              }
+  
+          } catch (error) {
+              console.error('Logout error:', error);
+              toast.current?.show({
+                  severity: 'error',
+                  summary: 'Logout Gagal',
+                  detail: error.message || 'Terjadi kesalahan saat logout',
+                  life: 5000
+              });
+              
+              setTimeout(() => {
+                  router.push('/auth/login');
+              }, 2000);
+              
+          } finally {
+              setIsLoggingOut(false);
+          }
+      };
+  
+      useEffect(() => {
+          console.log('Dashboard useEffect:', { 
+              initialized, 
+              loading, 
+              hasUser: !!user,
+              redirected: redirectedRef.current 
+          });
+  
+          if (initialized && !loading && !user && !redirectedRef.current) {
+              redirectedRef.current = true;
+              router.push('/auth/login');
+          }
+      }, [initialized, loading, user, router]);
 
-  const roleOptions = [
-    { label: 'Super Admin', value: 'superadmin', icon: 'pi pi-crown' },
-    { label: 'Admin', value: 'admin', icon: 'pi pi-shield' },
-    { label: 'User', value: 'user', icon: 'pi pi-user' }
-  ];
 
   const isValidEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -50,7 +93,7 @@ const ProfilePage = () => {
 
   useEffect(() => {
     if (user && !authLoading) {
-      console.log('📝 ProfilePage: Initializing user data from context', user.username);
+      console.log('Initializing user data', user.username);
       setUserInfo(user);
       setOriginalUserInfo({ ...user });
       
@@ -128,7 +171,7 @@ const ProfilePage = () => {
             setEditMode(false);
             setOriginalUserInfo({ ...userInfo });
             
-            console.log('🔄 ProfilePage: Updating user data in context');
+            console.log('Updating user data in context');
             setUser(userInfo);
           } else {
             showToast('error', 'Error', result.message || 'Gagal memperbarui profil');
@@ -152,80 +195,6 @@ const ProfilePage = () => {
       accept: () => {
         setUserInfo({ ...originalUserInfo });
         setEditMode(false);
-      }
-    });
-  };
-
-  const validatePassword = () => {
-    if (!passwordData.currentPassword) {
-      showToast('error', 'Error', 'Password saat ini harus diisi');
-      return false;
-    }
-
-    if (!passwordData.newPassword) {
-      showToast('error', 'Error', 'Password baru harus diisi');
-      return false;
-    }
-
-    if (passwordData.newPassword.length < 8) {
-      showToast('error', 'Error', 'Password minimal 8 karakter');
-      return false;
-    }
-
-    if (passwordData.newPassword !== passwordData.confirmPassword) {
-      showToast('error', 'Error', 'Password konfirmasi tidak sama');
-      return false;
-    }
-
-    const strongPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/.test(passwordData.newPassword);
-    if (!strongPassword) {
-      showToast('warn', 'Peringatan', 'Gunakan password yang kuat (huruf besar, kecil, angka, dan simbol)');
-    }
-
-    return true;
-  };
-
-  const handleChangePassword = async () => {
-    if (!validatePassword()) return;
-
-    confirmDialog({
-      message: 'Apakah Anda yakin ingin mengubah password?',
-      header: 'Konfirmasi Ubah Password',
-      icon: 'pi pi-key',
-      acceptClassName: 'p-button-warning',
-      accept: async () => {
-        try {
-          setSaving(true);
-          
-          const response = await fetch('/api/users/change-password', {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              currentPassword: passwordData.currentPassword,
-              newPassword: passwordData.newPassword
-            }),
-          });
-
-          const result = await response.json();
-
-          if (response.ok && result.status === '00') {
-            showToast('success', 'Berhasil', result.message || 'Password berhasil diubah');
-            setPasswordData({
-              currentPassword: '',
-              newPassword: '',
-              confirmPassword: ''
-            });
-          } else {
-            showToast('error', 'Error', result.message || 'Gagal mengubah password');
-          }
-        } catch (error) {
-          console.error('Change password error:', error);
-          showToast('error', 'Error', 'Terjadi kesalahan saat mengubah password');
-        } finally {
-          setSaving(false);
-        }
       }
     });
   };
@@ -367,10 +336,6 @@ const ProfilePage = () => {
                         {userInfo.no_hp || '-'}
                       </span>
                     </div>
-                    <div className="flex justify-content-between">
-                      <span className="font-semibold text-700">User ID:</span>
-                      <span className="text-sm text-600">#{userInfo.id}</span>
-                    </div>
                   </div>
                 </div>
               </Card>
@@ -429,7 +394,6 @@ const ProfilePage = () => {
                     <InputText 
                       id="role"
                       value={userInfo.role}
-                      options={roleOptions}
                       onChange={(e) => setUserInfo({...userInfo, role: e.value})}
                       disabled
                       className="w-full"
@@ -439,6 +403,18 @@ const ProfilePage = () => {
                      
                     />
                   </div>
+                </div>
+                <div>
+                     <Button
+                      id="logout"
+                      name="logout"
+                      label={isLoggingOut ? 'Logging out...' : 'Logout'}
+                      icon={isLoggingOut ? 'pi pi-spin pi-spinner' : 'pi pi-sign-out'}
+                      className="p-button-danger mt-5"
+                      loading={isLoggingOut}
+                      onClick={handleLogout}
+                      disabled={isLoggingOut}
+                        />
                 </div>
 
                 {hasChanges() && editMode && (
@@ -455,88 +431,6 @@ const ProfilePage = () => {
             </div>
           </div>
         </div>
-      </div>
-
-      <div className="col-12">
-        <Card title="Keamanan Akun" className="mt-4">
-          <div className="mb-3">
-            <h6 className="text-900 mb-2">Ubah Password</h6>
-            <p className="text-600 text-sm m-0">
-              Pastikan menggunakan password yang kuat dengan kombinasi huruf besar, kecil, angka, dan simbol
-            </p>
-          </div>
-          
-          <div className="grid">
-            <div className="col-12 md:col-4">
-              <label htmlFor="currentPassword" className="block text-900 font-medium mb-2">
-                Password Saat Ini <span className="text-red-500">*</span>
-              </label>
-              <Password 
-                id="currentPassword"
-                value={passwordData.currentPassword}
-                onChange={(e) => setPasswordData({...passwordData, currentPassword: e.target.value})}
-                feedback={false}
-                className="w-full"
-                inputClassName="w-full"
-                toggleMask
-                placeholder="Masukkan password lama"
-              />
-            </div>
-
-            <div className="col-12 md:col-4">
-              <label htmlFor="newPassword" className="block text-900 font-medium mb-2">
-                Password Baru <span className="text-red-500">*</span>
-              </label>
-              <Password 
-                id="newPassword"
-                value={passwordData.newPassword}
-                onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
-                className="w-full"
-                inputClassName="w-full"
-                toggleMask
-                placeholder="Minimal 8 karakter"
-                promptLabel="Masukkan password"
-                weakLabel="Lemah"
-                mediumLabel="Sedang"
-                strongLabel="Kuat"
-              />
-            </div>
-
-            <div className="col-12 md:col-4">
-              <label htmlFor="confirmPassword" className="block text-900 font-medium mb-2">
-                Konfirmasi Password Baru <span className="text-red-500">*</span>
-              </label>
-              <Password 
-                id="confirmPassword"
-                value={passwordData.confirmPassword}
-                onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
-                feedback={false}
-                className="w-full"
-                inputClassName="w-full"
-                toggleMask
-                placeholder="Ulangi password baru"
-              />
-            </div>
-
-            <div className="col-12">
-              <div className="flex justify-content-end mt-3">
-                <Button 
-                  label="Ubah Password"
-                  icon="pi pi-key"
-                  onClick={handleChangePassword}
-                  className="p-button-warning"
-                  loading={saving}
-                  disabled={
-                    saving || 
-                    !passwordData.currentPassword || 
-                    !passwordData.newPassword || 
-                    !passwordData.confirmPassword
-                  }
-                />
-              </div>
-            </div>
-          </div>
-        </Card>
       </div>
     </div>
   );

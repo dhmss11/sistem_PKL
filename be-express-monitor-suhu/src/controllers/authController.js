@@ -1,6 +1,6 @@
 // src/controllers/authController.js
 import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
+import jwt, { decode } from 'jsonwebtoken';
 import { 
   getUserByEmail, 
   getUserByUsername, 
@@ -14,7 +14,7 @@ import {
 
 const generateToken = (user) => {
   return jwt.sign(
-    { id: user.id, email: user.email, username: user.username, role: user.role },
+    { id: user.id, email: user.email, username: user.username, role: user.role, no_hp: user.no_hp, },
     process.env.JWT_SECRET,
   );
 };
@@ -51,7 +51,7 @@ export const register = async (req, res) => {
       email: trimmedEmail, 
       username: trimmedUsername,
       password: hash, 
-      no_hp: no_hp || null,
+      no_hp: no_hp,
       role
     });
 
@@ -70,7 +70,6 @@ export const register = async (req, res) => {
   }
 };
 
-// src/controllers/authController.js - Bagian Login yang diperbaiki
 export const login = async (req, res) => {
   try {
     const { emailOrUsername, password, email, username } = req.body;
@@ -145,27 +144,28 @@ export const verify = async (req, res) => {
     const token = req.cookies?.token || req.headers?.authorization?.replace('Bearer ', '');
     
     if (!token) {
-      console.log('Token tidak ditemukan');
       return res.status(401).json({ message: 'Tidak ada token' });
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    console.log('Token berhasil diverifikasi untuk user:', decoded.id);
+
+    const user = await getUserById(decoded.id);
 
     return res.json({
       ok: true,
       user: {
-        id: decoded.id,
-        email: decoded.email,
-        username: decoded.username,
-        role: decoded.role,
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        role: user.role,
+        no_hp: user.no_hp,
       },
     });
   } catch (error) {
-    console.error('Error verifikasi:', error);
     return res.status(401).json({ message: 'Token tidak valid' });
   }
 };
+
 
 
 

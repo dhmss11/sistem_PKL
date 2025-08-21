@@ -55,7 +55,6 @@ export default function MutasiKirimDataContent() {
     return date;
   };
 
-  // Fixed: Add proper dependencies or empty arrays
   const fetchGudang = useCallback(async () => {
     try {
       const res = await fetch("/api/gudang/nama");

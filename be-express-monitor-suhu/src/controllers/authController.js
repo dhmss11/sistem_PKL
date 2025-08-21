@@ -1,6 +1,6 @@
 // src/controllers/authController.js
 import bcrypt from 'bcrypt';
-import jwt, { decode } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 import { 
   getUserByEmail, 
   getUserByUsername, 
@@ -11,10 +11,11 @@ import {
   getAllUsers as getAllUsersFromModel,
   deleteUser as deleteUserFromModel
 } from '../models/userModel.js';
+import { updateUser } from './userController.js';
 
 const generateToken = (user) => {
   return jwt.sign(
-    { id: user.id, email: user.email, username: user.username, role: user.role, no_hp: user.no_hp, },
+    { id: user.id, email: user.email, username: user.username, role: user.role },
     process.env.JWT_SECRET,
   );
 };
@@ -51,7 +52,7 @@ export const register = async (req, res) => {
       email: trimmedEmail, 
       username: trimmedUsername,
       password: hash, 
-      no_hp: no_hp,
+      no_hp: no_hp || null,
       role
     });
 
@@ -70,6 +71,7 @@ export const register = async (req, res) => {
   }
 };
 
+// src/controllers/authController.js - Bagian Login yang diperbaiki
 export const login = async (req, res) => {
   try {
     const { emailOrUsername, password, email, username } = req.body;
@@ -144,34 +146,35 @@ export const verify = async (req, res) => {
     const token = req.cookies?.token || req.headers?.authorization?.replace('Bearer ', '');
     
     if (!token) {
+      console.log('Token tidak ditemukan');
       return res.status(401).json({ message: 'Tidak ada token' });
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-    const user = await getUserById(decoded.id);
+    console.log('Token berhasil diverifikasi untuk user:', decoded.id);
 
     return res.json({
       ok: true,
       user: {
-        id: user.id,
-        email: user.email,
-        username: user.username,
-        role: user.role,
-        no_hp: user.no_hp,
+        id: decoded.id,
+        email: decoded.email,
+        username: decoded.username,
+        role: decoded.role,
+        no_hp: decoded.no_hp,
+        profile_image: decoded.profile_image
       },
     });
   } catch (error) {
+    console.error('Error verifikasi:', error);
     return res.status(401).json({ message: 'Token tidak valid' });
   }
 };
 
 
 
-
 export const updateProfile = async (req, res) => {
   try {
-    const { username, no_hp } = req.body;
+    const { username, no_hp, profile_image } = req.body;
     const userId = req.user.id;
 
     if (!username) {
@@ -189,6 +192,9 @@ export const updateProfile = async (req, res) => {
     if (no_hp !== undefined) {
       updateData.no_hp = no_hp;
     }
+    if (profile_image !== undefined) {
+      updateData.profile_image =profile_image
+    }
 
     await updateProfileModel(userId, updateData);
 
@@ -201,7 +207,8 @@ export const updateProfile = async (req, res) => {
         email: updatedUser.email,
         username: updatedUser.username,
         no_hp: updatedUser.no_hp,
-        role: updatedUser.role
+        role: updatedUser.role,
+        profile_image: updatedUser.profile_image,
       }
     });
   } catch (err) {

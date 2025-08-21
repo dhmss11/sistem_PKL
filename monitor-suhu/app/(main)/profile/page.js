@@ -136,6 +136,37 @@ const ProfilePage = () => {
     return true;
   };
 
+  const handleImageUpload = (event) => {
+    const file = event.files[0];
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) {
+        showToast('error', 'Error', 'Ukuran file maksimal 2MB');
+        return;
+      }
+
+      if (!file.type.startsWith('image/')) {
+        showToast('error', 'Error', 'File harus berupa gambar');
+        return;
+      }
+
+      const reader = new FileReader();
+    reader.onload = (e) => {
+      const base64Image = e.target.result;
+      
+      setProfileImage(base64Image);
+      
+      setUserInfo({
+        ...userInfo, 
+        profile_image: base64Image
+      });
+      
+      showToast('success', 'Berhasil', 'Foto profil berhasil dipilih. Klik Simpan untuk menyimpan perubahan.');
+    };
+    reader.readAsDataURL(file);
+  }
+};
+
+
   const handleSaveProfile = async () => {
     if (!validateForm()) return;
 
@@ -153,7 +184,8 @@ const ProfilePage = () => {
             username: userInfo.username.trim(),
             email: userInfo.email.trim(),
             no_hp: userInfo.no_hp?.trim() || '',
-            role: userInfo.role
+            role: userInfo.role,
+            profile_image: userInfo.profile_image || null
           };
 
           const response = await fetch('/api/users/profile', {
@@ -185,6 +217,16 @@ const ProfilePage = () => {
       }
     });
   };
+  useEffect(() => {
+  if (user && !authLoading) {
+    setUserInfo(user);
+    setOriginalUserInfo({ ...user });
+    
+    if (user.profile_image) {
+      setProfileImage(user.profile_image);
+    }
+  }
+}, [user, authLoading]);
 
   const handleCancelEdit = () => {
     confirmDialog({
@@ -197,27 +239,6 @@ const ProfilePage = () => {
         setEditMode(false);
       }
     });
-  };
-
-  const handleImageUpload = (event) => {
-    const file = event.files[0];
-    if (file) {
-      if (file.size > 2 * 1024 * 1024) {
-        showToast('error', 'Error', 'Ukuran file maksimal 2MB');
-        return;
-      }
-
-      if (!file.type.startsWith('image/')) {
-        showToast('error', 'Error', 'File harus berupa gambar');
-        return;
-      }
-
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setProfileImage(e.target.result);
-      };
-      reader.readAsDataURL(file);
-    }
   };
 
   const hasChanges = () => {
@@ -379,7 +400,7 @@ const ProfilePage = () => {
                     </label>
                     <InputText 
                       id="no_hp"
-                      value={userInfo.no_hp}
+                      value={userInfo.no_hp || ''}
                       onChange={(e) => setUserInfo({...userInfo, no_hp: e.target.value})}
                       disabled={!editMode}
                       className="w-full"
@@ -393,14 +414,11 @@ const ProfilePage = () => {
                     </label>
                     <InputText 
                       id="role"
-                      value={userInfo.role}
+                      value={userInfo.role || ''}
                       onChange={(e) => setUserInfo({...userInfo, role: e.value})}
                       disabled
                       className="w-full"
-                      placeholder="Pilih Role"
-                      optionLabel="label"
-                      optionValue="value"
-                     
+                      placeholder="Pilih Role"                     
                     />
                   </div>
                 </div>

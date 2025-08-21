@@ -9,38 +9,34 @@ export const AuthProvider = ({ children }) => {
     const [initialized, setInitialized] = useState(false);
 
     const checkAuth = useCallback(async () => {
-        if (loading && initialized) return;
+    try {
+        console.log('AuthContext: Checking authentication...');
+        setLoading(true);
         
-        try {
-            console.log('AuthContext: Checking authentication...');
-            setLoading(true);
-            
-            const response = await fetch('/api/auth/verify', {
-                method: 'GET',
-                credentials: 'include',
-                headers: {
-                    'Cache-Control': 'no-cache',
-                }
-            });
-
-            console.log('🔍 Auth check response:', response.status);
-
-            if (response.ok) {
-                const data = await response.json();
-                console.log('Auth check successful', data.user?.username);
-                setUser(data.user);
-            } else {
-                console.log('Auth check failed', response.status);
-                setUser(null);
+        const response = await fetch('/api/auth/verify', {
+            method: 'GET',
+            credentials: 'include',
+            headers: {
+                'Cache-Control': 'no-cache',
             }
-        } catch (error) {
-            console.error('Auth check error', error);
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            console.log('🔍 Verify response data:', data.user);
+            setUser(data.user);
+        } else {
+            console.log('Auth check failed', response.status);
             setUser(null);
-        } finally {
-            setLoading(false);
-            setInitialized(true);
         }
-    }, [loading, initialized]);
+    } catch (error) {
+        console.error('Auth check error', error);
+        setUser(null);
+    } finally {
+        setLoading(false);
+        setInitialized(true);
+    }
+}, []);
 
     const logout = useCallback(async () => {
         try {

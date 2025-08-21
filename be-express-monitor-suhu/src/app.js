@@ -61,7 +61,6 @@ app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
   res.setHeader('Access-Control-Expose-Headers', 'Set-Cookie');
   
-  // Handle preflight requests
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
@@ -69,7 +68,6 @@ app.use((req, res, next) => {
   next();
 });
 
-// Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/master-produk', masterProdukRouters);
@@ -95,7 +93,6 @@ app.get('/', [setResponseHeader], (req, res) => {
   });
 });
 
-// Error handling middleware
 app.use((err, req, res, next) => {
   console.error('Global error:', err);
   

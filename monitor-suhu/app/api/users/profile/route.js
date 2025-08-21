@@ -19,7 +19,6 @@ const getUserIdFromCookie = async () => {
       username: decoded.username,
       email: decoded.email,
       role: decoded.role,
-      no_hp: decoded.no_hp,
       error: null
     };
     
@@ -31,7 +30,6 @@ const getUserIdFromCookie = async () => {
     };
   }
 };
-
 
 const isValidEmail = (email) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -99,7 +97,7 @@ export const PUT = async (req) => {
     }
 
     const body = await req.json();
-    const { username, email, no_hp, role } = body;
+    const { username, email, no_hp, role, profile_image } = body;
 
     if (!username || !email) {
       return NextResponse.json({
@@ -117,11 +115,20 @@ export const PUT = async (req) => {
       }, { status: 400 });
     }
 
+    if (no_hp && !isValidPhone(no_hp)) {
+      return NextResponse.json({
+        status: '99',
+        message: 'Format nomor telepon tidak valid (contoh: 08123456789)',
+        data: {}
+      }, { status: 400 });
+    }
+
     const updateData = {
       username: username.trim(),
       email: email.trim(),
       no_hp: no_hp?.trim() || '',
-      role
+      role,
+      profile_image
     };
 
     const response = await Axios.put(API_ENDPOINTS.EDIT_USER(userId), updateData);

@@ -2,6 +2,7 @@
 import jwt from 'jsonwebtoken';
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
+import { DecodeError } from 'next/dist/shared/lib/utils';
 
 export async function GET() {
   try {
@@ -28,6 +29,7 @@ export async function GET() {
         email: decoded.email,
         username: decoded.username,
         role: decoded.role,
+        no_hp: decoded.no_hp
       },
     });
     

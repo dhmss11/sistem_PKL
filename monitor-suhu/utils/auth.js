@@ -6,8 +6,6 @@ export const getUserFromToken = () => {
   try {
     const cookieStore = cookies();
     
-    // Coba beberapa nama cookie yang umum digunakan
-    // Sesuaikan dengan nama cookie yang Anda gunakan
     const possibleTokenNames = ['auth_token', 'token', 'access_token', 'jwt_token', 'authToken'];
     let token = null;
     
@@ -23,7 +21,6 @@ export const getUserFromToken = () => {
       return { error: 'No token found', userId: null };
     }
     
-    // Decode JWT token
     const decoded = jwt.verify(token.value, process.env.JWT_SECRET || 'your-secret-key');
     
     return {
@@ -31,6 +28,7 @@ export const getUserFromToken = () => {
       username: decoded.username,
       email: decoded.email,
       role: decoded.role,
+      no_hp: decoded.no_hp,
       error: null
     };
     

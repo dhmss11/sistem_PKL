@@ -24,15 +24,9 @@ export default function MutasiKirimData() {
 
   const [formData, setFormData] = useState({
     TGL: null,
-    KODE: '',
-    NAMA: '',
     FAKTUR: '',
-    QTY: '',
-    BARCODE: '',
-    harga: '',
     GUDANG_KIRIM: null,
     GUDANG_TERIMA: null,
-    SATUAN: null,
   });
 
   const formatDateForDatabase = (date) => {
@@ -54,7 +48,6 @@ export default function MutasiKirimData() {
         setGudangOptions(json.namaGudang.map(nama => ({ label: nama, value: nama })));
       }
     } catch (error) {
-      console.error(error);
       toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Gagal mengambil data gudang', life: 3000 });
     }
   }, []);
@@ -67,7 +60,6 @@ export default function MutasiKirimData() {
         setSatuanOptions(json.data.map(item => ({ label: item.KODE, value: item.KODE })));
       }
     } catch (error) {
-      console.error(error);
       setSatuanOptions([]);
     }
   }, []);
@@ -88,36 +80,34 @@ export default function MutasiKirimData() {
         })));
       }
     } catch (error) {
-      console.error(error);
       toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Gagal mengambil data produk', life: 3000 });
     }
   }, []);
 
   const fetchKirimData = useCallback(async () => {
     try {
-      const res = await fetch('/api/kirimbarang');
+      const res = await fetch('/api/mutasi');
       const json = await res.json();
       if (json.status === '00') {
         const formattedData = json.data.map((item, index) => ({
           id: item.id || index + 1,
-          NAMA: item.NAMA || '-',
-          FAKTUR: item.FAKTUR || '-',
-          TGL: item.TGL || '-',
-          GUDANG_KIRIM: item.GUDANG_KIRIM || '-',
-          GUDANG_TERIMA: item.GUDANG_TERIMA || '-',
-          KODE: item.KODE || '-',
-          QTY: item.QTY || 0,
-          BARCODE: item.BARCODE || '-',
-          SATUAN: item.SATUAN || '-',
-          USERNAME: item.USERNAME || '-',
-          STATUS: item.STATUS || 'Pending'
+          NAMA: item.nama || item.NAMA || '-',
+          FAKTUR: item.faktur || item.FAKTUR || '-',
+          TGL: item.tanggal || item.TGL || '-',
+          GUDANG_KIRIM: item.dari || item.GUDANG_KIRIM || '-',
+          GUDANG_TERIMA: item.ke || item.GUDANG_TERIMA || '-',
+          KODE: item.kode || item.KODE || '-',
+          QTY: item.qty || item.QTY || 0,
+          BARCODE: item.barcode || item.BARCODE || '-',
+          SATUAN: item.satuan || item.SATUAN || '-',
+          USERNAME: item.username || item.USERNAME || '-',
+          STATUS: item.status || item.STATUS || 'Pending'
         }));
         setKirimData(formattedData);
       } else {
         toast.current?.show({ severity: 'error', summary: 'Error', detail: json.message || 'Gagal mengambil data', life: 3000 });
       }
     } catch (error) {
-      console.error(error);
       toast.current?.show({ severity: 'error', summary: 'Error', detail: error.message, life: 3000 });
     } finally {
       setLoading(false);
@@ -136,46 +126,45 @@ export default function MutasiKirimData() {
   };
 
   const generateFaktur = () => {
-  const timestamp = Date.now();
-  return `FA${timestamp}`;
-};
+    const timestamp = Date.now();
+    return `FA${timestamp}`;
+  };
 
-const handleSelect = (selectedProduct) => {
-  setKirimData(prev => {
-    const existing = prev.find(item => item.BARCODE === selectedProduct.BARCODE);
+  const handleSelect = (selectedProduct) => {
+    setKirimData(prev => {
+      const existing = prev.find(item => item.BARCODE === selectedProduct.BARCODE);
 
-    let faktur = formData.FAKTUR;
-    if (!faktur) {
-      faktur = generateFaktur();
-      setFormData(prevForm => ({ ...prevForm, FAKTUR: faktur }));
-    }
+      let faktur = formData.FAKTUR;
+      if (!faktur) {
+        faktur = generateFaktur();
+        setFormData(prevForm => ({ ...prevForm, FAKTUR: faktur }));
+      }
 
-    if (existing) {
-      return prev.map(item =>
-        item.BARCODE === selectedProduct.BARCODE
-          ? { ...item, QTY: Number(item.QTY) + 1 }
-          : item
-      );
-    } else {
-      
-      const newItem = {
-        id: prev.length + 1,
-        KODE: selectedProduct.KODE,
-        BARCODE: selectedProduct.BARCODE,
-        NAMA: selectedProduct.NAMA,
-        QTY: 1,
-        HARGA: selectedProduct.HJ,
-        SATUAN: selectedProduct.SATUAN,
-        FAKTUR: faktur,
-        TGL: formData.TGL ? formatDateForDatabase(formData.TGL) : '-',
-        GUDANG_KIRIM: formData.GUDANG_KIRIM || '-',
-        GUDANG_TERIMA: formData.GUDANG_TERIMA || '-',
-        USERNAME: user?.username || '-',
-        STATUS: 'Pending'
-      };
-      return [...prev, newItem];
-    }
-  });
+      if (existing) {
+        return prev.map(item =>
+          item.BARCODE === selectedProduct.BARCODE
+            ? { ...item, QTY: Number(item.QTY) + 1 }
+            : item
+        );
+      } else {
+        const newItem = {
+          id: prev.length + 1,
+          KODE: selectedProduct.KODE,
+          BARCODE: selectedProduct.BARCODE,
+          NAMA: selectedProduct.NAMA,
+          QTY: 1,
+          HARGA: selectedProduct.HJ,
+          SATUAN: selectedProduct.SATUAN,
+          FAKTUR: faktur,
+          TGL: formData.TGL ? formatDateForDatabase(formData.TGL) : '-',
+          GUDANG_KIRIM: formData.GUDANG_KIRIM || '-',
+          GUDANG_TERIMA: formData.GUDANG_TERIMA || '-',
+          USERNAME: user?.username || '-',
+          STATUS: 'Pending'
+        };
+        return [...prev, newItem];
+      }
+    });
 
     setVisible(false);
     toast.current?.show({
@@ -186,29 +175,39 @@ const handleSelect = (selectedProduct) => {
     });
   };
 
-
   const handleSubmit = async () => {
     if (!formData.GUDANG_KIRIM || !formData.GUDANG_TERIMA || !formData.TGL) {
-      toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Field Gudang dan Tanggal wajib diisi', life: 3000 });
+      toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Gudang dan Tanggal wajib diisi', life: 3000 });
       return;
     }
+
     setSubmitLoading(true);
     try {
-      const payload = {
-        ...formData,
-        TGL: formatDateForDatabase(formData.TGL),
-        USERNAME: user?.username,
-        STATUS: '1'
-      };
-      const res = await fetch('/api/kirimbarang', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-      const result = await res.json();
-      if (result.status === '00') {
-        toast.current?.show({ severity: 'success', summary: 'Success', detail: 'Data berhasil disimpan!', life: 3000 });
-        setFormData({ TGL: null, KODE: '', NAMA: '', FAKTUR: '', QTY: '', BARCODE: '', harga: '', GUDANG_KIRIM: null, GUDANG_TERIMA: null, SATUAN: null });
-        fetchKirimData();
-      } else {
-        toast.current?.show({ severity: 'error', summary: 'Error', detail: result.message || 'Gagal menyimpan data', life: 3000 });
+      for (let item of kirimData) {
+        const payload = {
+          nama: item.NAMA,
+          faktur: item.FAKTUR,
+          tanggal: item.TGL,
+          gudangkirim: item.GUDANG_KIRIM,
+          gudangterima: item.GUDANG_TERIMA,
+          kode: item.KODE,
+          qty: item.QTY,
+          barcode: item.BARCODE,
+          satuan: item.SATUAN,
+          username: item.USERNAME
+        };
+
+        await fetch('/api/mutasi/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
       }
+
+      toast.current?.show({ severity: 'success', summary: 'Success', detail: 'Data berhasil disimpan!', life: 3000 });
+      setFormData({ TGL: null, FAKTUR: '', GUDANG_KIRIM: null, GUDANG_TERIMA: null });
+      setKirimData([]);
+      fetchKirimData();
     } catch (error) {
       toast.current?.show({ severity: 'error', summary: 'Error', detail: error.message, life: 3000 });
     } finally {
@@ -217,21 +216,14 @@ const handleSelect = (selectedProduct) => {
   };
 
   const handleDeleteRow = (id) => {
-  setKirimData(prev => prev.filter(item => item.id !== id));
-
-  toast.current?.show({
-    severity: 'success',
-    summary: 'Berhasil',
-    detail: 'Data berhasil dihapus',
-    life: 3000
-  });
-};
+    setKirimData(prev => prev.filter(item => item.id !== id));
+    toast.current?.show({ severity: 'success', summary: 'Berhasil', detail: 'Data berhasil dihapus', life: 3000 });
+  };
 
   return (
     <div className="card p-4">
       <Toast ref={toast} />
       <h2 className="text-xl font-bold mb-4">Kirim Barang</h2>
-
 
       <div className="mb-4 p-4 border rounded-lg bg-gray-50">
         {/* Form Input */}
@@ -246,7 +238,7 @@ const handleSelect = (selectedProduct) => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
           <div>
             <label className="block text-sm font-medium mb-1">Tanggal</label>
             <Calendar placeholder="Tanggal Kirim" value={formData.TGL} onChange={(e) => handleInputChange('TGL', e.value)} showIcon dateFormat="dd/mm/yy" className="w-full" />
@@ -255,66 +247,57 @@ const handleSelect = (selectedProduct) => {
             <label className="block text-sm font-medium mb-1">Faktur</label>
             <InputText placeholder="Faktur" value={formData.FAKTUR} onChange={(e) => handleInputChange('FAKTUR', e.target.value)} className="w-full" />
           </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">BARCODE</label>
-            <div className="p-inputgroup">
-              <InputText placeholder="BARCODE" value={formData.BARCODE} onChange={(e) => handleInputChange('BARCODE', e.target.value)} />
-              <Button icon="pi pi-search" onClick={() => setVisible(true)} />
-            </div>
-          </div>
         </div>
 
-      {/* Dialog Pilih Produk */}
-      <Dialog header="Pilih Produk" visible={visible} style={{ width: '70vw' }} onHide={() => setVisible(false)} position="center">
-        <DataTable value={produkList} paginator rows={10} size="small">
-          <Column field="KODE" header="KODE" sortable/>
-          <Column field="BARCODE" header="BARCODE"/>
-          <Column field="NAMA" header="NAMA"/>
-          <Column field="QTY" header="QTY"/>
-          <Column field="SATUAN" header="SATUAN"/>
-          <Column field="HJ" header="HARGA" body={(rowData) => `Rp ${(rowData.HJ ?? 0).toLocaleString('id-ID')}`} />
-          <Column header="AKSI" body={(rowData) => <Button label="Pilih" icon="pi pi-check" size="small" onClick={() => handleSelect(rowData)} />} />
-        </DataTable>
-      </Dialog>
+        {/* Dialog Pilih Produk */}
+        <Dialog header="Pilih Produk" visible={visible} style={{ width: '70vw' }} onHide={() => setVisible(false)} position="center">
+          <DataTable value={produkList} paginator rows={10} size="small">
+            <Column field="KODE" header="KODE" sortable />
+            <Column field="BARCODE" header="BARCODE" />
+            <Column field="NAMA" header="NAMA" />
+            <Column field="QTY" header="STOK" />
+            <Column field="SATUAN" header="SATUAN" />
+            <Column field="HJ" header="HARGA" body={(rowData) => `Rp ${(rowData.HJ ?? 0).toLocaleString('id-ID')}`} />
+            <Column header="AKSI" body={(rowData) => <Button label="Pilih" icon="pi pi-check" size="small" onClick={() => handleSelect(rowData)} />} />
+          </DataTable>
+        </Dialog>
 
-      {/* Tabel Kirim Data */}
-      <div className='mt-3'>
-        <DataTable value={kirimData} paginator rows={10} size="small" loading={loading} scrollable emptyMessage="Tidak ada data yang ditemukan">
-          <Column field='NAMA' header="NAMA"/>
-          <Column field="FAKTUR" header="FAKTUR" />
-          <Column field="TGL" header="TANGGAL" />
-          <Column field="GUDANG_KIRIM" header="DARI GUDANG" />
-          <Column field="GUDANG_TERIMA" header="KE GUDANG" />
-          <Column field="KODE" header="KODE" />
-          <Column field="QTY" header="QTY" />
-          <Column field="BARCODE" header="BARCODE"/>
-          <Column field="SATUAN" header="SATUAN" />
-          <Column field="USERNAME" header="USER" />
-          <Column field="STATUS" header="STATUS" />
-          <Column
-            header="AKSI"
-            body={(rowData) => (
-              <Button
-                icon="pi pi-trash"
-                className="p-button-danger p-button-sm"
-                onClick={() => handleDeleteRow(rowData.id)}
-              />
-            )}
-          />
-        </DataTable>
-        <div className="w-full flex mt-3 justify-end gap-2">
-          <Button
-            label="Simpan"
-            icon="pi pi-check"
-            onClick={handleSubmit}
-            loading={submitLoading}
-            className="p-button-success ml-auto"
-          />
+        {/* Tabel Kirim Data */}
+        <div className='mt-3'>
+          <DataTable value={kirimData} paginator rows={10} size="small" loading={loading} scrollable emptyMessage="Tidak ada data yang ditemukan">
+            <Column field='NAMA' header="NAMA" />
+            <Column field="FAKTUR" header="FAKTUR" />
+            <Column field="TGL" header="TANGGAL" />
+            <Column field="GUDANG_KIRIM" header="DARI GUDANG" />
+            <Column field="GUDANG_TERIMA" header="KE GUDANG" />
+            <Column field="KODE" header="KODE" />
+            <Column field="QTY" header="QTY" />
+            <Column field="BARCODE" header="BARCODE" />
+            <Column field="SATUAN" header="SATUAN" />
+            <Column field="USERNAME" header="USER" />
+            <Column field="STATUS" header="STATUS" />
+            <Column
+              header="AKSI"
+              body={(rowData) => (
+                <Button
+                  icon="pi pi-trash"
+                  className="p-button-danger p-button-sm"
+                  onClick={() => handleDeleteRow(rowData.id)}
+                />
+              )}
+            />
+          </DataTable>
+          <div className="w-full flex mt-3 justify-end gap-2">
+            <Button
+              label="Simpan"
+              icon="pi pi-check"
+              onClick={handleSubmit}
+              loading={submitLoading}
+              className="p-button-success ml-auto"
+            />
+          </div>
         </div>
       </div>
     </div>
-   </div>
-
   );
 }
-

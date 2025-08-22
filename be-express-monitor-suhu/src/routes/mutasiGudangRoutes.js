@@ -1,17 +1,14 @@
-import {Router} from "express";
+import {Router} from "express"
 import {
-    createMutasiGudangKe,
-    createMutasiGudangDari,
-    getAllMutasiGudangKe,
-    getAllMutasiGudangDari
+    createmutasi,
+    receivemutasi,
+    getAllmutasi
 } from "../controllers/mutasiGudangController.js";
 
 const router = Router();
 
-router.post("/createke", createMutasiGudangKe);
-router.get("/ke", getAllMutasiGudangKe);
-
-router.post("/createdari", createMutasiGudangDari);
-router.get("/dari", getAllMutasiGudangDari);
+router.post ("/create",createmutasi);
+router.post("/receive/:id",receivemutasi);
+router.get("/",getAllmutasi);
 
 export default router;

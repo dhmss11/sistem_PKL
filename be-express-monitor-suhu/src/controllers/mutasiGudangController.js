@@ -1,5 +1,4 @@
-import db from "../core/config/knex.js";
-import { status } from "../utils/general.js";
+import {db} from "../core/config/knex.js";
 
 export const createmutasi = async(req,res) => {
     try {

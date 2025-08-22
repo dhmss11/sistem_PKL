@@ -27,14 +27,18 @@ export const createmutasi = async(req,res) => {
     }
 };
 
-export const receivemutasi = async (req,res) => {
+export const receivemutasi = async (req, res) => {
     try {
-        const {id} = req.params;
-        const {faktur,faktur_kirim,tgl,gudang_kirim,gudang_terima,barcode,qty,satuan,username} = req.body;
+        const { faktur } = req.params;
+        const { faktur_kirim, tgl, gudang_kirim, gudang_terima, barcode, qty, satuan, username } = req.body;
 
-        await db("mutasigudang_ke").where({id}).update({ status : "recevid" });
+        // Update status mutasi di tabel mutasigudang_ke
+        await db("mutasigudang_ke")
+            .where({ faktur })
+            .update({ status: "received" });
 
-        await db("mutasigudang_dari").insert ({
+        // Insert ke tabel mutasigudang_dari
+        await db("mutasigudang_dari").insert({
             faktur,
             faktur_kirim,
             tgl,
@@ -46,21 +50,22 @@ export const receivemutasi = async (req,res) => {
             username
         });
 
+        // Insert ke log mutasi (history)
         await db("mutasigudang").insert({
-            posting : "diterima",
-            id,
+            posting: "diterima",
             faktur,
             tgl,
-            dari : gudang_kirim,
-            ke : gudang_terima,
+            dari: gudang_kirim,
+            ke: gudang_terima,
             barcode,
             qty,
             username
         });
-        res.json({status : "00" , massage : "mutasil berhasil diterima"});
+
+        res.json({ status: "00", message: "Mutasi berhasil diterima" });
     } catch (error) {
         console.error(error);
-            res.status(500).json({status : "99" ,message : "Error create mutasi"});
+        res.status(500).json({ status: "99", message: "Error menerima mutasi" });
     }
 };
 

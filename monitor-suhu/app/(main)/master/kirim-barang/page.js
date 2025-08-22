@@ -24,9 +24,15 @@ export default function MutasiKirimData() {
 
   const [formData, setFormData] = useState({
     TGL: null,
+    KODE: '',
+    NAMA: '',
     FAKTUR: '',
+    QTY: '',
+    BARCODE: '',
+    harga: '',
     GUDANG_KIRIM: null,
     GUDANG_TERIMA: null,
+    SATUAN: null,
   });
 
   const formatDateForDatabase = (date) => {
@@ -48,6 +54,7 @@ export default function MutasiKirimData() {
         setGudangOptions(json.namaGudang.map(nama => ({ label: nama, value: nama })));
       }
     } catch (error) {
+      console.error(error);
       toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Gagal mengambil data gudang', life: 3000 });
     }
   }, []);
@@ -60,6 +67,7 @@ export default function MutasiKirimData() {
         setSatuanOptions(json.data.map(item => ({ label: item.KODE, value: item.KODE })));
       }
     } catch (error) {
+      console.error(error);
       setSatuanOptions([]);
     }
   }, []);
@@ -80,10 +88,12 @@ export default function MutasiKirimData() {
         })));
       }
     } catch (error) {
+      console.error(error);
       toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Gagal mengambil data produk', life: 3000 });
     }
   }, []);
 
+  // AMBIL HISTORI DARI API MUTASI (bukan /api/kirimbarang)
   const fetchKirimData = useCallback(async () => {
     try {
       const res = await fetch('/api/mutasi');
@@ -98,8 +108,8 @@ export default function MutasiKirimData() {
           GUDANG_TERIMA: item.ke || item.GUDANG_TERIMA || '-',
           KODE: item.kode || item.KODE || '-',
           QTY: item.qty || item.QTY || 0,
-          BARCODE: item.barcode || item.BARCODE || '-',
-          SATUAN: item.satuan || item.SATUAN || '-',
+          BARCODE: item.barcode || item.BARCODE || '-',   // BARCODE TETAP
+          SATUAN: item.satuan || item.SATUAN || '-',      // SATUAN TETAP
           USERNAME: item.username || item.USERNAME || '-',
           STATUS: item.status || item.STATUS || 'Pending'
         }));
@@ -108,6 +118,7 @@ export default function MutasiKirimData() {
         toast.current?.show({ severity: 'error', summary: 'Error', detail: json.message || 'Gagal mengambil data', life: 3000 });
       }
     } catch (error) {
+      console.error(error);
       toast.current?.show({ severity: 'error', summary: 'Error', detail: error.message, life: 3000 });
     } finally {
       setLoading(false);
@@ -130,6 +141,7 @@ export default function MutasiKirimData() {
     return `FA${timestamp}`;
   };
 
+  // Tambah produk ke tabel (BARCODE & SATUAN dipertahankan)
   const handleSelect = (selectedProduct) => {
     setKirimData(prev => {
       const existing = prev.find(item => item.BARCODE === selectedProduct.BARCODE);
@@ -167,6 +179,7 @@ export default function MutasiKirimData() {
     });
 
     setVisible(false);
+    setFormData(prev => ({ ...prev, BARCODE: '' })); // bersihkan input barcode setelah pilih
     toast.current?.show({
       severity: 'success',
       summary: 'Produk Ditambahkan',
@@ -175,9 +188,33 @@ export default function MutasiKirimData() {
     });
   };
 
+  // Scan / ketik barcode lalu Enter → otomatis tambah
+  const handleBarcodeEnter = (e) => {
+    if (e.key !== 'Enter') return;
+    const code = (formData.BARCODE || '').toString().trim();
+    if (!code) return;
+    const found = produkList.find(p => (p.BARCODE || '').toString() === code);
+    if (found) {
+      handleSelect(found);
+    } else {
+      toast.current?.show({
+        severity: 'warn',
+        summary: 'Tidak ditemukan',
+        detail: `Barcode "${code}" tidak ada di daftar produk`,
+        life: 3000
+      });
+    }
+  };
+
+  // SIMPAN: kirim per-item ke /api/mutasi/create (barcode & satuan ikut terkirim)
   const handleSubmit = async () => {
     if (!formData.GUDANG_KIRIM || !formData.GUDANG_TERIMA || !formData.TGL) {
-      toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Gudang dan Tanggal wajib diisi', life: 3000 });
+      toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Field Gudang dan Tanggal wajib diisi', life: 3000 });
+      return;
+    }
+
+    if (kirimData.length === 0) {
+      toast.current?.show({ severity: 'warn', summary: 'Kosong', detail: 'Belum ada item untuk disimpan', life: 2500 });
       return;
     }
 
@@ -186,29 +223,39 @@ export default function MutasiKirimData() {
       for (let item of kirimData) {
         const payload = {
           nama: item.NAMA,
-          faktur: item.FAKTUR,
-          tanggal: item.TGL,
-          gudangkirim: item.GUDANG_KIRIM,
-          gudangterima: item.GUDANG_TERIMA,
+          faktur: item.FAKTUR || formData.FAKTUR || generateFaktur(),
+          tanggal: item.TGL && item.TGL !== '-' ? item.TGL : formatDateForDatabase(formData.TGL),
+          gudangkirim: item.GUDANG_KIRIM || formData.GUDANG_KIRIM,
+          gudangterima: item.GUDANG_TERIMA || formData.GUDANG_TERIMA,
           kode: item.KODE,
           qty: item.QTY,
-          barcode: item.BARCODE,
-          satuan: item.SATUAN,
-          username: item.USERNAME
+          barcode: item.BARCODE,     // ← JANGAN DIHILANGKAN
+          satuan: item.SATUAN,       // ← JANGAN DIHILANGKAN
+          username: item.USERNAME || user?.username || '-'
         };
 
-        await fetch('/api/mutasi/create', {
+        const res = await fetch('/api/mutasi/create', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
+
+        // jika API mengembalikan error per-item
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.message || 'Gagal menyimpan salah satu item');
+        }
       }
 
       toast.current?.show({ severity: 'success', summary: 'Success', detail: 'Data berhasil disimpan!', life: 3000 });
-      setFormData({ TGL: null, FAKTUR: '', GUDANG_KIRIM: null, GUDANG_TERIMA: null });
+      setFormData({
+        TGL: null, KODE: '', NAMA: '', FAKTUR: '', QTY: '', BARCODE: '', harga: '',
+        GUDANG_KIRIM: null, GUDANG_TERIMA: null, SATUAN: null
+      });
       setKirimData([]);
       fetchKirimData();
     } catch (error) {
+      console.error(error);
       toast.current?.show({ severity: 'error', summary: 'Error', detail: error.message, life: 3000 });
     } finally {
       setSubmitLoading(false);
@@ -217,7 +264,12 @@ export default function MutasiKirimData() {
 
   const handleDeleteRow = (id) => {
     setKirimData(prev => prev.filter(item => item.id !== id));
-    toast.current?.show({ severity: 'success', summary: 'Berhasil', detail: 'Data berhasil dihapus', life: 3000 });
+    toast.current?.show({
+      severity: 'success',
+      summary: 'Berhasil',
+      detail: 'Data berhasil dihapus',
+      life: 3000
+    });
   };
 
   return (
@@ -238,7 +290,7 @@ export default function MutasiKirimData() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
           <div>
             <label className="block text-sm font-medium mb-1">Tanggal</label>
             <Calendar placeholder="Tanggal Kirim" value={formData.TGL} onChange={(e) => handleInputChange('TGL', e.value)} showIcon dateFormat="dd/mm/yy" className="w-full" />
@@ -247,16 +299,28 @@ export default function MutasiKirimData() {
             <label className="block text-sm font-medium mb-1">Faktur</label>
             <InputText placeholder="Faktur" value={formData.FAKTUR} onChange={(e) => handleInputChange('FAKTUR', e.target.value)} className="w-full" />
           </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">BARCODE</label>
+            <div className="p-inputgroup">
+              <InputText
+                placeholder="Scan / ketik BARCODE lalu Enter"
+                value={formData.BARCODE}
+                onChange={(e) => handleInputChange('BARCODE', e.target.value)}
+                onKeyDown={handleBarcodeEnter}
+              />
+              <Button icon="pi pi-search" onClick={() => setVisible(true)} />
+            </div>
+          </div>
         </div>
 
         {/* Dialog Pilih Produk */}
         <Dialog header="Pilih Produk" visible={visible} style={{ width: '70vw' }} onHide={() => setVisible(false)} position="center">
           <DataTable value={produkList} paginator rows={10} size="small">
-            <Column field="KODE" header="KODE" sortable />
-            <Column field="BARCODE" header="BARCODE" />
-            <Column field="NAMA" header="NAMA" />
-            <Column field="QTY" header="STOK" />
-            <Column field="SATUAN" header="SATUAN" />
+            <Column field="KODE" header="KODE" sortable/>
+            <Column field="BARCODE" header="BARCODE"/>
+            <Column field="NAMA" header="NAMA"/>
+            <Column field="QTY" header="QTY"/>
+            <Column field="SATUAN" header="SATUAN"/>
             <Column field="HJ" header="HARGA" body={(rowData) => `Rp ${(rowData.HJ ?? 0).toLocaleString('id-ID')}`} />
             <Column header="AKSI" body={(rowData) => <Button label="Pilih" icon="pi pi-check" size="small" onClick={() => handleSelect(rowData)} />} />
           </DataTable>
@@ -265,15 +329,15 @@ export default function MutasiKirimData() {
         {/* Tabel Kirim Data */}
         <div className='mt-3'>
           <DataTable value={kirimData} paginator rows={10} size="small" loading={loading} scrollable emptyMessage="Tidak ada data yang ditemukan">
-            <Column field='NAMA' header="NAMA" />
+            <Column field='NAMA' header="NAMA"/>
             <Column field="FAKTUR" header="FAKTUR" />
             <Column field="TGL" header="TANGGAL" />
             <Column field="GUDANG_KIRIM" header="DARI GUDANG" />
             <Column field="GUDANG_TERIMA" header="KE GUDANG" />
             <Column field="KODE" header="KODE" />
             <Column field="QTY" header="QTY" />
-            <Column field="BARCODE" header="BARCODE" />
-            <Column field="SATUAN" header="SATUAN" />
+            <Column field="BARCODE" header="BARCODE"/>   {/* BARCODE tetap tampil */}
+            <Column field="SATUAN" header="SATUAN" />    {/* SATUAN tetap tampil */}
             <Column field="USERNAME" header="USER" />
             <Column field="STATUS" header="STATUS" />
             <Column

@@ -8,7 +8,7 @@ import {
 const router = Router();
 
 router.post ("/create",createmutasi);
-router.post("/receive/:id",receivemutasi);
+router.post("/receive/:faktur",receivemutasi);
 router.get("/",getAllmutasi);
 
 export default router;

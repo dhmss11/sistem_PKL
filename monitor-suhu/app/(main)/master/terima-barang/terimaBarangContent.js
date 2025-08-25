@@ -1,4 +1,4 @@
-'use client';
+'use client'
 
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { DataTable } from 'primereact/datatable';
@@ -8,189 +8,373 @@ import { Button } from 'primereact/button';
 import { Dropdown } from 'primereact/dropdown';
 import { Calendar } from 'primereact/calendar';
 import { InputText } from 'primereact/inputtext';
-export const dynamic = "force-dynamic";
+import { Dialog } from 'primereact/dialog';
+import { useAuth } from '@/app/(auth)/context/authContext';
 
-export default function MutasiTerimaDataContent() {
-  const toastRef = useRef(null);
+export default function TerimaBarang() {
   const [terimaData, setTerimaData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [submitLoading, setSubmitLoading] = useState(false);
   const [gudangOptions, setGudangOptions] = useState([]);
-  const [selectedFromGudang, setSelectedFromGudang] = useState(null);
-  const [selectedToGudang, setSelectedToGudang] = useState(null);
+  const [satuanOptions, setSatuanOptions] = useState([]);
+  const [visible, setVisible] = useState(false);
+  const [produkList, setProdukList] = useState([]);
+  const { user } = useAuth();
+  const toast = useRef(null);
+
+  const [formData, setFormData] = useState({
+    TGL: null,
+    KODE: '',
+    NAMA: '',
+    FAKTUR: '',
+    FAKTUR_KIRIM: '',
+    QTY: '',
+    BARCODE: '',
+    GUDANG_KIRIM: null,
+    GUDANG_TERIMA: null,
+    SATUAN: null,
+  });
+
+  const formatDateForDatabase = (date) => {
+    if (!date) return '-';
+    if (date instanceof Date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+    return date;
+  };
 
   const fetchGudang = useCallback(async () => {
     try {
       const res = await fetch("/api/gudang/nama");
       const json = await res.json();
-
       if (json.status === "00") {
-        const options = json.namaGudang.map(nama => ({
-          label: nama,
-          value: nama,
-        }));
-        setGudangOptions(options);
+        setGudangOptions(json.namaGudang.map(nama => ({ label: nama, value: nama })));
       }
     } catch (error) {
-      console.error("Form Gagal ambil nama gudang", error);
+      console.error(error);
+      toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Gagal mengambil data gudang', life: 3000 });
     }
   }, []);
 
-  const fetchTerima = async () => {
+  const fetchSatuan = useCallback(async () => {
     try {
-      const res = await fetch('/api/terimabarang');
+      const res = await fetch("/api/satuan");
       const json = await res.json();
-
-      if (json.status === '00') {
-        setTerimaData(json.data || []);
-      } else {
-        toastRef.current?.show({
-          severity: 'error',
-          summary: 'Error',
-          detail: json.message || 'Gagal mengambil data',
-          life: 3000
-        });
+      if (json.status === "00" && Array.isArray(json.data)) {
+        setSatuanOptions(json.data.map(item => ({ label: item.KODE, value: item.KODE })));
       }
-    } catch (err) {
-      console.error('Fetch error:', err);
-      toastRef.current?.show({
-        severity: 'error',
-        summary: 'Error',
-        detail: 'Gagal mengambil data mutasi',
-        life: 3000
-      });
+    } catch (error) {
+      console.error(error);
+      setSatuanOptions([]);
+    }
+  }, []);
+
+  const fetchProduk = useCallback(async () => {
+    try {
+      const res = await fetch("/api/stock");
+      const json = await res.json();
+      if (json.status === "00") {
+        setProdukList(json.data.map(item => ({
+          ID: item.ID,
+          KODE: item.KODE,
+          BARCODE: item.BARCODE,
+          NAMA: item.NAMA,
+          HJ: item.HJ,
+          SATUAN: item.SATUAN,
+          QTY: item.QTY,
+        })));
+      }
+    } catch (error) {
+      console.error(error);
+      toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Gagal mengambil data produk', life: 3000 });
+    }
+  }, []);
+
+  // Fetch data terima barang dari API
+  const fetchTerimaData = useCallback(async () => {
+    try {
+      const res = await fetch('/api/terimabarang'); // Endpoint untuk mengambil data terima barang
+      const json = await res.json();
+      if (json.status === '00') {
+        const formattedData = json.data.map((item, index) => ({
+          id: item.ID || item.id || index + 1,
+          NAMA: item.NAMA || item.nama || '-',
+          FAKTUR: item.FAKTUR || item.faktur || '-',
+          FAKTUR_KIRIM: item.FAKTUR_KIRIM || item.faktur_kirim || '-',
+          TGL: item.TGL || item.tanggal || '-',
+          GUDANG_KIRIM: item.GUDANG_KIRIM || item.gudang_kirim || '-',
+          GUDANG_TERIMA: item.GUDANG_TERIMA || item.gudang_terima || '-',
+          KODE: item.KODE || item.kode || '-',
+          QTY: item.QTY || item.qty || 0,
+          BARCODE: item.BARCODE || item.barcode || '-',
+          SATUAN: item.SATUAN || item.satuan || '-',
+          USERNAME: item.USERNAME || item.username || '-'
+        }));
+        setTerimaData(formattedData);
+      } else {
+        console.log('API Response:', json);
+        toast.current?.show({ severity: 'warn', summary: 'Info', detail: json.message || 'Tidak ada data terima barang', life: 3000 });
+        setTerimaData([]);
+      }
+    } catch (error) {
+      console.error('Error fetching terima data:', error);
+      toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Gagal mengambil data dari server', life: 3000 });
+      setTerimaData([]);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    fetchTerima();
     fetchGudang();
-  }, [fetchGudang]);
+    fetchSatuan();
+    fetchProduk();
+    fetchTerimaData();
+  }, []);
+
+  const handleInputChange = (field, value) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const generateFaktur = () => {
+    const timestamp = Date.now();
+    return `TR${timestamp}`;
+  };
+
+  // Tambah produk ke tabel terima
+  const handleSelect = (selectedProduct) => {
+    setTerimaData(prev => {
+      const existing = prev.find(item => item.BARCODE === selectedProduct.BARCODE);
+
+      let faktur = formData.FAKTUR;
+      if (!faktur) {
+        faktur = generateFaktur();
+        setFormData(prevForm => ({ ...prevForm, FAKTUR: faktur }));
+      }
+
+      if (existing) {
+        return prev.map(item =>
+          item.BARCODE === selectedProduct.BARCODE
+            ? { ...item, QTY: Number(item.QTY) + 1 }
+            : item
+        );
+      } else {
+        const newItem = {
+          id: prev.length + 1,
+          KODE: selectedProduct.KODE,
+          BARCODE: selectedProduct.BARCODE,
+          NAMA: selectedProduct.NAMA,
+          QTY: 1,
+          SATUAN: selectedProduct.SATUAN,
+          FAKTUR: faktur,
+          FAKTUR_KIRIM: formData.FAKTUR_KIRIM || '-',
+          TGL: formData.TGL ? formatDateForDatabase(formData.TGL) : '-',
+          GUDANG_KIRIM: formData.GUDANG_KIRIM || '-',
+          GUDANG_TERIMA: formData.GUDANG_TERIMA || '-',
+          USERNAME: user?.username || '-'
+        };
+        return [...prev, newItem];
+      }
+    });
+
+    setVisible(false);
+    setFormData(prev => ({ ...prev, BARCODE: '' }));
+    toast.current?.show({
+      severity: 'success',
+      summary: 'Produk Ditambahkan',
+      detail: `${selectedProduct.NAMA} berhasil ditambahkan`,
+      life: 3000
+    });
+  };
+
+  // Scan / ketik barcode lalu Enter → otomatis tambah
+  const handleBarcodeEnter = (e) => {
+    if (e.key !== 'Enter') return;
+    const code = (formData.BARCODE || '').toString().trim();
+    if (!code) return;
+    const found = produkList.find(p => (p.BARCODE || '').toString() === code);
+    if (found) {
+      handleSelect(found);
+    } else {
+      toast.current?.show({
+        severity: 'warn',
+        summary: 'Tidak ditemukan',
+        detail: `Barcode "${code}" tidak ada di daftar produk`,
+        life: 3000
+      });
+    }
+  };
+
+  // SIMPAN: kirim per-item ke API terima barang
+  const handleSubmit = async () => {
+    if (!formData.GUDANG_TERIMA || !formData.GUDANG_KIRIM || !formData.TGL) {
+      toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Field Gudang dan Tanggal wajib diisi', life: 3000 });
+      return;
+    }
+
+    if (terimaData.length === 0) {
+      toast.current?.show({ severity: 'warn', summary: 'Kosong', detail: 'Belum ada item untuk disimpan', life: 2500 });
+      return;
+    }
+
+    setSubmitLoading(true);
+    try {
+      // Kirim semua data sekaligus dalam satu request
+      const payload = terimaData.map(item => ({
+        FAKTUR: item.FAKTUR || formData.FAKTUR || generateFaktur(),
+        FAKTUR_KIRIM: item.FAKTUR_KIRIM || '-',
+        TGL: item.TGL && item.TGL !== '-' ? item.TGL : formatDateForDatabase(formData.TGL),
+        GUDANG_TERIMA: item.GUDANG_TERIMA || formData.GUDANG_TERIMA,
+        GUDANG_KIRIM: item.GUDANG_KIRIM || formData.GUDANG_KIRIM,
+        KODE: item.KODE,
+        QTY: parseInt(item.QTY) || 0,
+        BARCODE: item.BARCODE,
+        SATUAN: item.SATUAN,
+        USERNAME: item.USERNAME || user?.username || 'SYSTEM'
+      }));
+
+      console.log('Payload yang akan dikirim:', payload);
+
+      const res = await fetch('/api/terimabarang', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ data: payload })
+      });
+
+      const responseData = await res.json();
+      console.log('Response dari server:', responseData);
+
+      if (!res.ok) {
+        throw new Error(responseData.message || `HTTP ${res.status}: ${res.statusText}`);
+      }
+
+      if (responseData.status !== '00') {
+        throw new Error(responseData.message || 'Gagal menyimpan data');
+      }
+
+      toast.current?.show({ severity: 'success', summary: 'Success', detail: 'Data berhasil disimpan!', life: 3000 });
+      setFormData({
+        TGL: null, KODE: '', NAMA: '', FAKTUR: '', QTY: '', BARCODE: '',
+        GUDANG_KIRIM: null, GUDANG_TERIMA: null, SATUAN: null
+      });
+      setTerimaData([]);
+      fetchTerimaData();
+    } catch (error) {
+      console.error('Error saat submit:', error);
+      toast.current?.show({ 
+        severity: 'error', 
+        summary: 'Error', 
+        detail: error.message || 'Terjadi kesalahan saat menyimpan data', 
+        life: 5000 
+      });
+    } finally {
+      setSubmitLoading(false);
+    }
+  };
+
+  const handleDeleteRow = (id) => {
+    setTerimaData(prev => prev.filter(item => item.id !== id));
+    toast.current?.show({
+      severity: 'success',
+      summary: 'Berhasil',
+      detail: 'Data berhasil dihapus',
+      life: 3000
+    });
+  };
 
   return (
-    <div className="card">
-      <Toast ref={toastRef} />
-      <h2 className="text-xl font-bold mb-4">Kirim Barang</h2>
+    <div className="card p-4">
+      <Toast ref={toast} />
+      <h2 className="text-xl font-bold mb-4">Terima Barang</h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
-        <div>
-          <label className="block text-sm font-medium mb-1">Dari Gudang</label>
-          <Dropdown
-            id='darigudang'
-            name='darigudang'
-            className="w-full"
-            placeholder="Pilih Gudang"
-            options={gudangOptions}
-            value={selectedFromGudang}
-            onChange={(e) => setSelectedFromGudang(e.value)}
-            optionLabel="label"
-            optionValue="value"
-            showClear
-          />
+      <div className="mb-4 p-4 border rounded-lg bg-gray-50">
+        {/* Form Input */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+          <div>
+            <label className="block text-sm font-medium mb-1">Ke Gudang</label>
+            <Dropdown placeholder="Pilih Ke Gudang" options={gudangOptions} value={formData.GUDANG_KIRIM} onChange={(e) => handleInputChange('GUDANG_KIRIM', e.value)} showClear />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Dari Gudang</label>
+            <Dropdown placeholder="Pilih Dari Gudang" options={gudangOptions} value={formData.GUDANG_TERIMA} onChange={(e) => handleInputChange('GUDANG_TERIMA', e.value)} showClear />
+          </div>
         </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">Ke Gudang</label>
-          <Dropdown
-            id='kegudang'
-            name='kegudang'
-            className="w-full"
-            placeholder="Pilih Gudang"
-            options={gudangOptions}
-            value={selectedToGudang}
-            onChange={(e) => setSelectedToGudang(e.value)}
-            optionLabel="label"
-            optionValue="value"
-            showClear
-          />
-        </div>
-        <div className="flex gap-2">
-          <div className="w-1/2">
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+          <div>
             <label className="block text-sm font-medium mb-1">Tanggal</label>
-            <Calendar
-              id="tanggal"
-              name="tanggal"
-              className="w-full"
-              placeholder="Tanggal Kirim"
-              showIcon
-            />
+            <Calendar placeholder="Tanggal" value={formData.TGL} onChange={(e) => handleInputChange('TGL', e.value)} showIcon dateFormat="dd/mm/yy" className="w-full" />
           </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Faktur </label>
+            <InputText placeholder="Faktur" value={formData.FAKTUR} onChange={(e) => handleInputChange('FAKTUR', e.target.value)} className="w-full" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">BARCODE</label>
+            <div className="p-inputgroup">
+              <InputText
+                placeholder="Scan / ketik BARCODE lalu Enter"
+                value={formData.BARCODE}
+                onChange={(e) => handleInputChange('BARCODE', e.target.value)}
+                onKeyDown={handleBarcodeEnter}
+              />
+              <Button icon="pi pi-search" onClick={() => setVisible(true)} />
+            </div>
+          </div>
+        </div>
 
-          <div className="w-1/2">
-            <label className="block text-sm font-medium mb-1">Kode</label>
-            <InputText
-              id="kode"
-              name="kode"
-              className="w-full"
-              placeholder="Kode"
+        {/* Dialog Pilih Produk */}
+        <Dialog header="Pilih Produk" visible={visible} style={{ width: '70vw' }} onHide={() => setVisible(false)} position="center">
+          <DataTable value={produkList} paginator rows={10} size="small">
+            <Column field="KODE" header="KODE" sortable/>
+            <Column field="BARCODE" header="BARCODE"/>
+            <Column field="NAMA" header="NAMA"/>
+            <Column field="QTY" header="QTY"/>
+            <Column field="SATUAN" header="SATUAN"/>
+            <Column field="HJ" header="HARGA" body={(rowData) => `Rp ${(rowData.HJ ?? 0).toLocaleString('id-ID')}`} />
+            <Column header="AKSI" body={(rowData) => <Button label="Pilih" icon="pi pi-check" size="small" onClick={() => handleSelect(rowData)} />} />
+          </DataTable>
+        </Dialog>
+
+        {/* Tabel Terima Data */}
+        <div className='mt-3'>
+          <DataTable value={terimaData} paginator rows={10} size="small" loading={loading} scrollable emptyMessage="Tidak ada data yang ditemukan">
+            <Column field='NAMA' header="NAMA"/>
+            <Column field="FAKTUR" header="FAKTUR " />
+            <Column field="FAKTUR_KIRIM" header="FAKTUR KIRIM" />
+            <Column field="TGL" header="TANGGAL" />
+            <Column field="GUDANG_KIRIM" header="KE GUDANG" />
+            <Column field="GUDANG_TERIMA" header="DARI GUDANG" />
+            <Column field="KODE" header="KODE" />
+            <Column field="QTY" header="QTY" />
+            <Column field="BARCODE" header="BARCODE"/>
+            <Column field="SATUAN" header="SATUAN" />
+            <Column field="USERNAME" header="USER" />
+            <Column
+              header="AKSI"
+              body={(rowData) => (
+                <Button
+                  icon="pi pi-trash"
+                  className="p-button-danger p-button-sm"
+                  onClick={() => handleDeleteRow(rowData.id)}
+                />
+              )}
+            />
+          </DataTable>
+          <div className="w-full flex mt-3 justify-end gap-2">
+            <Button
+              label="Simpan"
+              icon="pi pi-check"
+              onClick={handleSubmit}
+              loading={submitLoading}
+              className="p-button-success ml-auto"
             />
           </div>
         </div>
       </div>
-
-      <div className="mb-3 p-2 border rounded-lg bg-white">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div>
-            <label className='block text-sm font-medium mb-1'>Faktur</label>
-            <InputText
-              id='faktur'
-              name='faktur'
-              className='w-full'
-              placeholder='Faktur'
-            />
-          </div>
-          <div>
-            <label className='block text-sm font-medium mb-1'>QTY</label>
-            <InputText
-              id='QTY'
-              name='QTY'
-              className='w-full'
-              placeholder='QTY'
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Satuan</label>
-            <Dropdown
-              id='satuan'
-              name='satuan'
-              className="w-full"
-              placeholder="Pilih satuan"
-              optionLabel="label"
-              optionValue="value"
-              showClear
-            />
-          </div>
-        </div>
-      </div>
-
-      <DataTable
-        size='small'
-        className='text-sm'
-        value={terimaData}
-        loading={loading}
-        paginator
-        rows={10}
-        scrollable
-        emptyMessage="Tidak ada data untuk ditampilkan"
-      >
-        <Column field="FAKTUR" header="FAKTUR" />
-        <Column field="FAKTUR_KIRIM" header="FAKTUR_KIRIM" />
-        <Column field="TGL" header="TGL" body={(rowData) => {
-          const date = new Date(rowData.TGL);
-          return date.toLocaleDateString('id-ID');
-        }} />
-        <Column field="GUDANG_TERIMA" header="GUDANG_TERIMA" />
-        <Column field="GUDANG_KIRIM" header="GUDANG_KIRIM" />
-        <Column field="KODE" header="KODE" />
-        <Column field="QTY" header="QTY" />
-        <Column field="BARCODE" header="BARCODE" />
-        <Column field="SATUAN" header="SATUAN" />
-        <Column field="USERNAME" header="USERNAME" />
-        <Column field="DATETIME" header="DATETIME" body={(rowData) => {
-          const datetime = new Date(rowData.DATETIME);
-          return datetime.toLocaleString('id-ID');
-        }} />
-      </DataTable>
     </div>
   );
 }

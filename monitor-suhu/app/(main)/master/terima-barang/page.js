@@ -16,6 +16,11 @@ export default function MutasiTerimaDataPage() {
   const [visible, setVisible] = useState(false);
   const [pendingData, setPendingData] = useState([]);
 
+  const generateFaktur = () => {
+    const timestamp = Date.now();
+    return `FT${timestamp}`;
+  };
+
   const fetchPendingFaktur = async () => {
     try {
       const res = await fetch(`/api/mutasi/create/pending`);
@@ -41,8 +46,9 @@ export default function MutasiTerimaDataPage() {
     try {
       const res = await fetch(`/api/mutasi/receive/${faktur}`);
       const json = await res.json();
-      if (json.status === '00') setTerimaData([json.data]); // hanya faktur yang dipilih
-      else {
+      if (json.status === '00') {
+        setTerimaData([json.data]); // hanya faktur yang dipilih
+      } else {
         setTerimaData([]);
         toastRef.current?.show({ severity: 'info', summary: 'Info', detail: json.message || 'Data tidak ditemukan', life: 3000 });
       }
@@ -67,14 +73,31 @@ export default function MutasiTerimaDataPage() {
   };
 
   const handleTerimaRow = async (rowData) => {
-    const faktur = rowData.faktur;
-    if (!faktur) return toastRef.current?.show({ severity: 'error', summary: 'Error', detail: 'Faktur tidak tersedia', life: 3000 });
+    const fakturKirim = rowData.faktur;
+    if (!fakturKirim) {
+      return toastRef.current?.show({ severity: 'error', summary: 'Error', detail: 'Faktur tidak tersedia', life: 3000 });
+    }
+
+    const fakturBaru = generateFaktur();
+
+    const payload = {
+      faktur: fakturBaru,
+      faktur_kirim: fakturKirim,
+      nama: rowData.nama,
+      qty: rowData.qty,
+      satuan: rowData.satuan,
+      username: rowData.username,
+      tgl: new Date().toISOString(),
+      gudang_kirim: rowData.gudang_kirim,
+      gudang_terima: rowData.gudang_terima,
+      barcode: rowData.barcode,
+    };
 
     try {
-      const res = await fetch(`/api/mutasi/receive/${faktur}`, {
+      const res = await fetch(`/api/mutasi/receive/${fakturKirim}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(rowData)
+        body: JSON.stringify(payload)
       });
       const json = await res.json();
       if (json.status === '00') {
@@ -99,7 +122,13 @@ export default function MutasiTerimaDataPage() {
       <div className="flex flex-col gap-1 mb-4">
         <label className="font-medium">Cari Faktur</label>
         <div className="p-inputgroup">
-          <InputText placeholder="Ketik Faktur dan Enter" value={fakturInput} onChange={(e) => setFakturInput(e.target.value)} onKeyDown={handleFakturEnter} className="w-64" />
+          <InputText 
+            placeholder="Ketik Faktur dan Enter" 
+            value={fakturInput} 
+            onChange={(e) => setFakturInput(e.target.value)} 
+            onKeyDown={handleFakturEnter} 
+            className="w-64" 
+          />
           <Button icon="pi pi-search" onClick={fetchPendingFaktur} />
         </div>
       </div>
@@ -107,7 +136,7 @@ export default function MutasiTerimaDataPage() {
       <Dialog header="Pilih Faktur Pending" visible={visible} style={{ width: '80vw' }} onHide={() => setVisible(false)}>
         <DataTable value={pendingData} paginator rows={10} size="small" emptyMessage="Tidak ada faktur pending">
           <Column field="faktur" header="Faktur" />
-          <Column field="tgl" header="Tanggal" body={(row) => new Date(row.tgl).toLocaleDateString('id-ID')} />
+          <Column field="tgl" header="Tanggal"  />
           <Column header="Action" body={(row) => <Button label="Pilih" icon="pi pi-check" size="small" onClick={() => handleSelectFaktur(row)} />} />
         </DataTable>
       </Dialog>
@@ -123,7 +152,17 @@ export default function MutasiTerimaDataPage() {
         <Column field="satuan" header="Satuan" />
         <Column field="username" header="User Kirim" />
         <Column field="status" header="Status" />
-        <Column header="Action" body={(row) => <Button label="Terima" icon="pi pi-check" className="p-button-success" onClick={() => handleTerimaRow(row)} />} />
+        <Column 
+          header="Action" 
+          body={(row) => (
+            <Button 
+              label="Terima" 
+              icon="pi pi-check" 
+              className="p-button-success" 
+              onClick={() => handleTerimaRow(row)} 
+            />
+          )} 
+        />
       </DataTable>
     </div>
   );

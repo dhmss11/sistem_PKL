@@ -1,4 +1,5 @@
 import {db} from "../core/config/knex.js";
+import { format } from "date-fns";
 
 export const createmutasi = async(req,res) => {
     try {
@@ -35,32 +36,16 @@ export const createmutasi = async(req,res) => {
     }
 };
 
-export const updateStatusMutasi = async (req, res) => {
-  try {
-    const { faktur } = req.params;
-
-    const updated = await db("mutasigudang_ke")
-      .where({ faktur })
-      .update({ status: "received" });
-
-    if (!updated) {
-      return res.status(404).json({ status: "99", message: "Faktur tidak ditemukan" });
-    }
-
-    res.json({ status: "00", message: "Status mutasi berhasil diupdate", faktur });
-  } catch (error) {
-    console.error("Error updateStatusMutasi:", error);
-    res.status(500).json({ status: "99", message: "Error update status mutasi", error: error.message });
-  }
-};
 
 
 export const receivemutasi = async (req, res) => {
     try {
         const { faktur } = req.params;
-        const { faktur_kirim, tgl, gudang_kirim, gudang_terima, barcode, qty, satuan, username } = req.body;
-
-        await db("mutasigudang_dari").insert({
+        const { faktur_kirim, gudang_kirim, gudang_terima, barcode, qty, satuan, username } = req.body;
+        const tgl = format(new Date(), "yyyy-MM-dd HH:mm")
+        
+        await db.transaction(async (trx) => {
+          await trx("mutasigudang_dari").insert({
             faktur,
             faktur_kirim,
             tgl,
@@ -72,8 +57,8 @@ export const receivemutasi = async (req, res) => {
             username
         });
 
-        await db("mutasigudang").insert({
-            posting: "diterima",
+        await trx("mutasigudang").insert({
+            posting: "masuk",
             faktur,
             tgl,
             dari: gudang_kirim,
@@ -82,6 +67,12 @@ export const receivemutasi = async (req, res) => {
             qty,
             username
         });
+        await trx("mutasigudang_ke")
+        .where({ faktur })
+        .update({ status: "received" });
+
+        })
+        
 
         res.json({ status: "00", message: "Mutasi berhasil diterima",faktur});
     } catch (error) {

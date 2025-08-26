@@ -1,48 +1,10 @@
-import axios from 'axios';
-import { NextResponse } from 'next/server';
-import { API_ENDPOINTS } from '@/app/api/api';
+import axios from "axios";
+import { NextResponse } from "next/server";
+import { API_ENDPOINTS } from "@/app/api/api"; // berisi URL ke backend Express
 
-export async function GET(req, { params }) {
-  try {
-    const { faktur } = params;
-    if (!faktur) {
-      return NextResponse.json(
-        { status: '99', message: 'Faktur tidak dikirim' },
-        { status: 400 }
-      );
-    }
-
-    console.log('Fetching mutasi for faktur:', faktur);
-    const response = await axios.get(API_ENDPOINTS.GET_MUTASI_BY_FAKTUR(faktur));
-    console.log('Mutasi fetch success:', response.status);
-    return NextResponse.json(response.data);
-  } catch (error) {
-    const resolvedParams = await params;
-    console.error('Error fetch mutasi by faktur:', {
-      faktur: resolvedParams?.faktur,
-      status: error.response?.status,
-      statusText: error.response?.statusText,
-      data: error.response?.data,
-      message: error.message,
-      url: error.config?.url
-    });
-
-    if (error.response?.status === 404) {
-      return NextResponse.json(
-        { status: '99', message: 'Mutasi tidak ditemukan' },
-        { status: 404 }
-      );
-    }
-
-    return NextResponse.json(
-      { status: '99', message: 'Error mengambil data mutasi' },
-      { status: 500 }
-    );
-  }
-}
-
-export async function POST(request, {params}) {
-  const {faktur} =  params;
+// POST => Terima Mutasi
+export async function POST(req, { params }) {
+  const { faktur } = params;
 
   if (!faktur) {
     return NextResponse.json(
@@ -52,21 +14,31 @@ export async function POST(request, {params}) {
   }
 
   try {
-    const body = await request.json();
+    const body = await req.json();
 
-    const response = await axios.post(API_ENDPOINTS.UPDATE_STATUS(faktur), body, {
-      headers: { "Content-Type": "application/json" },
-    });
-
-    return NextResponse.json(
-      { status: '00', message: 'Berhasil Update Status', data: response.data },
-      { status: 200 }
+    // Kirim ke backend Express
+    const response = await axios.post(
+      API_ENDPOINTS.RECEIVE_MUTASI(faktur),
+      body,
+      { headers: { "Content-Type": "application/json" } }
     );
 
-  } catch (error) {
-    console.error("Error Update Status", error.response?.data || error.message);
     return NextResponse.json(
-      { status: "99", message: error.response?.data?.message || "Gagal Update Status" },
+      {
+        status: "00",
+        message: "Mutasi berhasil diterima",
+        data: response.data,
+      },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Error RECEIVE_MUTASI:", error.response?.data || error.message);
+
+    return NextResponse.json(
+      {
+        status: "99",
+        message: error.response?.data?.message || "Gagal menerima mutasi",
+      },
       { status: 500 }
     );
   }

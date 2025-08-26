@@ -12,6 +12,7 @@ import { FileUpload } from 'primereact/fileupload';
 import { Badge } from 'primereact/badge';
 import { useAuth } from '@/app/(auth)/context/authContext';
 import { useRouter } from 'next/navigation';
+import { base64url } from 'jose';
 
 const ProfilePage = () => {
   const toast = useRef(null);
@@ -136,33 +137,38 @@ const ProfilePage = () => {
     return true;
   };
 
-  const handleImageUpload = (event) => {
-    const file = event.files[0];
-    if (file) {
-      if (file.size > 2 * 1024 * 1024) {
-        showToast('error', 'Error', 'Ukuran file maksimal 2MB');
-        return;
-      }
+ const handleImageUpload = (event) => {
+  const file = event.files[0];
+  if (file) {
+    if (file.size > 2 * 1024 * 1024) {
+      showToast('error', 'Error', 'Ukuran file maksimal 2MB');
+      return;
+    }
 
-      if (!file.type.startsWith('image/')) {
-        showToast('error', 'Error', 'File harus berupa gambar');
-        return;
-      }
+    if (!file.type.startsWith('image/')) {
+      showToast('error', 'Error', 'File harus berupa gambar');
+      return;
+    }
 
-      const reader = new FileReader();
+    const reader = new FileReader();
     reader.onload = (e) => {
       const base64Image = e.target.result;
-      
+
       setProfileImage(base64Image);
-      
-      setUserInfo({
-        ...userInfo, 
-        profile_image: base64Image
-      });
-      
-      showToast('success', 'Berhasil', 'Foto profil berhasil dipilih. Klik Simpan untuk menyimpan perubahan.');
+
+      setUserInfo((prev) => ({
+        ...prev,
+        profile_image: base64Image, // tambahkan ke payload
+      }));
+
+      showToast(
+        'success',
+        'Berhasil',
+        'Foto profil berhasil dipilih. Klik Simpan untuk menyimpan perubahan.'
+      );
     };
-    reader.readAsDataURL(file);
+    reader.readAsDataURL(file); 
+    console.log({base64url})
   }
 };
 

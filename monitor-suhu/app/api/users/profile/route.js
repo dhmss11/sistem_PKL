@@ -3,6 +3,8 @@ import { API_ENDPOINTS } from '../../api';
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import jwt from 'jsonwebtoken';
+import { profile } from 'console';
+import { decode } from 'punycode';
 
 const getUserIdFromCookie = async () => {
   try {
@@ -19,7 +21,6 @@ const getUserIdFromCookie = async () => {
       username: decoded.username,
       email: decoded.email,
       role: decoded.role,
-      no_hp: decoded.no_hp || null,
       error: null
     };
     

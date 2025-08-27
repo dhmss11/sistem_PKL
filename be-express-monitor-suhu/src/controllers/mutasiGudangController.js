@@ -1,3 +1,4 @@
+import { date } from "zod";
 import {db} from "../core/config/knex.js";
 
 export const createmutasi = async(req,res) => {
@@ -79,3 +80,22 @@ export const getAllmutasi = async (req,res) => {
     }
 };
 
+export const getAllFaktur = async (req, res) => {
+    try {
+        const fakturList = await db("mutasigudang")
+        .select("FAKTUR","TGL")
+        .orderBy("TGL","desc");
+
+        res.status(200).json({
+            status: "00",
+            message: "data fakktur berhasil diambil",
+            data: fakturList,
+        });
+    } catch (error) {
+        res.status(500).json({
+            status: "99",
+            message: "data faktur berhasil diambil",
+            data: fakturList,
+        });
+    } 
+};

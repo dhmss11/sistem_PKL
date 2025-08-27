@@ -19,8 +19,13 @@ export default function TerimaBarang() {
   const [satuanOptions, setSatuanOptions] = useState([]);
   const [visible, setVisible] = useState(false);
   const [produkList, setProdukList] = useState([]);
+  const [ fakturList, setFakturList ] = useState([]);
+  const [visibleFaktur, setVisibleFaktur] = useState(false);
+  const [rows, setRows ] = useState([]);
+  const [selectedFaktur, setSelectedFaktur] = useState([]);
   const { user } = useAuth();
   const toast = useRef(null);
+  
 
   const [formData, setFormData] = useState({
     TGL: null,
@@ -34,6 +39,39 @@ export default function TerimaBarang() {
     GUDANG_TERIMA: null,
     SATUAN: null,
   });
+
+  useEffect(() => {
+  fetch("http://localhost:8100/api/mutasi/faktur")
+    .then((res) => res.json())
+    .then((data) => {
+      console.log("API faktur:", data); 
+      if (data.status === "00") {
+        setFakturList(data.data);
+      }
+    })
+    .catch((err) => console.error("Error fetch faktur:", err));
+}, []);
+
+const handleSelectFaktur = (fakturData) => {
+  setSelectedFaktur((prev) => {
+    // cek apakah faktur sudah ada di tabel
+    const existingIndex = prev.findIndex((item) => item.FAKTUR === fakturData.FAKTUR);
+
+    if (existingIndex !== -1) {
+      const updated = [...prev];
+      updated[existingIndex] = {
+        ...updated[existingIndex],
+        qty: (updated[existingIndex].qty || 1) + 1
+      };
+      return updated;
+    } else {
+      return [...prev, { ...fakturData, qty: 1 }];
+    }
+  });
+};
+
+
+  
 
   const formatDateForDatabase = (date) => {
     if (!date) return '-';
@@ -128,11 +166,28 @@ export default function TerimaBarang() {
     }
   }, []);
 
+  const fetchFaktur = useCallback(async () => {
+    try {
+      const res = await fetch("/api/mutasi/faktur");
+      const json = await res.json();
+      if (json.status === "00") {
+        setFakturList(json.data.map(item => ({
+          label: `${item.FAKTUR} - ${item.TGL}`,
+          value: item.FAKTUR
+        })));
+      }
+    } catch (error) {
+      console.error(error);
+      toast.current?.show({ severity: 'error', summary: 'Error', details: 'gagal ambil faktur', life: 3000});
+    }
+  },[]);
+
   useEffect(() => {
     fetchGudang();
     fetchSatuan();
     fetchProduk();
     fetchTerimaData();
+    fetchFaktur();
   }, []);
 
   const handleInputChange = (field, value) => {
@@ -294,12 +349,12 @@ export default function TerimaBarang() {
         {/* Form Input */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
           <div>
-            <label className="block text-sm font-medium mb-1">Ke Gudang</label>
-            <Dropdown placeholder="Pilih Ke Gudang" options={gudangOptions} value={formData.GUDANG_KIRIM} onChange={(e) => handleInputChange('GUDANG_KIRIM', e.value)} showClear />
+            <label className="block text-sm font-medium mb-1">Dari Gudang</label>
+            <Dropdown placeholder="Pilih Ke Gudang" options={gudangOptions} value={formData.GUDANG_TERIMA} onChange={(e) => handleInputChange('GUDANG_TERIMA', e.value)} showClear />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Dari Gudang</label>
-            <Dropdown placeholder="Pilih Dari Gudang" options={gudangOptions} value={formData.GUDANG_TERIMA} onChange={(e) => handleInputChange('GUDANG_TERIMA', e.value)} showClear />
+            <label className="block text-sm font-medium mb-1">ke Gudang</label>
+            <Dropdown placeholder="Pilih Dari Gudang" options={gudangOptions} value={formData.GUDANG_KIRIM} onChange={(e) => handleInputChange('GUDANG_KIRIM', e.value)} showClear />
           </div>
         </div>
 
@@ -310,8 +365,95 @@ export default function TerimaBarang() {
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Faktur </label>
-            <InputText placeholder="Faktur" value={formData.FAKTUR} onChange={(e) => handleInputChange('FAKTUR', e.target.value)} className="w-full" />
+            <div className='p-inputgroup'>
+              <InputText
+              placeholder="ketik / pilih FAKTUR"
+              value={ formData.FAKTUR}
+              onChange={(e) => handleInputChange("FAKTUR", e.target.value)}
+              />
+              <Button icon="pi pi-search" onClick={() => setVisibleFaktur(true)} />
+            </div>
           </div>
+
+          <Dialog
+            header="Pilih Faktur"
+            visible={visibleFaktur}
+            style={{ width: "50vw" }}
+            onHide={() => setVisibleFaktur(false)}
+            position="center"
+          >
+            <DataTable value={fakturList} paginator rows={10} size="small">
+              <Column field="FAKTUR" header="FAKTUR" sortable />
+              <Column
+                field="TGL"
+                header="TANGGAL"
+                body={(rowData) =>
+                  new Date(rowData.TGL).toLocaleDateString("id-ID")
+                }
+                sortable
+              />
+              <Column
+                header="AKSI"
+                body={(rowData) => (
+                  <Button
+                  label="Pilih"
+                  icon="pi pi-check"
+                  size="small"
+                  onClick={() => {
+                    setFormData((prev) => ({
+                      ...prev,
+                      FAKTUR: rowData.FAKTUR,
+                      TGL: rowData.TGL,
+                    }));
+
+                    setTerimaData((prev) => {
+                      const existsIndex = prev.findIndex(item => item.FAKTUR === rowData.FAKTUR);
+
+                      if (existsIndex !== -1) {
+                        // kalau sudah ada → QTY + 1
+                        const updated = [...prev];
+                        updated[existsIndex] = {
+                          ...updated[existsIndex],
+                          QTY: (updated[existsIndex].QTY || 0) + 1
+                        };
+                        return updated;
+                      }
+
+                      // kalau belum ada → tambahkan baru
+                      return [
+                        ...prev,
+                        {
+                          id: prev.length + 1,
+                          FAKTUR: rowData.FAKTUR,
+                          TGL: new Date(rowData.TGL).toLocaleDateString("id-ID"),
+                          NAMA: "-",
+                          FAKTUR_KIRIM: "-",
+                          GUDANG_KIRIM: "-",
+                          GUDANG_TERIMA: "-",
+                          KODE: "-",
+                          QTY: 1,
+                          BARCODE: "-",
+                          SATUAN: "-",
+                          USERNAME: user?.username || "-"
+                        }
+                      ];
+                    });
+
+                    setVisibleFaktur(false);
+
+                    toast.current?.show({
+                      severity: 'success',
+                      summary: 'Faktur Ditambahkan',
+                      detail: `Faktur berhasil dipilih`,
+                      life: 3000
+                    });
+                  }}
+                />
+                )}
+              />
+            </DataTable>
+          </Dialog>
+  
           <div>
             <label className="block text-sm font-medium mb-1">BARCODE</label>
             <div className="p-inputgroup">
@@ -341,7 +483,7 @@ export default function TerimaBarang() {
 
         {/* Tabel Terima Data */}
         <div className='mt-3'>
-          <DataTable value={terimaData} paginator rows={10} size="small" loading={loading} scrollable emptyMessage="Tidak ada data yang ditemukan">
+          <DataTable value={terimaData}paginator rows={10} size="small" loading={loading} scrollable emptyMessage="Tidak ada data yang ditemukan">
             <Column field='NAMA' header="NAMA"/>
             <Column field="FAKTUR" header="FAKTUR " />
             <Column field="FAKTUR_KIRIM" header="FAKTUR KIRIM" />

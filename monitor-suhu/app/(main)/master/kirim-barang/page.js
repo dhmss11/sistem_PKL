@@ -23,16 +23,16 @@ export default function MutasiKirimData() {
   const toast = useRef(null);
 
   const [formData, setFormData] = useState({
-    TGL: null,
+    TGL: '',
     KODE: '',
     NAMA: '',
     FAKTUR: '',
     QTY: '',
     BARCODE: '',
     harga: '',
-    GUDANG_KIRIM: null,
-    GUDANG_TERIMA: null,
-    SATUAN: null,
+    GUDANG_KIRIM: '',
+    GUDANG_TERIMA: '',
+    SATUAN: '',
   });
 
   const formatDateForDatabase = (date) => {
@@ -103,7 +103,7 @@ export default function MutasiKirimData() {
           id: item.id || index + 1,
           NAMA: item.nama || item.NAMA || '-',
           FAKTUR: item.faktur || item.FAKTUR || '-',
-          TGL: item.tanggal || item.TGL || '-',
+          TGL: item.TANGGAL || item.TGL || '-',
           GUDANG_KIRIM: item.dari || item.GUDANG_KIRIM || '-',
           GUDANG_TERIMA: item.ke || item.GUDANG_TERIMA || '-',
           KODE: item.kode || item.KODE || '-',
@@ -114,9 +114,7 @@ export default function MutasiKirimData() {
           STATUS: item.status || item.STATUS || 'Pending'
         }));
         setKirimData(formattedData);
-      } else {
-        toast.current?.show({ severity: 'error', summary: 'Error', detail: json.message || 'Gagal mengambil data', life: 3000 });
-      }
+      } 
     } catch (error) {
       console.error(error);
       toast.current?.show({ severity: 'error', summary: 'Error', detail: error.message, life: 3000 });
@@ -188,7 +186,6 @@ export default function MutasiKirimData() {
     });
   };
 
-  // Scan / ketik barcode lalu Enter → otomatis tambah
   const handleBarcodeEnter = (e) => {
     if (e.key !== 'Enter') return;
     const code = (formData.BARCODE || '').toString().trim();
@@ -206,7 +203,6 @@ export default function MutasiKirimData() {
     }
   };
 
-  // SIMPAN: kirim per-item ke /api/mutasi/create (barcode & satuan ikut terkirim)
   const handleSubmit = async () => {
     if (!formData.GUDANG_KIRIM || !formData.GUDANG_TERIMA || !formData.TGL) {
       toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Field Gudang dan Tanggal wajib diisi', life: 3000 });
@@ -224,14 +220,14 @@ export default function MutasiKirimData() {
         const payload = {
           nama: item.NAMA,
           faktur: item.FAKTUR || formData.FAKTUR || generateFaktur(),
-          tanggal: item.TGL && item.TGL !== '-' ? item.TGL : formatDateForDatabase(formData.TGL),
-          gudangkirim: item.GUDANG_KIRIM || formData.GUDANG_KIRIM,
-          gudangterima: item.GUDANG_TERIMA || formData.GUDANG_TERIMA,
+          tgl: item.TGL && item.TGL !== '-' ? item.TGL : formatDateForDatabase(formData.TGL),
+          gudang_kirim: item.GUDANG_KIRIM || formData.GUDANG_KIRIM,
+          gudang_terima: item.GUDANG_TERIMA || formData.GUDANG_TERIMA,
           kode: item.KODE,
           qty: item.QTY,
           barcode: item.BARCODE,     // ← JANGAN DIHILANGKAN
           satuan: item.SATUAN,       // ← JANGAN DIHILANGKAN
-          username: item.USERNAME || user?.username || '-'
+          username: item.USERNAME || user?.username || '-',
         };
 
         const res = await fetch('/api/mutasi/create', {
@@ -240,7 +236,6 @@ export default function MutasiKirimData() {
           body: JSON.stringify(payload)
         });
 
-        // jika API mengembalikan error per-item
         if (!res.ok) {
           const err = await res.json().catch(() => ({}));
           throw new Error(err.message || 'Gagal menyimpan salah satu item');
@@ -249,8 +244,8 @@ export default function MutasiKirimData() {
 
       toast.current?.show({ severity: 'success', summary: 'Success', detail: 'Data berhasil disimpan!', life: 3000 });
       setFormData({
-        TGL: null, KODE: '', NAMA: '', FAKTUR: '', QTY: '', BARCODE: '', harga: '',
-        GUDANG_KIRIM: null, GUDANG_TERIMA: null, SATUAN: null
+        TGL: '', KODE: '', NAMA: '', FAKTUR: '', QTY: '', BARCODE: '', harga: '',
+        GUDANG_KIRIM: '', GUDANG_TERIMA: '', SATUAN: ''
       });
       setKirimData([]);
       fetchKirimData();
@@ -303,7 +298,7 @@ export default function MutasiKirimData() {
             <label className="block text-sm font-medium mb-1">BARCODE</label>
             <div className="p-inputgroup">
               <InputText
-                placeholder="Scan / ketik BARCODE lalu Enter"
+                placeholder="Scan Barcode"
                 value={formData.BARCODE}
                 onChange={(e) => handleInputChange('BARCODE', e.target.value)}
                 onKeyDown={handleBarcodeEnter}
@@ -336,8 +331,8 @@ export default function MutasiKirimData() {
             <Column field="GUDANG_TERIMA" header="KE GUDANG" />
             <Column field="KODE" header="KODE" />
             <Column field="QTY" header="QTY" />
-            <Column field="BARCODE" header="BARCODE"/>   {/* BARCODE tetap tampil */}
-            <Column field="SATUAN" header="SATUAN" />    {/* SATUAN tetap tampil */}
+            <Column field="BARCODE" header="BARCODE"/> 
+            <Column field="SATUAN" header="SATUAN" />    
             <Column field="USERNAME" header="USER" />
             <Column field="STATUS" header="STATUS" />
             <Column

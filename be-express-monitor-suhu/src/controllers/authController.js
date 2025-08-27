@@ -121,7 +121,8 @@ export const login = async (req, res) => {
         email: user.email, 
         username: user.username,
         role: user.role,
-        no_hp: user.no_hp
+        no_hp: user.no_hp,
+        profile_image: user.profile_image
       },
       token: token 
     });
@@ -160,6 +161,7 @@ export const verify = async (req, res) => {
         username: decoded.username,
         role: decoded.role,
         no_hp: decoded.no_hp,
+        profile_image: decoded.profile_image
       },
     });
   } catch (error) {
@@ -172,7 +174,7 @@ export const verify = async (req, res) => {
 
 export const updateProfile = async (req, res) => {
   try {
-    const { username, no_hp } = req.body;
+    const { username, no_hp, profile_image } = req.body;
     const userId = req.user.id;
 
     if (!username) {
@@ -190,6 +192,9 @@ export const updateProfile = async (req, res) => {
     if (no_hp !== undefined) {
       updateData.no_hp = no_hp;
     }
+    if (profile_image !== undefined) {
+      updateData.profile_image = profile_image;
+    }
 
     await updateProfileModel(userId, updateData);
 
@@ -202,7 +207,8 @@ export const updateProfile = async (req, res) => {
         email: updatedUser.email,
         username: updatedUser.username,
         no_hp: updatedUser.no_hp,
-        role: updatedUser.role
+        role: updatedUser.role,
+        profile_image: updateData.profile_image
       }
     });
   } catch (err) {

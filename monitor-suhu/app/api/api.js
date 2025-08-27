@@ -121,8 +121,10 @@ export const API_ENDPOINTS = {
     
     UPLOAD_IMAGE: `${API_URL}/upload/image`,
 
-    CREATE_MUTASI: `${API_URL}/mutasigudang/create`,
-    RECEIVE_MUTASI: (id)=>`${API_URL}/mutasigudang/recieve/${id}`,
-    GET_ALL_MUTASI: `${API_URL}/mutasigudang`, 
+    CREATE_MUTASI: `${API_URL}/mutasi/create`,
+    RECEIVE_MUTASI: (faktur) => `${API_URL}/mutasi/receive/${faktur}`,
+    GET_PENDING_MUTASI: `${API_URL}/mutasi/pending`,
+    GET_MUTASI_BY_FAKTUR: (faktur) => `${API_URL}/mutasi/receive/${faktur}`,
+    UPDATE_STATUS: (faktur) => `${API_URL}/mutasi/update/${faktur}`
   };
 

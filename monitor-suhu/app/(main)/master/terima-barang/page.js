@@ -7,6 +7,8 @@ import { Toast } from 'primereact/toast';
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
 import { Dialog } from 'primereact/dialog';
+import { InputNumber } from 'primereact/inputnumber';
+import { useAuth } from '@/app/(auth)/context/authContext';
 
 export default function MutasiTerimaDataPage() {
   const toastRef = useRef(null);
@@ -15,10 +17,51 @@ export default function MutasiTerimaDataPage() {
   const [loading, setLoading] = useState(false);
   const [visible, setVisible] = useState(false);
   const [pendingData, setPendingData] = useState([]);
+  const [qtyAwal, setQtyAwal] = useState(null);
+  const  { user }= useAuth();
 
-  const generateFaktur = () => {
-    const timestamp = Date.now();
-    return `FT${timestamp}`;
+  const generateFaktur = () => `FT${Date.now()}`;
+
+  // Fungsi gabungan fetchByFaktur + fetchValidasi
+  const handleFakturEnter = async (e) => {
+    if (e.key !== 'Enter') return;
+
+    const faktur = fakturInput.trim();
+    if (!faktur) return;
+
+    setLoading(true);
+
+    try {
+      // Ambil data utama mutasi
+      const resTerima = await fetch(`/api/mutasi/receive/${faktur}`);
+      const jsonTerima = await resTerima.json();
+      if (jsonTerima.status === '00' && jsonTerima.data) {
+        const qtyTerima = Number(jsonTerima.data.qty ?? 0);
+        setTerimaData([{ ...jsonTerima.data, qty: qtyTerima }]);
+
+        // Ambil data validasi qty
+        const resValidasi = await fetch(`/api/mutasi/validasi/${faktur}`);
+        const jsonValidasi = await resValidasi.json();
+        if (jsonValidasi.status === '00' && jsonValidasi.data) {
+          const qtyApi = Number(jsonValidasi.data.qty ?? qtyTerima);
+          setQtyAwal(qtyApi);
+          console.log('QtyAwal dari API validasi:', qtyApi);
+        } else {
+          setQtyAwal(qtyTerima); // fallback ke qty dari fetchByFaktur
+          console.log('QtyAwal dari API validasi: fallback ke qty dari fetchByFaktur', qtyTerima);
+        }
+      } else {
+        setTerimaData([]);
+        setQtyAwal(null);
+        toastRef.current?.show({ severity: 'info', summary: 'Info', detail: jsonTerima.message || 'Data tidak ditemukan', life: 3000 });
+      }
+    } catch (err) {
+      console.error(err);
+      setQtyAwal(0);
+      toastRef.current?.show({ severity: 'error', summary: 'Error', detail: 'Gagal mengambil data', life: 3000 });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const fetchPendingFaktur = async () => {
@@ -40,34 +83,12 @@ export default function MutasiTerimaDataPage() {
     }
   };
 
-  const fetchByFaktur = async (faktur) => {
-    if (!faktur) return;
-    setLoading(true);
-    try {
-      const res = await fetch(`/api/mutasi/receive/${faktur}`);
-      const json = await res.json();
-      if (json.status === '00') {
-        setTerimaData([json.data]); // hanya faktur yang dipilih
-      } else {
-        setTerimaData([]);
-        toastRef.current?.show({ severity: 'info', summary: 'Info', detail: json.message || 'Data tidak ditemukan', life: 3000 });
-      }
-    } catch (err) {
-      console.error(err);
-      toastRef.current?.show({ severity: 'error', summary: 'Error', detail: 'Gagal mengambil data', life: 3000 });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleFakturEnter = (e) => {
-    if (e.key !== 'Enter') return;
-    fetchByFaktur(fakturInput.trim());
-  };
-
   const handleSelectFaktur = (row) => {
     setFakturInput(row.faktur);
-    setTerimaData([row]); // hanya faktur yang dipilih tampil
+    setTerimaData([{
+      ...row,
+      qty: Number(row.qty)
+    }]);
     setVisible(false);
     toastRef.current?.show({ severity: 'success', summary: 'Faktur Dipilih', detail: `Faktur ${row.faktur} berhasil dimuat`, life: 3000 });
   };
@@ -91,6 +112,8 @@ export default function MutasiTerimaDataPage() {
       gudang_kirim: rowData.gudang_kirim,
       gudang_terima: rowData.gudang_terima,
       barcode: rowData.barcode,
+      user_terima: user?.username
+
     };
 
     try {
@@ -105,6 +128,7 @@ export default function MutasiTerimaDataPage() {
         fetchPendingFaktur();
         setFakturInput('');
         setTerimaData([]);
+        setQtyAwal(null);
       } else {
         toastRef.current?.show({ severity: 'error', summary: 'Error', detail: json.message || 'Gagal menerima mutasi', life: 3000 });
       }
@@ -113,6 +137,69 @@ export default function MutasiTerimaDataPage() {
       toastRef.current?.show({ severity: 'error', summary: 'Error', detail: 'Gagal menerima mutasi', life: 3000 });
     }
   };
+
+  const handleQtyChange = (faktur, newQty) => {
+    if (newQty <= 0) {
+      toastRef.current?.show({ 
+        severity: 'warn', 
+        summary: 'Invalid Quantity', 
+        detail: 'Quantity harus lebih dari 0', 
+        life: 3000 
+      });
+      return;
+    }
+
+    if (qtyAwal !== null && newQty > qtyAwal) {
+      toastRef.current?.show({
+        severity: 'warn',
+        summary: 'Invalid Quantity',
+        detail: 'Anda menerima qty lebih dari yang dikirim',
+        life: 3000
+      });
+      return;
+    }
+
+    setTerimaData(prev =>
+      prev.map(item => item.faktur === faktur ? { ...item, qty: newQty } : item)
+    );
+  };
+
+  const qtyBodyTemplate = (rowData) => (
+    <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
+      <InputNumber
+        value={rowData.qty}
+        onValueChange={(e) => handleQtyChange(rowData.faktur, e.value)}
+        min={1}
+        style={{ width: '100%' }}
+        inputStyle={{
+          width: '60px',              
+          transition: 'all 0.2s ease',
+          border: 'none',
+          outline: 'none',
+          background: 'transparent',
+          textAlign: 'left',
+          padding: '4px',
+          fontSize: '14px',
+          lineHeight: '1.2',
+          verticalAlign: 'middle'
+        }}
+        onFocus={(e) => {
+          e.target.style.width = '100px'; 
+          e.target.style.border = '2px solid #1761b6ff';
+          e.target.style.borderRadius = '6px';
+          e.target.style.background = 'white';
+          e.target.style.boxShadow = '0 0 0 3px rgba(244, 244, 244, 0.2)';
+        }}
+        onBlur={(e) => {
+          e.target.style.width = '60px'; 
+          e.target.style.border = 'none';
+          e.target.style.background = 'transparent';
+          e.target.style.boxShadow = 'none';
+        }}
+        size="small"
+      />
+    </div>
+  );
 
   return (
     <div className="card">
@@ -136,7 +223,7 @@ export default function MutasiTerimaDataPage() {
       <Dialog header="Pilih Faktur Pending" visible={visible} style={{ width: '80vw' }} onHide={() => setVisible(false)}>
         <DataTable value={pendingData} paginator rows={10} size="small" emptyMessage="Tidak ada faktur pending">
           <Column field="faktur" header="Faktur" />
-          <Column field="tgl" header="Tanggal"  />
+          <Column field="tgl" header="Tanggal" />
           <Column header="Action" body={(row) => <Button label="Pilih" icon="pi pi-check" size="small" onClick={() => handleSelectFaktur(row)} />} />
         </DataTable>
       </Dialog>
@@ -148,7 +235,7 @@ export default function MutasiTerimaDataPage() {
         <Column field="gudang_kirim" header="Gudang Kirim" />
         <Column field="gudang_terima" header="Gudang Terima" />
         <Column field="barcode" header="Barcode" />
-        <Column field="qty" header="Qty" />
+        <Column field="qty" header="Qty" body={qtyBodyTemplate} />
         <Column field="satuan" header="Satuan" />
         <Column field="username" header="User Kirim" />
         <Column field="status" header="Status" />
@@ -161,7 +248,7 @@ export default function MutasiTerimaDataPage() {
               className="p-button-success" 
               onClick={() => handleTerimaRow(row)} 
             />
-          )} 
+          )}
         />
       </DataTable>
     </div>

@@ -25,7 +25,6 @@ const AppMenuitem = (props) => {
 
     useEffect(() => {
         onRouteChange(pathname);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [pathname]);
 
     const itemClick = (event) => {

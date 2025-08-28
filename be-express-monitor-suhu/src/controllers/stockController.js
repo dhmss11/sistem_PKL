@@ -4,7 +4,7 @@ import { datetime, status } from "../utils/general.js";
 export const fetchAllStock = async (req, res) => {
     try {
         const data = await db('stock').select([
-            'gudang',
+            'GUDANG',
             'KODE',
             'KODE_TOKO',
             'NAMA',
@@ -53,7 +53,7 @@ export const fetchAllStock = async (req, res) => {
 export const addStock = async (req, res) => {
     try {
         const {
-            gudang,
+            GUDANG,
             KODE,
             KODE_TOKO,
             NAMA,
@@ -74,7 +74,7 @@ export const addStock = async (req, res) => {
         } = req.body;
 
         await db('stock').insert({
-            gudang, 
+            GUDANG, 
             KODE,
             KODE_TOKO,
             NAMA,
@@ -113,14 +113,14 @@ export const editStock = async (req, res) => {
   try {
     const { id } = req.params; 
     const {
-      gudang, KODE, KODE_TOKO, NAMA, JENIS, GOLONGAN,
+      GUDANG, KODE, KODE_TOKO, NAMA, JENIS, GOLONGAN,
       RAK, DOS, SATUAN, ISI, DISCOUNT, HB, HJ, BERAT, QTY
     } = req.body;
 
     await db('stock')
       .where({ KODE: id }) 
       .update({
-        gudang, KODE, KODE_TOKO, NAMA, JENIS, GOLONGAN,
+        GUDANG, KODE, KODE_TOKO, NAMA, JENIS, GOLONGAN,
         RAK, DOS, SATUAN, ISI, DISCOUNT, HB, HJ,BERAT, QTY
       });
 

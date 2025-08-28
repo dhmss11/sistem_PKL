@@ -157,6 +157,17 @@ const AppMenu = () => {
                     icon: 'pi pi-fw pi-sync',
                     to: '/laporan/kartustock',
                     roles: ['user', 'admin', 'superadmin']
+                },
+                {
+                    label: "Laporan Sisa Stock",
+                    icon: 'pi pi-shopping-cart',
+                    to: '/laporan/stock'
+
+                },
+                {
+                    label: "Laporan Mutasi Gudang",
+                    icon: "pi pi-truck",
+                    to: "/laporan/mutasi"
                 }
             ]
         }

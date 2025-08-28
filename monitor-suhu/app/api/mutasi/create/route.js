@@ -11,7 +11,7 @@ export async function POST(req) {
     } catch (error) {
         console.error("Error Gagal Menambahkan Data KOntol", error);
         return NextResponse.json(
-            { status: "99", message: "Error Gagal Menambahkan Data" },
+            { status: "99", message: error.response?.data.message},
             { status: 500 }
         );
     }

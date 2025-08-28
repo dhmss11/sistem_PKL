@@ -94,7 +94,6 @@ export default function MutasiKirimData() {
     }
   }, []);
 
-  // AMBIL HISTORI DARI API MUTASI (bukan /api/kirimbarang)
   const fetchKirimData = useCallback(async () => {
     try {
       const res = await fetch('/api/mutasi');
@@ -140,7 +139,6 @@ export default function MutasiKirimData() {
     return `FA${timestamp}`;
   };
 
-  // Function to handle QTY changes
   const handleQtyChange = (id, newQty) => {
     if (newQty <= 0) {
       toast.current?.show({ 
@@ -159,7 +157,6 @@ export default function MutasiKirimData() {
     );
   };
 
-  // Tambah produk ke tabel (BARCODE & SATUAN dipertahankan)
   const handleSelect = (selectedProduct) => {
     setKirimData(prev => {
       const existing = prev.find(item => item.BARCODE === selectedProduct.BARCODE);
@@ -245,8 +242,8 @@ export default function MutasiKirimData() {
           gudang_terima: item.GUDANG_TERIMA || formData.GUDANG_TERIMA,
           kode: item.KODE,
           qty: item.QTY,
-          barcode: item.BARCODE,     // ← JANGAN DIHILANGKAN
-          satuan: item.SATUAN,       // ← JANGAN DIHILANGKAN
+          barcode: item.BARCODE,     
+          satuan: item.SATUAN,      
           username: item.USERNAME || user?.username || '-',
         };
 
@@ -287,7 +284,6 @@ export default function MutasiKirimData() {
     });
   };
 
-  // Template for editable QTY column
 const qtyBodyTemplate = (rowData) => {
   return (
     <div
@@ -305,7 +301,7 @@ const qtyBodyTemplate = (rowData) => {
         min={1}
         style={{ width: '100%' }}
         inputStyle={{
-          width: '60px',              // default kecil
+          width: '60px',              
           transition: 'all 0.2s ease',
           border: 'none',
           outline: 'none',

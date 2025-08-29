@@ -11,7 +11,6 @@ export const createmutasi = async(req,res) => {
         const isValid = qty > validasiStock 
 
       const sisaStock = Math.max(validasiStock - qty,0)
-      console.log(sisaStock)
 
         if (isValid) {
           return res.status(400).json({
@@ -62,7 +61,7 @@ export const createmutasi = async(req,res) => {
 export const receivemutasi = async (req, res) => {
     try {
         const { faktur } = req.params;
-        const { nama, faktur_kirim, gudang_kirim, gudang_terima, barcode, qty, satuan, user_terima } = req.body;
+        const { nama, faktur_kirim, gudang_kirim, gudang_terima, barcode, qty, satuan, username } = req.body;
         const tgl = format(new Date(), "yyyy-MM-dd HH:mm");
 
         const mutasiKeObj = await db("mutasigudang_ke")
@@ -97,7 +96,7 @@ export const receivemutasi = async (req, res) => {
                 barcode,
                 qty,
                 satuan,
-                user_terima,
+                username,
             });
 
             await trx("mutasigudang").insert({
@@ -109,7 +108,7 @@ export const receivemutasi = async (req, res) => {
                 ke: gudang_terima,
                 barcode,
                 qty,
-                username: user_terima,
+                username, 
             });
 
             await trx("mutasigudang_ke")

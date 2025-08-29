@@ -199,7 +199,7 @@ const handleSelectFaktur = (fakturData) => {
     return `TR${timestamp}`;
   };
 
-  // Tambah produk ke tabel terima
+  
   const handleSelect = (selectedProduct) => {
     setTerimaData(prev => {
       const existing = prev.find(item => item.BARCODE === selectedProduct.BARCODE);
@@ -245,7 +245,7 @@ const handleSelectFaktur = (fakturData) => {
     });
   };
 
-  // Scan / ketik barcode lalu Enter → otomatis tambah
+  
   const handleBarcodeEnter = (e) => {
     if (e.key !== 'Enter') return;
     const code = (formData.BARCODE || '').toString().trim();
@@ -263,7 +263,7 @@ const handleSelectFaktur = (fakturData) => {
     }
   };
 
-  // SIMPAN: kirim per-item ke API terima barang
+  
   const handleSubmit = async () => {
     if (!formData.GUDANG_TERIMA || !formData.GUDANG_KIRIM || !formData.TGL) {
       toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Field Gudang dan Tanggal wajib diisi', life: 3000 });
@@ -277,7 +277,7 @@ const handleSelectFaktur = (fakturData) => {
 
     setSubmitLoading(true);
     try {
-      // Kirim semua data sekaligus dalam satu request
+      
       const payload = terimaData.map(item => ({
         FAKTUR: item.FAKTUR || formData.FAKTUR || generateFaktur(),
         FAKTUR_KIRIM: item.FAKTUR_KIRIM || '-',
@@ -419,7 +419,7 @@ const handleSelectFaktur = (fakturData) => {
                         return updated;
                       }
 
-                      // kalau belum ada → tambahkan baru
+                      
                       return [
                         ...prev,
                         {

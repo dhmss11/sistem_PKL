@@ -121,7 +121,7 @@ export const getMutasiByFaktur = async (req, res) => {
   try {
     const { faktur } = req.params;
 
-    const data = await db("mutasigudang_ke") // ganti sesuai nama tabel
+    const data = await db("mutasigudang_ke") 
       .where({ faktur })
       .first();
 

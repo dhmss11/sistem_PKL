@@ -61,6 +61,7 @@ export const API_ENDPOINTS = {
   GET_STOCK_BY_SATUAN: (satuan) => `${API_URL}/stock/satuan/${satuan}`,
   GET_BY_GUDANG : (gudang) => `${API_URL}stock/gudang${gudang}`,
   GET_TOTAL_COLUMNS_STOCK: `${API_URL}/stock/total`,
+  EXPORT_STOCK: `${API_URL}/stock/export`,
 
   // Kartu Stock endpoints
   GET_ALL_KARTUSTOCK: `${API_URL}/kartustock`,
@@ -127,7 +128,8 @@ export const API_ENDPOINTS = {
     GET_MUTASI_BY_FAKTUR: (faktur) => `${API_URL}/mutasi/receive/${faktur}`,
     UPDATE_STATUS: (faktur) => `${API_URL}/mutasi/update/${faktur}`,
     VALIDASI: (faktur) => `${API_URL}/mutasi/validasi/${faktur}`,
-    GET_ALL_MUTASI: `${API_URL}/mutasi`
+    GET_ALL_MUTASI: `${API_URL}/mutasi`,
+    EXPORT_MUTASI: `${API_URL}/mutasi/export`
     
   };
 

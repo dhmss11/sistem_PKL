@@ -1,6 +1,7 @@
 import { json } from "sequelize";
 import {db} from "../core/config/knex.js";
 import { format } from "date-fns";
+import ExcelJS from "exceljs";
 
 export const createmutasi = async(req,res) => {
     try {
@@ -187,4 +188,78 @@ export const getMutasiByFaktur = async (req, res) => {
   }
 };
 
+
+export const exportDataToExcel = async (req, res) => {
+  try {
+    const data = await db("mutasigudang").select(
+      "POSTING",
+      "FAKTUR",
+      "NAMA",
+      "BARCODE",
+      "KE",
+      "DARI",
+      "TGL",
+      "QTY"
+ )
+ const workbook = new ExcelJS.Workbook();
+ const worksheet = workbook.addWorksheet("Mutasi Gudang");
+
+ worksheet.columns = [
+  {header: "Posting",key: "POSTING", width: 20},
+  {header: "Faktur",key: "FAKTUR", width: 20},
+  {header: "Nama",key: "NAMA", width: 20},
+  {header: "Barcode",key: "BARCODE", width: 20},
+  {header: "Ke Gudang",key: "KE", width: 20},
+  {header: "Dari Gudang",key: "DARI", width: 20},
+  {header: "Tanggal",key: "TGL", width: 20},
+  {header: "QTY",key: "QTY", width: 20},
+ ];
+ data.forEach((row) => {
+  worksheet.addRow(row);
+ });
+ worksheet.getRow(1).eachCell((cell) => {
+      cell.font = { bold: true };
+      cell.alignment = { vertical: "middle", horizontal: "center" };
+      cell.border = {
+        top: { style: "thin" },
+        left: { style: "thin" },
+        bottom: { style: "thin" },
+        right: { style: "thin" },
+      };
+      cell.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FFD9D9D9" }, 
+      };
+    });
+
+    worksheet.eachRow((row, rowNumber) => {
+      if (rowNumber !== 1) {
+        row.eachCell((cell) => {
+          cell.alignment = { vertical: "middle", horizontal: "left" };
+          cell.border = {
+            top: { style: "thin" },
+            left: { style: "thin" },
+            bottom: { style: "thin" },
+            right: { style: "thin" },
+          };
+        });
+      }
+    });
+
+ res.setHeader(
+  "Content-Type",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+ );
+ res.setHeader(
+  "Content-Disposition",
+  "attachment; filename=mutasi_gudang.xlsx"
+ );
+ await workbook.xlsx.write(res);
+ res.end();
+  }catch (error) {
+    console.error(error)
+    res.status(500).send("Gagal Export Data")
+  }
+};
 

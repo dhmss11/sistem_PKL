@@ -1,5 +1,6 @@
 import { db } from "../core/config/knex.js";
 import { datetime, status } from "../utils/general.js";
+import ExcelJS from "exceljs";
 
 export const fetchAllStock = async (req, res) => {
     try {
@@ -233,4 +234,74 @@ export const getTotalColumnsStock = async (req, res) => {
     });
   }
 };
+
+export const exportDataToExcel = async (req, res) => {
+  try {
+    const data = await db("stock").select(
+      "KODE",
+      "NAMA",
+      "GUDANG",
+      "BARCODE",
+      "QTY",
+      "SATUAN",
+ )
+ const workbook = new ExcelJS.Workbook();
+ const worksheet = workbook.addWorksheet("Sisa Stock");
+
+ worksheet.columns = [
+  {header: "Kode",key: "KODE", width: 20},
+  {header: "Barcode",key: "BARCODE", width: 20},
+  {header: "Nama",key: "NAMA", width: 20},
+  {header: "Gudang",key: "GUDANG", width: 20},
+  {header: "Satuan",key: "SATUAN", width: 20},
+ ];
+ data.forEach((row) => {
+  worksheet.addRow(row);
+ });
+ worksheet.getRow(1).eachCell((cell) => {
+      cell.font = { bold: true };
+      cell.alignment = { vertical: "middle", horizontal: "center" };
+      cell.border = {
+        top: { style: "thin" },
+        left: { style: "thin" },
+        bottom: { style: "thin" },
+        right: { style: "thin" },
+      };
+      cell.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FFD9D9D9" }, 
+      };
+    });
+
+    worksheet.eachRow((row, rowNumber) => {
+      if (rowNumber !== 1) {
+        row.eachCell((cell) => {
+          cell.alignment = { vertical: "middle", horizontal: "left" };
+          cell.border = {
+            top: { style: "thin" },
+            left: { style: "thin" },
+            bottom: { style: "thin" },
+            right: { style: "thin" },
+          };
+        });
+      }
+    });
+
+ res.setHeader(
+  "Content-Type",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+ );
+ res.setHeader(
+  "Content-Disposition",
+  "attachment; filename=laporan_stock.xlsx"
+ );
+ await workbook.xlsx.write(res);
+ res.end();
+  }catch (error) {
+    console.error(error)
+    res.status(500).send("Gagal Export Data")
+  }
+};
+
 

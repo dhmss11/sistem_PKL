@@ -1,5 +1,4 @@
 'use client';
-import React from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
@@ -10,6 +9,28 @@ const LaporanStock = () => {
   const toastRef = useRef(null);
   const [dataLaporan, setDataLaporan] = useState([]);
   const [loading, setLoading] = useState(false);
+
+   const handleDownload = async () => {
+          try {
+            const response = await fetch("/api/stock/export", {
+              method: 'GET',
+            })
+            if (!response.ok) {
+              throw new Error("Gagal Download Laporan")
+            }
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(new Blob([blob]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', 'laporan_stock.xlsx');
+            document.body.appendChild(link);
+            link.click();
+            link.parentNode.removeChild(link);
+          } catch (error) {
+            toastRef.current?.showToast('99', 'Terjadi Kesalahan pada saat Download')
+          };
+        };
+
 
   const fetchLaporan = async () => {
     setLoading(true);
@@ -27,12 +48,9 @@ const LaporanStock = () => {
               GUDANG: item.GUDANG,
               BARCODE:item.BARCODE,
               SATUAN: item.SATUAN,
-              SISA: 0
+              SISA: item.QTY
             };
           }
-          let qty = Number(item.QTY) || 0;
-          if (item.STATUS === 'MASUK') grouped[key].SISA += qty;
-          if (item.STATUS === 'KELUAR') grouped[key].SISA -= qty;
         });
 
         setDataLaporan(Object.values(grouped));
@@ -54,6 +72,7 @@ const LaporanStock = () => {
     <div className="card">
       <h3 className="text-xl font-semibold mb-4">Laporan Sisa Stok</h3>
       <Button label="Refresh" icon="pi pi-refresh" className="mb-3" onClick={fetchLaporan} />
+      <Button label="Download Laporan"  icon="pi pi-download" className='mb-3 ml-3' onClick={handleDownload}/>
 
       <DataTable value={dataLaporan} paginator rows={10} loading={loading} stripedRows>
         <Column field="KODE" header="Kode Produk" />

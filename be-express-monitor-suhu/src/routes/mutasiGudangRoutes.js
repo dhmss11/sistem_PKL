@@ -6,7 +6,7 @@ import {
     getAllFaktur,
     getPendingMutasi,
     getMutasiByFaktur,
-
+    exportDataToExcel
 } from "../controllers/mutasiGudangController.js";
 
 const router = Router();
@@ -18,6 +18,7 @@ router.get("/faktur", getAllFaktur);
 router.get("/pending", getPendingMutasi);
 router.get("/receive/:faktur", getMutasiByFaktur);
 router.get("/mutasi", getAllmutasi)
+router.get("/export", exportDataToExcel)
 
 
 export default router;

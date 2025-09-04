@@ -96,7 +96,7 @@ export default function MutasiKirimData() {
 
   const fetchKirimData = useCallback(async () => {
     try {
-      const res = await fetch('/api/mutasi');
+      const res = await fetch('/api/kirimdata');
       const json = await res.json();
       if (json.status === '00') {
         const formattedData = json.data.map((item, index) => ({

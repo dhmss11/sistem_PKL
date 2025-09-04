@@ -1,7 +1,7 @@
-// import { date } from "zod";
-// import { json } from "sequelize";
+
 import {db} from "../core/config/knex.js";
 import { format } from "date-fns";
+import ExcelJS from "exceljs";
 
 export const createmutasi = async(req,res) => {
     try {
@@ -12,7 +12,6 @@ export const createmutasi = async(req,res) => {
         const isValid = qty > validasiStock 
 
       const sisaStock = Math.max(validasiStock - qty,0)
-      console.log(sisaStock)
 
         if (isValid) {
           return res.status(400).json({
@@ -63,7 +62,7 @@ export const createmutasi = async(req,res) => {
 export const receivemutasi = async (req, res) => {
     try {
         const { faktur } = req.params;
-        const { nama, faktur_kirim, gudang_kirim, gudang_terima, barcode, qty, satuan, user_terima } = req.body;
+        const { nama, faktur_kirim, gudang_kirim, gudang_terima, barcode, qty, satuan, username } = req.body;
         const tgl = format(new Date(), "yyyy-MM-dd HH:mm");
 
         const mutasiKeObj = await db("mutasigudang_ke")
@@ -98,7 +97,7 @@ export const receivemutasi = async (req, res) => {
                 barcode,
                 qty,
                 satuan,
-                user_terima,
+                username,
             });
 
             await trx("mutasigudang").insert({
@@ -110,7 +109,7 @@ export const receivemutasi = async (req, res) => {
                 ke: gudang_terima,
                 barcode,
                 qty,
-                username: user_terima,
+                username, 
             });
 
             await trx("mutasigudang_ke")
@@ -189,7 +188,6 @@ export const getMutasiByFaktur = async (req, res) => {
   }
 };
 
-
 export const getAllFaktur = async (req, res) => {
     try {
         const fakturList = await db("mutasigudang")
@@ -209,3 +207,78 @@ export const getAllFaktur = async (req, res) => {
         });
     } 
 };
+
+export const exportDataToExcel = async (req, res) => {
+  try {
+    const data = await db("mutasigudang").select(
+      "POSTING",
+      "FAKTUR",
+      "NAMA",
+      "BARCODE",
+      "KE",
+      "DARI",
+      "TGL",
+      "QTY"
+ )
+ const workbook = new ExcelJS.Workbook();
+ const worksheet = workbook.addWorksheet("Mutasi Gudang");
+
+ worksheet.columns = [
+  {header: "Posting",key: "POSTING", width: 20},
+  {header: "Faktur",key: "FAKTUR", width: 20},
+  {header: "Nama",key: "NAMA", width: 20},
+  {header: "Barcode",key: "BARCODE", width: 20},
+  {header: "Ke Gudang",key: "KE", width: 20},
+  {header: "Dari Gudang",key: "DARI", width: 20},
+  {header: "Tanggal",key: "TGL", width: 20},
+  {header: "QTY",key: "QTY", width: 20},
+ ];
+ data.forEach((row) => {
+  worksheet.addRow(row);
+ });
+ worksheet.getRow(1).eachCell((cell) => {
+      cell.font = { bold: true };
+      cell.alignment = { vertical: "middle", horizontal: "center" };
+      cell.border = {
+        top: { style: "thin" },
+        left: { style: "thin" },
+        bottom: { style: "thin" },
+        right: { style: "thin" },
+      };
+      cell.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FFD9D9D9" }, 
+      };
+    });
+
+    worksheet.eachRow((row, rowNumber) => {
+      if (rowNumber !== 1) {
+        row.eachCell((cell) => {
+          cell.alignment = { vertical: "middle", horizontal: "left" };
+          cell.border = {
+            top: { style: "thin" },
+            left: { style: "thin" },
+            bottom: { style: "thin" },
+            right: { style: "thin" },
+          };
+        });
+      }
+    });
+
+ res.setHeader(
+  "Content-Type",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+ );
+ res.setHeader(
+  "Content-Disposition",
+  "attachment; filename=mutasi_gudang.xlsx"
+ );
+ await workbook.xlsx.write(res);
+ res.end();
+  }catch (error) {
+    console.error(error)
+    res.status(500).send("Gagal Export Data")
+  }
+};
+

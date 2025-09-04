@@ -6,7 +6,8 @@ import {
     deleteStock,
     fetchStockBySatuan,
     getStockByGudang,
-    getTotalColumnsStock
+    getTotalColumnsStock,
+    exportDataToExcel
 } from '../controllers/stockController.js';
 
 const router = Router();
@@ -19,4 +20,5 @@ router.delete('/:id', deleteStock);
 router.delete('/delete/:id', deleteStock);
 router.get('/gudang/:gudang',getStockByGudang);
 router.get("/total", getTotalColumnsStock);
+router.get("/export", exportDataToExcel)
 export default router;

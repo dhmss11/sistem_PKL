@@ -12,7 +12,7 @@ import { format, parseISO } from 'date-fns';
 import ToastNotifier from '@/app/components/ToastNotifier';
 
 const initialFormState = {
-  gudang: '',
+  GUDANG: '',
   KODE: '',
   KODE_TOKO: '',
   NAMA: '',

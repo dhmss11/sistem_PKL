@@ -134,7 +134,7 @@ const handleSelectFaktur = (fakturData) => {
   // Fetch data terima barang dari API
   const fetchTerimaData = useCallback(async () => {
     try {
-      const res = await fetch('/api/terimabarang'); // Endpoint untuk mengambil data terima barang
+      const res = await fetch('/api/terimabarang'); 
       const json = await res.json();
       if (json.status === '00') {
         const formattedData = json.data.map((item, index) => ({

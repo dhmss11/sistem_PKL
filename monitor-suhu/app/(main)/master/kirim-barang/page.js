@@ -9,6 +9,7 @@ import { Dropdown } from 'primereact/dropdown';
 import { Calendar } from 'primereact/calendar';
 import { InputText } from 'primereact/inputtext';
 import { Dialog } from 'primereact/dialog';
+import { InputNumber } from 'primereact/inputnumber';
 import { useAuth } from '@/app/(auth)/context/authContext';
 
 export default function MutasiKirimData() {
@@ -93,7 +94,6 @@ export default function MutasiKirimData() {
     }
   }, []);
 
-  // AMBIL HISTORI DARI API MUTASI (bukan /api/kirimbarang)
   const fetchKirimData = useCallback(async () => {
     try {
       const res = await fetch('/api/mutasi');
@@ -139,7 +139,24 @@ export default function MutasiKirimData() {
     return `FA${timestamp}`;
   };
 
-  // Tambah produk ke tabel (BARCODE & SATUAN dipertahankan)
+  const handleQtyChange = (id, newQty) => {
+    if (newQty <= 0) {
+      toast.current?.show({ 
+        severity: 'warn', 
+        summary: 'Invalid Quantity', 
+        detail: 'Quantity harus lebih dari 0', 
+        life: 3000 
+      });
+      return;
+    }
+    
+    setKirimData(prev => 
+      prev.map(item => 
+        item.id === id ? { ...item, QTY: newQty } : item
+      )
+    );
+  };
+
   const handleSelect = (selectedProduct) => {
     setKirimData(prev => {
       const existing = prev.find(item => item.BARCODE === selectedProduct.BARCODE);
@@ -225,8 +242,8 @@ export default function MutasiKirimData() {
           gudang_terima: item.GUDANG_TERIMA || formData.GUDANG_TERIMA,
           kode: item.KODE,
           qty: item.QTY,
-          barcode: item.BARCODE,     // ← JANGAN DIHILANGKAN
-          satuan: item.SATUAN,       // ← JANGAN DIHILANGKAN
+          barcode: item.BARCODE,     
+          satuan: item.SATUAN,      
           username: item.USERNAME || user?.username || '-',
         };
 
@@ -266,6 +283,54 @@ export default function MutasiKirimData() {
       life: 3000
     });
   };
+
+const qtyBodyTemplate = (rowData) => {
+  return (
+    <div
+      style={{
+        display: 'flex',
+        justifyContent: 'flex-start', // rata kiri biar expand ke kanan
+        alignItems: 'center',
+        height: '100%',
+        paddingRight: '8px' // beri ruang kanan biar gak nabrak border
+      }}
+    >
+      <InputNumber
+        value={rowData.QTY}
+        onValueChange={(e) => handleQtyChange(rowData.id, e.value)}
+        min={1}
+        style={{ width: '100%' }}
+        inputStyle={{
+          width: '60px',              
+          transition: 'all 0.2s ease',
+          border: 'none',
+          outline: 'none',
+          background: 'transparent',
+          textAlign: 'left',
+          padding: '4px',
+          fontSize: '14px',
+          lineHeight: '1.2',
+          verticalAlign: 'middle'
+        }}
+        onFocus={(e) => {
+          e.target.style.width = '100px'; // expand ke kanan
+          e.target.style.border = '2px solid #1761b6ff';
+          e.target.style.borderRadius = '6px';
+          e.target.style.background = 'white';
+          e.target.style.boxShadow = '0 0 0 3px rgba(244, 244, 244, 0.2)';
+        }}
+        onBlur={(e) => {
+          e.target.style.width = '60px'; // kembali ke kecil
+          e.target.style.border = 'none';
+          e.target.style.background = 'transparent';
+          e.target.style.boxShadow = 'none';
+        }}
+        size="small"
+      />
+    </div>
+  );
+};
+
 
   return (
     <div className="card p-4">
@@ -324,19 +389,20 @@ export default function MutasiKirimData() {
         {/* Tabel Kirim Data */}
         <div className='mt-3'>
           <DataTable value={kirimData} paginator rows={10} size="small" loading={loading} scrollable emptyMessage="Tidak ada data yang ditemukan">
-            <Column field='NAMA' header="NAMA"/>
-            <Column field="FAKTUR" header="FAKTUR" />
-            <Column field="TGL" header="TANGGAL" />
-            <Column field="GUDANG_KIRIM" header="DARI GUDANG" />
-            <Column field="GUDANG_TERIMA" header="KE GUDANG" />
-            <Column field="KODE" header="KODE" />
-            <Column field="QTY" header="QTY" />
-            <Column field="BARCODE" header="BARCODE"/> 
-            <Column field="SATUAN" header="SATUAN" />    
-            <Column field="USERNAME" header="USER" />
-            <Column field="STATUS" header="STATUS" />
+            <Column field='NAMA' header="NAMA" style={{ minWidth: '200px' }} />
+            <Column field="FAKTUR" header="FAKTUR" style={{ minWidth: '120px' }} />
+            <Column field="TGL" header="TANGGAL" style={{ minWidth: '100px' }} />
+            <Column field="GUDANG_KIRIM" header="DARI GUDANG" style={{ minWidth: '120px' }} />
+            <Column field="GUDANG_TERIMA" header="KE GUDANG" style={{ minWidth: '120px' }} />
+            <Column field="KODE" header="KODE" style={{ minWidth: '80px' }} />
+            <Column field="QTY" header="QTY" body={qtyBodyTemplate} style={{ minWidth: '80px', padding: '0 8px' }} />
+            <Column field="BARCODE" header="BARCODE" style={{ minWidth: '100px' }} /> 
+            <Column field="SATUAN" header="SATUAN" style={{ minWidth: '80px' }} />    
+            <Column field="USERNAME" header="USER" style={{ minWidth: '100px' }} />
+            <Column field="STATUS" header="STATUS" style={{ minWidth: '100px' }} />
             <Column
               header="AKSI"
+              style={{ minWidth: '80px' }}
               body={(rowData) => (
                 <Button
                   icon="pi pi-trash"

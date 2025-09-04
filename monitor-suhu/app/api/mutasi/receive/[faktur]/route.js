@@ -1,8 +1,8 @@
 import axios from "axios";
 import { NextResponse } from "next/server";
-import { API_ENDPOINTS } from "@/app/api/api"; // berisi URL ke backend Express
+import { API_ENDPOINTS } from "@/app/api/api"; 
 
-// POST => Terima Mutasi
+
 export async function POST(req, { params }) {
   const { faktur } = params;
 

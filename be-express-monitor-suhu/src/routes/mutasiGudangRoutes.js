@@ -17,6 +17,7 @@ router.get("/",getAllmutasi);
 router.get("/faktur", getAllFaktur);
 router.get("/pending", getPendingMutasi);
 router.get("/receive/:faktur", getMutasiByFaktur);
+router.get("/mutasi", getAllmutasi)
 
 
 export default router;

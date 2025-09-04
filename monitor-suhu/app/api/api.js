@@ -125,6 +125,9 @@ export const API_ENDPOINTS = {
     RECEIVE_MUTASI: (faktur) => `${API_URL}/mutasi/receive/${faktur}`,
     GET_PENDING_MUTASI: `${API_URL}/mutasi/pending`,
     GET_MUTASI_BY_FAKTUR: (faktur) => `${API_URL}/mutasi/receive/${faktur}`,
-    UPDATE_STATUS: (faktur) => `${API_URL}/mutasi/update/${faktur}`
+    UPDATE_STATUS: (faktur) => `${API_URL}/mutasi/update/${faktur}`,
+    VALIDASI: (faktur) => `${API_URL}/mutasi/validasi/${faktur}`,
+    GET_ALL_MUTASI: `${API_URL}/mutasi`
+    
   };
 

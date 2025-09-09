@@ -70,7 +70,6 @@ export const register = async (req, res) => {
   }
 };
 
-// src/controllers/authController.js - Bagian Login yang diperbaiki
 export const login = async (req, res) => {
   try {
     const { emailOrUsername, password, email, username } = req.body;
@@ -151,7 +150,6 @@ export const verify = async (req, res) => {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    console.log('Token berhasil diverifikasi untuk user:', decoded.id);
 
     return res.json({
       ok: true,

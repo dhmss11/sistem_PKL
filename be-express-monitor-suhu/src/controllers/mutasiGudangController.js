@@ -5,8 +5,7 @@ import ExcelJS from "exceljs";
 
 export const createmutasi = async(req,res) => {
     try {
-        const{nama,faktur,tgl,gudang_kirim,gudang_terima,qty,barcode,satuan,username} = req.body;
-
+        const{nama,kode,faktur,tgl,gudang_kirim,gudang_terima,qty,barcode,satuan,username} = req.body;
         const validasiStockObj = await db("stock").where({  barcode }).select("QTY").first();
         const validasiStock = validasiStockObj.QTY
         const isValid = qty > validasiStock 
@@ -22,6 +21,7 @@ export const createmutasi = async(req,res) => {
         await db.transaction(async (trx) => { 
           await trx("mutasigudang_ke").insert({
             nama,
+            kode,
             faktur,
             tgl,
             gudang_kirim,
@@ -36,6 +36,7 @@ export const createmutasi = async(req,res) => {
         await trx("mutasigudang").insert ({
             posting : "keluar",
             faktur,
+            kode,
             nama,
             tgl,
             dari : gudang_kirim,
@@ -62,7 +63,7 @@ export const createmutasi = async(req,res) => {
 export const receivemutasi = async (req, res) => {
     try {
         const { faktur } = req.params;
-        const { nama, faktur_kirim, gudang_kirim, gudang_terima, barcode, qty, satuan, username } = req.body;
+        const { nama, kode, faktur_kirim, gudang_kirim, gudang_terima, barcode, qty, satuan, username } = req.body;
         const tgl = format(new Date(), "yyyy-MM-dd HH:mm");
 
         const mutasiKeObj = await db("mutasigudang_ke")
@@ -90,6 +91,7 @@ export const receivemutasi = async (req, res) => {
             await trx("mutasigudang_dari").insert({
                 faktur,
                 nama,
+                kode,
                 faktur_kirim,
                 tgl,
                 gudang_kirim,
@@ -103,6 +105,7 @@ export const receivemutasi = async (req, res) => {
             await trx("mutasigudang").insert({
                 posting: "masuk",
                 nama,
+                kode,
                 faktur,
                 tgl,
                 dari: gudang_kirim,
@@ -124,8 +127,17 @@ export const receivemutasi = async (req, res) => {
               .where({ barcode })
               .update ({ qty:updateStock})
 
-              
+               await trx("stock").insert({
+                GUDANG: gudang_terima,
+                NAMA: nama,
+                QTY: qty,
+                KODE: kode,
+                TGL_MASUK: tgl,
+                SATUAN: satuan,
+              })
+              console.log("Berhasil Insert")
         });
+         
 
         res.json({ status: "00", message: "Mutasi berhasil diterima", faktur });
     } catch (error) {
@@ -173,7 +185,7 @@ export const getMutasiByFaktur = async (req, res) => {
   try {
     const { faktur } = req.params;
 
-    const data = await db("mutasigudang_ke") // ganti sesuai nama tabel
+    const data = await db("mutasigudang_ke") 
       .where({ faktur })
       .first();
 

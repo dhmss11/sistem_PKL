@@ -289,10 +289,10 @@ const qtyBodyTemplate = (rowData) => {
     <div
       style={{
         display: 'flex',
-        justifyContent: 'flex-start', // rata kiri biar expand ke kanan
+        justifyContent: 'flex-start', 
         alignItems: 'center',
         height: '100%',
-        paddingRight: '8px' // beri ruang kanan biar gak nabrak border
+        paddingRight: '8px' 
       }}
     >
       <InputNumber
@@ -313,14 +313,14 @@ const qtyBodyTemplate = (rowData) => {
           verticalAlign: 'middle'
         }}
         onFocus={(e) => {
-          e.target.style.width = '100px'; // expand ke kanan
+          e.target.style.width = '100px'; 
           e.target.style.border = '2px solid #1761b6ff';
           e.target.style.borderRadius = '6px';
           e.target.style.background = 'white';
           e.target.style.boxShadow = '0 0 0 3px rgba(244, 244, 244, 0.2)';
         }}
         onBlur={(e) => {
-          e.target.style.width = '60px'; // kembali ke kecil
+          e.target.style.width = '60px'; 
           e.target.style.border = 'none';
           e.target.style.background = 'transparent';
           e.target.style.boxShadow = 'none';
@@ -386,7 +386,6 @@ const qtyBodyTemplate = (rowData) => {
           </DataTable>
         </Dialog>
 
-        {/* Tabel Kirim Data */}
         <div className='mt-3'>
           <DataTable value={kirimData} paginator rows={10} size="small" loading={loading} scrollable emptyMessage="Tidak ada data yang ditemukan">
             <Column field='NAMA' header="NAMA" style={{ minWidth: '200px' }} />

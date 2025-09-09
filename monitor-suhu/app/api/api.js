@@ -2,7 +2,6 @@
 export const API_URL = process.env.API_URL;
 
 export const API_ENDPOINTS = {
-  // User endpoints
   GET_ALL_USERS: `${API_URL}/users`,
   GET_USER_BY_ID: (id) => `${API_URL}/users/${id}`,
   ADD_USER: `${API_URL}/users/create`,
@@ -11,7 +10,6 @@ export const API_ENDPOINTS = {
   UPDATE_USER: `${API_URL}/users/update`, // Tambahan untuk update profile
   CHANGE_PASSWORD: `${API_URL}/users/change-password`,
 
-  // Rak endpoints
   GET_ALL_RAK: `${API_URL}/rak`,
   GET_RAK_BY_KODE: (kode) => `${API_URL}/rak/${kode}`,
   ADD_RAK: `${API_URL}/rak/create`,
@@ -19,7 +17,6 @@ export const API_ENDPOINTS = {
   DELETE_RAK: (kode) => `${API_URL}/rak/delete/${kode}`,
   GET_PRODUK_BY_RAK: (kode) => `${API_URL}/rak/${kode}/produk`,
 
-  // Satuan endpoints
   GET_ALL_SATUAN: `${API_URL}/satuan`,
   GET_SATUAN_BY_KODE: (kode) => `${API_URL}/satuan/${kode}`,
   ADD_SATUAN: `${API_URL}/satuan/create`,
@@ -27,14 +24,12 @@ export const API_ENDPOINTS = {
   DELETE_SATUAN: (kode) => `${API_URL}/satuan/delete/${kode}`,
   GET_PRODUK_BY_SATUAN: (kode) => `${API_URL}/satuan/${kode}/produk`,
 
-  // Master Produk endpoints
   GETALLPRODUK: `${API_URL}/master-produk`,
   GETPRODUKBYID: (id) => `${API_URL}/master-produk/${id}`,
   ADDPRODUK: `${API_URL}/master-produk/create`,
   EDITPRODUK: (id) => `${API_URL}/master-produk/edit/${id}`,
   DELETEPRODUK: (id) => `${API_URL}/master-produk/delete/${id}`,
 
-  // Gudang endpoints
   GETALLGUDANG: `${API_URL}/nama-gudang`,
   GETGUDANGBYID: (id) => `${API_URL}/nama-gudang/${id}`,
   ADDGUDANG: `${API_URL}/nama-gudang/create`,
@@ -46,14 +41,12 @@ export const API_ENDPOINTS = {
   GET_PRODUK_BY_GUDANG: (gudang) => `${API_URL}/master-produk/gudang/${gudang}`,
   GETTOTALGUDANG: `${API_URL}/nama-gudang/total`,
   
-  // Golongan Stock endpoints
   GET_ALL_JENIS_GUDANG: `${API_URL}/golonganstock`,
   GET_ALL_KETERANGAN_STOCK: (keterangan) => `${API_URL}/golonganstock/keterangan/${keterangan}`,
   ADD_GOLONGAN_STOCK: `${API_URL}/golonganstock/create`,
   EDIT_JENIS_GUDANG: (kode) => `${API_URL}/golonganstock/edit/${kode}`,
   DELETE_JENIS_GUDANG: (kode) => `${API_URL}/golonganstock/delete/${kode}`,
 
-  // Stock endpoints
   GET_ALL_STOCK: `${API_URL}/stock`,
   ADD_STOCK: `${API_URL}/stock/add`,
   EDIT_STOCK: (id) => `${API_URL}/stock/edit/${id}`,
@@ -63,7 +56,6 @@ export const API_ENDPOINTS = {
   GET_TOTAL_COLUMNS_STOCK: `${API_URL}/stock/total`,
   EXPORT_STOCK: `${API_URL}/stock/export`,
 
-  // Kartu Stock endpoints
   GET_ALL_KARTUSTOCK: `${API_URL}/kartustock`,
   ADD_KARTUSTOCK: `${API_URL}/kartustock/add`,
   EDIT_KARTUSTOCK: (id) => `${API_URL}/kartustock/edit/${id}`,
@@ -129,7 +121,10 @@ export const API_ENDPOINTS = {
     UPDATE_STATUS: (faktur) => `${API_URL}/mutasi/update/${faktur}`,
     VALIDASI: (faktur) => `${API_URL}/mutasi/validasi/${faktur}`,
     GET_ALL_MUTASI: `${API_URL}/mutasi`,
-    EXPORT_MUTASI: `${API_URL}/mutasi/export`
+    EXPORT_MUTASI: `${API_URL}/mutasi/export`,
+
+    GET_LAPORAN_SISASTOCK: `${API_URL}/laporan/stock`,
+    GET_LAPORAN_MUTASI: `${API_URL}/laporan/mutasi`,
     
   };
 

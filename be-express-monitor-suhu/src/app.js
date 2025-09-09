@@ -19,6 +19,7 @@ import kirimBarang from './routes/kirimBarangRoutes.js';
 import terimaBarang from './routes/terimaBarangRoutes.js';
 import mutasiGudangRoutes from "./routes/mutasiGudangRoutes.js";
 import jenisRoleRoutes from './routes/jenisRoleRoute.js'; 
+import laporanRoutes from './routes/laporanRoutes.js';
 
 
 dotenv.config();
@@ -85,6 +86,7 @@ app.use('/api/golonganstock', golonganstock);
 app.use('/api/kirimbarang', kirimBarang);
 app.use('/api/terimabarang', terimaBarang);
 app.use("/api/mutasi", mutasiGudangRoutes);
+app.use("/api/laporan", laporanRoutes);
 
 app.get('/', [setResponseHeader], (req, res) => {
   return res.status(200).json({

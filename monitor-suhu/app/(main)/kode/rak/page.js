@@ -21,7 +21,6 @@ const RakPage = () => {
     KETERANGAN: '',
   });
 
-  // ambil data saat pertama render
   useEffect(() => {
     fetchRak();
   }, []);

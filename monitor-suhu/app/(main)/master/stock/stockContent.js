@@ -12,7 +12,7 @@ import { format, parseISO } from 'date-fns';
 import ToastNotifier from '@/app/components/ToastNotifier';
 
 const initialFormState = {
-  GUDANG: '',
+  GUDANG: '', 
   KODE: '',
   KODE_TOKO: '',
   NAMA: '',
@@ -50,6 +50,7 @@ const StockContent = () => {
   const [dialogMode, setDialogMode] = useState(null);
   const [selectedStock, setSelectedStock] = useState(null);
   const [form, setForm] = useState(initialFormState);
+  
   const formatDateToDB = (date) => {
     if (!date) return '';
     const d = new Date(date);
@@ -73,6 +74,7 @@ const StockContent = () => {
       return '';
     }
   };
+
   const fetchDropdownData = useCallback(async (endpoint, labelField = 'KETERANGAN') => {
     try {
       const res = await fetch(`/api/${endpoint}`);
@@ -93,6 +95,7 @@ const StockContent = () => {
       return [];
     }
   }, []);
+
   const fetchGudang = useCallback(async () => {
     try {
       const res = await fetch("/api/gudang/nama");
@@ -141,7 +144,7 @@ const StockContent = () => {
         fetchDropdownData('rak'),
         fetchDropdownData('satuan'),
         fetchDropdownData('golonganstock'),
-        fetchGudang(''),
+        fetchGudang(),
         fetchStock()
       ]);
 
@@ -181,12 +184,17 @@ const StockContent = () => {
     setFilters({
       rak: '',
       satuan: '',
-      gudang : ''
+      gudang: ''
     });
   }, []);
 
+  // Fixed handleFormChange to handle both regular inputs and dropdown changes
   const handleFormChange = useCallback((e) => {
     const { name, value } = e.target;
+    setForm(prev => ({ ...prev, [name]: value }));
+  }, []);
+
+  const handleDropdownChange = useCallback((name, value) => {
     setForm(prev => ({ ...prev, [name]: value }));
   }, []);
 
@@ -326,22 +334,24 @@ const StockContent = () => {
       style={{ width: '40rem' }}
     >
       <form onSubmit={handleSubmit}>
-
+        {/* Fix Gudang dropdown */}
         <div className="mb-3">
-          <label htmlFor="gudang">Gudang</label>
+          <label htmlFor="GUDANG">Gudang</label>
           <Dropdown
-            id="gudang"
-            name="gudang"
-            value={form.gudang}
+            id="GUDANG"
+            name="GUDANG"
+            value={form.GUDANG}
             options={options.gudang}
-            onChange={handleFormChange}
+            onChange={(e) => handleDropdownChange('GUDANG', e.value)}
             placeholder="Pilih Gudang"
             className="w-full mt-2"
             optionLabel="label"
             optionValue="value"
+            showClear
           />
         </div>
-        {['KODE', 'KODE_TOKO', 'NAMA', 'JENIS',].map((field) => (
+
+        {['KODE', 'KODE_TOKO', 'NAMA', 'JENIS'].map((field) => (
           <div key={field} className="mb-3">
             <label htmlFor={field}>{field.replace(/_/g, ' ')}</label>
             <InputText
@@ -361,16 +371,16 @@ const StockContent = () => {
             name="GOLONGAN"
             value={form.GOLONGAN}
             options={options.golongan}
-            onChange={handleFormChange}
+            onChange={(e) => handleDropdownChange('GOLONGAN', e.value)}
             className="w-full mt-2"
             placeholder="Pilih Golongan"
             optionLabel="label"
             optionValue="value"
+            showClear
           />
         </div>
         
         {/* RAK */}
-
         <div className="mb-3">
           <label htmlFor="RAK">RAK</label>
           <Dropdown
@@ -378,11 +388,12 @@ const StockContent = () => {
             name="RAK"
             value={form.RAK}
             options={options.rak}
-            onChange={handleFormChange}
+            onChange={(e) => handleDropdownChange('RAK', e.value)}
             className="w-full mt-2"
             placeholder="Pilih RAK"
             optionLabel="label"
             optionValue="value"
+            showClear
           />
         </div>
 
@@ -404,31 +415,27 @@ const StockContent = () => {
             name="SATUAN"
             value={form.SATUAN}
             options={options.satuan}
-            onChange={handleFormChange}
+            onChange={(e) => handleDropdownChange('SATUAN', e.value)}
             className="w-full mt-2"
             placeholder="Pilih Satuan"
             optionLabel="label"
             optionValue="value"
+            showClear
           />
-        </div>
-         <div>
-          <label className="block text-sm font-medium mb-1">BARCODE</label>
-          <div className="p-inputgroup">
-            <InputText
-              id="BARCODE"
-              name="BARCODE"
-              value={form.BARCODE || ''}
-              onChange={handleFormChange}
-              readOnly={dialogMode === 'edit'}
-              placeholder="Masukkan Barcode"
-              className="w-full mt-2"
-              optionLabel="label"
-              optionValue="value"
-          />
-            
-          </div>
         </div>
 
+        <div className="mb-3">
+          <label className="block text-sm font-medium mb-1">BARCODE</label>
+          <InputText
+            id="BARCODE"
+            name="BARCODE"
+            value={form.BARCODE || ''}
+            onChange={handleFormChange}
+            readOnly={dialogMode === 'edit'}
+            placeholder="Masukkan Barcode"
+            className="w-full mt-2"
+          />
+        </div>
 
         {['ISI', 'DISCOUNT', 'HB', 'HJ', 'BERAT', 'QTY'].map((field) => (
           <div key={field} className="mb-3">
@@ -564,5 +571,3 @@ const StockContent = () => {
 };
 
 export default StockContent;
-
-

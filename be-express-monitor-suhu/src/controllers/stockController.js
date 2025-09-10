@@ -110,6 +110,34 @@ export const addStock = async (req, res) => {
         });
     }
 };
+
+export const previewStockExcel = async (req, res) => {
+  try {
+    const data = await db("stock").select(
+      "KODE",
+      "NAMA",
+      "GUDANG",
+      "BARCODE",
+      "QTY",
+      "SATUAN" 
+    );
+
+    return res.status(200).json({
+      status: status.SUKSES,
+      message: "preview stock berhasil diambil",
+      datetime: datetime(),
+      data
+    });
+  } catch (error) {
+    console.error("error preview stock: ",error.message);
+    return res.status(500).json({
+      status: status.ERROR,
+      message: "gagal preview stock",
+      datetime: datetime(),
+      error: error.message
+    });
+  }
+}
 export const editStock = async (req, res) => {
   try {
     const { id } = req.params; 

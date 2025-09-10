@@ -72,7 +72,7 @@ const LaporanMutasiGudang = () => {
 
   return (
     <div className="card">
-      <h3 className="text-xl font-semibold mb-4">Laporan Sisa Stok</h3>
+      <h3 className="text-xl font-semibold mb-4">Laporan Mutasi Barang</h3>
       <Button label="Refresh" icon="pi pi-refresh" className="mb-3" onClick={fetchLaporanMutasi} />
       <Button label="Download Laporan" icon="pi pi-download" className='mb-3 ml-3' onClick={handleDownload}/>
 

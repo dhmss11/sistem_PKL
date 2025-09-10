@@ -55,6 +55,7 @@ export const API_ENDPOINTS = {
   GET_BY_GUDANG : (gudang) => `${API_URL}stock/gudang${gudang}`,
   GET_TOTAL_COLUMNS_STOCK: `${API_URL}/stock/total`,
   EXPORT_STOCK: `${API_URL}/stock/export`,
+  PREVIEW_STOCK: `${API_URL}/stock/preview`,
 
   GET_ALL_KARTUSTOCK: `${API_URL}/kartustock`,
   ADD_KARTUSTOCK: `${API_URL}/kartustock/add`,

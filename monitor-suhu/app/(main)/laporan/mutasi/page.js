@@ -60,6 +60,8 @@ const LaporanMutasiGudang = () => {
     <div className="card">
       <h3 className="text-xl font-semibold mb-4">Laporan Mutasi Gudang</h3>
       <Button label="Refresh" icon="pi pi-refresh" className="mb-3" onClick={fetchData} />
+      <h3 className="text-xl font-semibold mb-4">Laporan Mutasi Barang</h3>
+      <Button label="Refresh" icon="pi pi-refresh" className="mb-3" onClick={fetchLaporanMutasi} />
       <Button label="Download Laporan" icon="pi pi-download" className='mb-3 ml-3' onClick={handleDownload}/>
 
       <DataTable value={data} paginator rows={10} loading={loading} stripedRows>
@@ -69,7 +71,6 @@ const LaporanMutasiGudang = () => {
         <Column field="KE" header="KE GUDANG" />
         <Column field='BARCODE' header='BARCODE'/>
         <Column field="QTY" header="QTY" />
-
       </DataTable>
 
       <ToastNotifier ref={toastRef} />

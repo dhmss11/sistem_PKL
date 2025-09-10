@@ -22,7 +22,7 @@ export default function MutasiTerimaDataPage() {
 
   const generateFaktur = () => `FT${Date.now()}`;
 
-  // Fungsi gabungan fetchByFaktur + fetchValidasi
+  
   const handleFakturEnter = async (e) => {
     if (e.key !== 'Enter') return;
 
@@ -47,7 +47,7 @@ export default function MutasiTerimaDataPage() {
           setQtyAwal(qtyApi);
           console.log('QtyAwal dari API validasi:', qtyApi);
         } else {
-          setQtyAwal(qtyTerima); // fallback ke qty dari fetchByFaktur
+          setQtyAwal(qtyTerima); 
           console.log('QtyAwal dari API validasi: fallback ke qty dari fetchByFaktur', qtyTerima);
         }
       } else {
@@ -66,8 +66,10 @@ export default function MutasiTerimaDataPage() {
 
   const fetchPendingFaktur = async () => {
     try {
-      const res = await fetch(`/api/mutasi/create/pending`);
+      const res = await fetch(`/api/mutasi/pending`);
       const json = await res.json();
+      console.log("DEBUG pending faktur:", json);
+      
       if (json.status === "00" && Array.isArray(json.data)) {
         setPendingData(json.data);
         setVisible(true);

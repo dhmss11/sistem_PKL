@@ -10,6 +10,7 @@ import ToastNotifier from '@/app/components/ToastNotifier';
 const LaporanStock = () => {
   const toastRef = useRef(null);
   const [data, setData] = useState([]);
+  const [dataLaporan, setDataLaporan] = useState([]); // ✅ tambahin state laporan
   const [loading, setLoading] = useState(false);
   const [listGudang, setListGudang] = useState([]);
   const [selectedGudang, setSelectedGudang] = useState(null);
@@ -22,7 +23,7 @@ const LaporanStock = () => {
       const res = await fetch('/api/stock/preview');
       const json = await res.json();
       if (json.status === '00') {
-        setDataLaporan(json.data);
+        setDataLaporan(json.data || []);
         setPreviewVisible(true);   // ✅ tampilkan dialog setelah data siap
       } else {
         toastRef.current?.showToast('99', 'Terjadi kesalahan ambil preview');
@@ -34,21 +35,23 @@ const LaporanStock = () => {
     }
   };
 
-    const fetchData = async () => {
+  const fetchData = async () => {
     setLoading(true);
     try {
       const res = await fetch('/api/laporanstock');
       const json = await res.json();
       if (json.status === '00') {
-        const rows = Array.isArray(json.data) ? json.data
-        : Array.isArray(json.data?.rows) ? json.data.rows
-        : [];
+        const rows = Array.isArray(json.data)
+          ? json.data
+          : Array.isArray(json.data?.rows)
+          ? json.data.rows
+          : [];
         setData(rows);
-      if (json.status === '00') {
+
         const grouped = {};
         const gudangSet = new Set();
 
-        json.data.forEach(item => {
+        rows.forEach(item => {
           const gudangName = item.nama_gudang || item.NAMA_GUDANG || item.GUDANG || "-";
           const key = `${item.KODE}-${gudangName}`;
           gudangSet.add(gudangName);
@@ -75,7 +78,8 @@ const LaporanStock = () => {
     } finally {
       setLoading(false);
     }
-    };
+  };
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -84,14 +88,18 @@ const LaporanStock = () => {
     ? dataLaporan.filter(item => item.GUDANG === selectedGudang)
     : dataLaporan;
 
+  // ✅ bikin dummy handleDownload biar gak error
+  const handleDownload = () => {
+    toastRef.current?.showToast('00', 'Download laporan belum diimplementasi');
+  };
+
   return (
     <div className="card">
       <h3 className="text-xl font-semibold mb-4">Laporan Sisa Stok</h3>
-      <Button label="Refresh" icon="pi pi-refresh" className="mb-3" onClick={fetchData} />
-      <Button label="Download Laporan"  icon="pi pi-download" className='mb-3 ml-3' onClick={handleDownload}/>      
       <div className="flex items-center gap-3 mb-3">
-        <Button label="Refresh" icon="pi pi-refresh" onClick={fetchLaporan} />
+        <Button label="Refresh" icon="pi pi-refresh" onClick={fetchData} />
         <Button label="Preview Laporan" icon="pi pi-eye" onClick={fetchPreview} />
+        <Button label="Download Laporan" icon="pi pi-download" onClick={handleDownload} />
         <Dropdown
           value={selectedGudang}
           options={listGudang}
@@ -131,7 +139,7 @@ const LaporanStock = () => {
 
       <ToastNotifier ref={toastRef} />
     </div>
-  )
+  );
 };
 
 export default LaporanStock;

@@ -8,15 +8,18 @@ import { Dialog } from 'primereact/dialog';
 import { confirmDialog } from 'primereact/confirmdialog';
 import { ConfirmDialog } from 'primereact/confirmdialog';
 import ToastNotifier from '@/app/components/ToastNotifier';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
 
 const LaporanMutasiGudang = () => {
   const toastRef = useRef(null);
   const [data, setData] = useState([]);
-  const [dataLaporan, setDataLaporan] = useState([]); // ✅ state untuk laporan utama
+  const [dataLaporan, setDataLaporan] = useState([]);
   const [loading, setLoading] = useState(false);
   const [listGudang, setListGudang] = useState([]);
   const [selectedGudang, setSelectedGudang] = useState(null);
-  const [previewVisible, setPreviewVisible] = useState(false); // ✅ state untuk dialog
+  const [previewVisible, setPreviewVisible] = useState(false);
+  const [dataPreview, setDataPreview] = useState([]);
 
   const fetchPreview = async () => {
     setLoading(true);
@@ -25,8 +28,6 @@ const LaporanMutasiGudang = () => {
       const json = await res.json();
       if (json.status === '00') {
         const rows = Array.isArray(json.data) ? json.data : [];
-        
-        // Proses data preview sama seperti data utama
         const processedPreview = rows.map(item => ({
           POSTING: item.POSTING || item.tanggal_posting || item.posting || item.tgl_posting || "-",
           TGL: item.TGL || item.tanggal || item.tgl || item.tanggal_mutasi || "-",
@@ -37,9 +38,8 @@ const LaporanMutasiGudang = () => {
           QTY: item.QTY || item.qty || item.quantity || item.jumlah || 0,
           NAMA: item.NAMA || item.NAMA_BARANG || item.nama_produk || item.nama_barang || item.nama || "-"
         }));
-        
-        setDataLaporan(processedPreview);
-        setPreviewVisible(true); // ✅ tampilkan dialog setelah data siap
+        setDataPreview(processedPreview);
+        setPreviewVisible(true);
       } else {
         toastRef.current?.showToast('99', 'Terjadi kesalahan ambil preview');
       }
@@ -50,50 +50,40 @@ const LaporanMutasiGudang = () => {
     }
   };
 
+
+  // ✅ PERBAIKAN: Gunakan endpoint yang sama seperti preview
   const fetchData = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/laporanmutasi');
+      // ✅ GUNAKAN /api/mutasi BUKAN /api/laporanmutasi
+      const res = await fetch('/api/mutasi');
       const json = await res.json();
       if (json.status === '00') {
-        const rows = Array.isArray(json.data)
-          ? json.data
-          : Array.isArray(json.data?.rows)
-          ? json.data.rows
-          : [];
+        const rows = Array.isArray(json.data) ? json.data : [];
         setData(rows);
 
-        const grouped = {};
-        const gudangSet = new Set();
+        // ✅ PROSES DATA SAMA SEPERTI fetchPreview (tanpa grouping kompleks)
+        const processedData = rows.map(item => ({
+          POSTING: item.POSTING || item.tanggal_posting || item.posting || item.tgl_posting || "-",
+          TGL: item.TGL || item.tanggal || item.tgl || item.tanggal_mutasi || "-",
+          FAKTUR: item.FAKTUR || item.no_faktur || item.faktur || "-",
+          DARI: item.gudang_asal || item.DARI || item.GUDANG_ASAL || "-",
+          KE: item.gudang_tujuan || item.KE || item.GUDANG_TUJUAN || "-",
+          BARCODE: item.BARCODE || item.barcode || item.kode_barang || "-",
+          QTY: item.QTY || item.qty || item.quantity || item.jumlah || 0,
+          NAMA: item.NAMA || item.NAMA_BARANG || item.nama_produk || item.nama_barang || item.nama || "-"
+        }));
 
-        rows.forEach(item => {
-          const gudangAsal = item.gudang_asal || item.DARI || item.GUDANG_ASAL || "-";
-          const gudangTujuan = item.gudang_tujuan || item.KE || item.GUDANG_TUJUAN || "-";
-          const key = `${item.FAKTUR || item.no_faktur}-${item.BARCODE || item.barcode}`;
-
-          gudangSet.add(gudangAsal);
-          gudangSet.add(gudangTujuan);
-
-          if (!grouped[key]) {
-            grouped[key] = {
-              POSTING: item.POSTING || item.tanggal_posting || item.posting || item.tgl_posting,
-              TGL: item.TGL || item.tanggal || item.tgl || item.tanggal_mutasi,
-              FAKTUR: item.FAKTUR || item.no_faktur || item.faktur,
-              DARI: gudangAsal,
-              KE: gudangTujuan,
-              BARCODE: item.BARCODE || item.barcode || item.kode_barang,
-              QTY: item.QTY || item.qty || item.quantity || item.jumlah,
-              NAMA: item.NAMA || item.NAMA_BARANG || item.nama_produk || item.nama_barang || item.nama
-            };
-          }
-        });
-
-        setDataLaporan(Object.values(grouped));
+        setDataLaporan(processedData);
         
-        // Set options untuk dropdown gudang
-        const gudangOptions = Array.from(gudangSet)
-          .filter(g => g !== "-")
-          .map(g => ({ label: g, value: g }));
+        // Extract gudang options dari data yang sudah diproses
+        const gudangSet = new Set();
+        processedData.forEach(item => {
+          if (item.DARI && item.DARI !== "-") gudangSet.add(item.DARI);
+          if (item.KE && item.KE !== "-") gudangSet.add(item.KE);
+        });
+        
+        const gudangOptions = Array.from(gudangSet).map(g => ({ label: g, value: g }));
         setListGudang(gudangOptions);
 
       } else {
@@ -117,41 +107,34 @@ const LaporanMutasiGudang = () => {
       )
     : dataLaporan;
 
-  const handleDownload = async () => {
-    try {
-      let url = "/api/mutasi/export";
+  const exportToExcel = () => {
+  if (!dataPreview || dataPreview.length === 0) {
+    toastRef.current?.showToast('99', 'Tidak ada data untuk didownload');
+    return;
+  }
 
-      // Tambahkan parameter filter gudang jika ada
-      if (selectedGudang) {
-        url += `?gudang=${selectedGudang}`;
-      }
+  const exportData = dataPreview.map(item => ({
+    Posting: postingDateTemplate(item),
+    Tanggal: tanggalTemplate(item),
+    Faktur: item.FAKTUR,
+    Dari: item.DARI,
+    Ke: item.KE,
+    Barcode: item.BARCODE,
+    Nama: item.NAMA,
+    Qty: item.QTY,
+  }));
 
-      const response = await fetch(url, {
-        method: 'GET',
-      });
+  const worksheet = XLSX.utils.json_to_sheet(exportData);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Laporan Mutasi');
 
-      if (!response.ok) {
-        throw new Error("Gagal Download Laporan");
-      }
+  const wbout = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+  const blob = new Blob([wbout], { type: 'application/octet-stream' });
+  saveAs(blob, `laporan_mutasi_gudang${selectedGudang ? '_' + selectedGudang : ''}.xlsx`);
 
-      const blob = await response.blob();
-      const downloadUrl = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = downloadUrl;
-      link.setAttribute('download', `laporan_mutasi_gudang${selectedGudang ? '_' + selectedGudang : ''}.xlsx`);
-      document.body.appendChild(link);
-      link.click();
-      link.parentNode.removeChild(link);
-      window.URL.revokeObjectURL(downloadUrl);
+  toastRef.current?.showToast('00', 'Laporan berhasil didownload');
+};
 
-      toastRef.current?.showToast('00', 'Laporan berhasil didownload');
-    } catch (error) {
-      console.error('Download error:', error);
-      toastRef.current?.showToast('99', 'Terjadi kesalahan saat download laporan');
-    }
-  };
-
-  // Handle delete mutasi in preview
   const handleDelete = async (rowData) => {
     if (!rowData.FAKTUR) {
       toastRef.current?.showToast('99', 'Data tidak valid untuk dihapus');
@@ -164,9 +147,8 @@ const LaporanMutasiGudang = () => {
       icon: 'pi pi-exclamation-triangle',
       accept: async () => {
         try {
-          // Simulasi delete dari dataLaporan
-          const updatedData = dataLaporan.filter(item => item.FAKTUR !== rowData.FAKTUR);
-          setDataLaporan(updatedData);
+          const updatedPreview = dataPreview.filter(item => item.FAKTUR !== rowData.FAKTUR);
+          setDataPreview(updatedPreview);
           toastRef.current?.showToast('00', `Mutasi ${rowData.FAKTUR} berhasil dihapus (simulasi)`);
         } catch (err) {
           console.error('Error delete:', err);
@@ -179,7 +161,7 @@ const LaporanMutasiGudang = () => {
     });
   };
 
-  // Action template for preview table
+
   const actionBodyTemplate = (rowData) => (
     <div className="flex gap-2">
       <Button
@@ -193,7 +175,6 @@ const LaporanMutasiGudang = () => {
     </div>
   );
 
-  // Quantity body template
   const qtyBodyTemplate = (rowData) => {
     return (
       <span style={{ textAlign: 'right', display: 'block' }}>
@@ -202,11 +183,10 @@ const LaporanMutasiGudang = () => {
     );
   };
 
-  // Date body template - improved to handle various date formats
   const dateBodyTemplate = (rowData, field = 'POSTING') => {
     const dateValue = field === 'TGL' ? rowData.TGL : rowData.POSTING;
 
-    if (!dateValue) return '-';
+    if (!dateValue || dateValue === '-') return '-';
 
     try {
       let date;
@@ -310,7 +290,7 @@ const LaporanMutasiGudang = () => {
         <Column field="QTY" header="Qty" body={qtyBodyTemplate} sortable />
       </DataTable>
 
-      {/* Dialog preview */}
+      {/* Dialog preview - menggunakan data yang sama */}
       <Dialog
         header={`Preview Laporan Mutasi Gudang (${dataLaporan?.length || 0} data)`}
         visible={previewVisible}
@@ -323,7 +303,7 @@ const LaporanMutasiGudang = () => {
               label="Download"
               icon="pi pi-download"
               onClick={() => {
-                handleDownload();
+                exportToExcel();
                 setPreviewVisible(false);
               }}
               className="p-button-success"
@@ -343,15 +323,6 @@ const LaporanMutasiGudang = () => {
               <i className="pi pi-info-circle text-4xl text-gray-400 mb-3"></i>
               <h4 className="text-lg font-semibold text-gray-600 mb-2">Tidak ada data mutasi</h4>
               <p className="text-gray-500">Belum ada transaksi mutasi gudang yang dapat ditampilkan</p>
-              <Button
-                label="Refresh Data"
-                icon="pi pi-refresh"
-                onClick={() => {
-                  fetchData();
-                  fetchPreview();
-                }}
-                className="mt-4 p-button-outlined"
-              />
             </div>
           ) : (
             <>
@@ -363,12 +334,12 @@ const LaporanMutasiGudang = () => {
               </div>
 
               <DataTable
-                value={dataLaporan}
+                value={dataPreview}
                 loading={loading}
                 stripedRows
                 paginator
                 rows={15}
-                emptyMessage="Tidak ada data mutasi"
+                emptyMessage="Tidak ada data preview"
                 scrollable
                 scrollHeight="500px"
                 paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"

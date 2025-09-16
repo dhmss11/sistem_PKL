@@ -123,6 +123,7 @@ const StockContent = () => {
       if (json.status === '00') {
         const processedData = json.data.map(item => ({
           ...item,
+          id: item.id,
           TGL_MASUK: parseDateFromDB(item.TGL_MASUK),
           EXPIRED: parseDateFromDB(item.EXPIRED)
         }));
@@ -258,10 +259,15 @@ const StockContent = () => {
 
   const handleDelete = useCallback(async (data) => {
     if (!window.confirm('Apakah Anda yakin ingin menghapus data ini?')) return;
+    console.log("Stock ID:", data?.ID);
+    if (!data?.id) {
+      toastRef.current?.showToast('99', 'ID NOT FOUND')
+      return;
+    }
     
     setIsLoading(true);
     try {
-      const res = await fetch(`/api/stock/${data.KODE}`, { method: 'DELETE' });
+      const res = await fetch(`/api/stock/${data.id}`, { method: 'DELETE' });
       const json = await res.json();
 
       if (res.ok && json.status === '00') {

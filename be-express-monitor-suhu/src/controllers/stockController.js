@@ -5,6 +5,7 @@ import ExcelJS from "exceljs";
 export const fetchAllStock = async (req, res) => {
     try {
         const data = await db('stock').select([
+            'id',
             'GUDANG',
             'KODE',
             'KODE_TOKO',
@@ -147,7 +148,7 @@ export const editStock = async (req, res) => {
     } = req.body;
 
     await db('stock')
-      .where({ KODE: id }) 
+      .where({ id }) 
       .update({
         GUDANG, KODE, KODE_TOKO, NAMA, JENIS, GOLONGAN,
         RAK, DOS, SATUAN, ISI, DISCOUNT, HB, HJ,BERAT, QTY
@@ -174,7 +175,7 @@ export const deleteStock = async (req, res) => {
 
   try {
 
-    const deleted = await db('stock').where({ KODE: id }).del();
+    const deleted = await db('stock').where({ id }).del();
 
     if (deleted) {
       return res.json({

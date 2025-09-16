@@ -1,4 +1,4 @@
-import { Axios } from '@/utils/axios';
+import axios from 'axios';
 import { API_ENDPOINTS } from '@/app/api/api';
 import { NextResponse } from 'next/server';
 
@@ -27,10 +27,10 @@ export const PUT = async (request, { params }) => {
 
 
 export const DELETE = async (request, { params }) => {
-  const { id } = await params;
+  const  id  =  params.id;
   
   try {
-    const response = await Axios.delete(API_ENDPOINTS.DELETE_STOCK(id));
+    const response =  axios.delete(API_ENDPOINTS.DELETE_STOCK(id));
     
     return Response.json({
       status: '00',

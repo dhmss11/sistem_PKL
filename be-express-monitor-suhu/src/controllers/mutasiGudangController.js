@@ -1,6 +1,7 @@
 
 import {db} from "../core/config/knex.js";
 import { format } from "date-fns";
+import { parse } from "dotenv";
 import ExcelJS from "exceljs";
 
 export const createmutasi = async(req,res) => {
@@ -86,17 +87,44 @@ export const receivemutasi = async (req, res) => {
         const updateSisaStock = Math.max(mutasiKe - qty, 0)
         const updateStock = Math.max(sisaStock + updateSisaStock,0)
         console.log(updateStock) 
+
+        const lastStock = await db('stock')
+        .select('KODE')
+        .orderBy('KODE','desc')
+        .first()
+
+        const lastBarcode = await db('stock')
+        .select('BARCODE')
+        .orderBy('BARCODE', 'desc')
+        .first()
+
+        let NewBarcode;
+        if (lastBarcode && lastBarcode.BARCODE) {
+          const lastNumber = parseInt(lastBarcode.BARCODE, 10)
+          NewBarcode = String(lastNumber + 1).padStart(5, 0)
+        } else {
+          NewBarcode = "00001"
+        }
+
+        let newKode;
+        if (lastStock && lastStock.KODE) {
+          const lastNumber = parseInt(lastStock.KODE, 10);
+          newKode = String(lastNumber + 1).padStart(10, 0)
+        } else {
+          newKode = "0000000001";
+        }
+
         
         await db.transaction(async (trx) => {
             await trx("mutasigudang_dari").insert({
                 faktur,
                 nama,
-                kode,
+                kode: newKode,
                 faktur_kirim,
                 tgl,
                 gudang_kirim,
                 gudang_terima,
-                barcode,
+                barcode: NewBarcode,
                 qty,
                 satuan,
                 username,
@@ -105,12 +133,12 @@ export const receivemutasi = async (req, res) => {
             await trx("mutasigudang").insert({
                 posting: "masuk",
                 nama,
-                kode,
+                kode: newKode,
                 faktur,
                 tgl,
                 dari: gudang_kirim,
                 ke: gudang_terima,
-                barcode,
+                barcode: NewBarcode,
                 qty,
                 username, 
             });
@@ -131,9 +159,10 @@ export const receivemutasi = async (req, res) => {
                 GUDANG: gudang_terima,
                 NAMA: nama,
                 QTY: qty,
-                KODE: kode,
+                KODE: newKode,
                 TGL_MASUK: tgl,
                 SATUAN: satuan,
+                BARCODE: NewBarcode,
               })
               console.log("Berhasil Insert")
         });

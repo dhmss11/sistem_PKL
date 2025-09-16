@@ -34,12 +34,12 @@ const initialFormState = {
 
 const StockContent = () => {
   const toastRef = useRef(null);
-  const [filterSatuan, setFilterSatuan] = useState('');
   const [stock, setStock] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [filters, setFilters] = useState({
     rak: '',
     satuan: '',
+    gudang: '',
   });
   const [options, setOptions] = useState({
     rak: [],
@@ -157,7 +157,7 @@ const StockContent = () => {
     };
 
     loadInitialData();
-  }, [fetchDropdownData, fetchGudang, fetchStock]);
+  }, [fetchDropdownData, fetchStock]);
 
   const filteredStocks = useMemo(() => {
     let filtered = stock;
@@ -168,6 +168,9 @@ const StockContent = () => {
 
     if (filters.satuan) {
       filtered = filtered.filter(item => item.SATUAN === filters.satuan);
+    }
+    if (filters.gudang) {
+      filtered =filtered.filter(item => item.GUDANG === filters.gudang)
     }
 
     return filtered;
@@ -516,6 +519,18 @@ const StockContent = () => {
               optionValue="value"
               showClear
             />
+          </div>
+          <div>
+            <label className='block text-sm font-medium mb-1'>Filter Gudang</label>
+            <Dropdown
+            value={filters.gudang}
+            options={options.gudang}
+            onChange={(e) => handleFilterChange('gudang', e.value)}
+            className='w-full'
+            placeholder='Pilih Gudang'
+            optionLabel='label'
+            optionValue='value'
+            showClear/>
           </div>
         </div>
       </div>

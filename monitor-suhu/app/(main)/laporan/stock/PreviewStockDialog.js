@@ -49,6 +49,24 @@ const PreviewStockPage = () => {
     }
   };
 
+  const handleDownload = async () => {
+    try {
+      const res = await fetch('/api/stock/preview?download=excel');
+      if (!res.ok) throw new Error('gagal download laporan');
+
+      const blob  = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'laporan-stock.xlsx';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (err) {
+      toastRef.current?.showToast('99', 'terjadi kesalahan saat mendownload laporan');
+    }
+  };
+
   useEffect(() => {
     fetchPreview();
   }, []);
@@ -73,8 +91,11 @@ const PreviewStockPage = () => {
   return (
     <div className="card">
       <h3 className="text-xl font-semibold mb-4">Preview Laporan Stok</h3>
-
+     
+     <div className='flex gap-2 mb-3'>
       <Button label="Refresh" icon="pi pi-refresh" className="mb-3" onClick={fetchPreview} />
+     </div>
+      
 
       <DataTable value={dataPreview} loading={loading} stripedRows paginator rows={10}>
         <Column field="KODE" header="Kode Produk" />

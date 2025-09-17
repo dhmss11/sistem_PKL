@@ -4,18 +4,18 @@ import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Button } from 'primereact/button';
 import { Dropdown } from 'primereact/dropdown';
-import { Dialog } from 'primereact/dialog';   // ✅ import Dialog
+import { Dialog } from 'primereact/dialog';   
 import ToastNotifier from '@/app/components/ToastNotifier';
 
 const LaporanStock = () => {
   const toastRef = useRef(null);
   const [data, setData] = useState([]);
-  const [dataLaporan, setDataLaporan] = useState([]); // ✅ tambahin state laporan
+  const [dataLaporan, setDataLaporan] = useState([]); 
   const [loading, setLoading] = useState(false);
   const [listGudang, setListGudang] = useState([]);
   const [selectedGudang, setSelectedGudang] = useState(null);
 
-  const [previewVisible, setPreviewVisible] = useState(false); // ✅ state untuk dialog
+  const [previewVisible, setPreviewVisible] = useState(false); 
 
   const fetchPreview = async () => {
     setLoading(true);
@@ -24,7 +24,7 @@ const LaporanStock = () => {
       const json = await res.json();
       if (json.status === '00') {
         setDataLaporan(json.data || []);
-        setPreviewVisible(true);   // ✅ tampilkan dialog setelah data siap
+        setPreviewVisible(true);   
       } else {
         toastRef.current?.showToast('99', 'Terjadi kesalahan ambil preview');
       }
@@ -63,7 +63,7 @@ const LaporanStock = () => {
               GUDANG: gudangName,
               BARCODE: item.BARCODE,
               SATUAN: item.SATUAN,
-              SISA: item.QTY
+              QTY: item.QTY
             };
           }
         });
@@ -80,6 +80,24 @@ const LaporanStock = () => {
     }
   };
 
+  const handleDownload = async () => {
+    try {
+      const res = await fetch('/api/stock/preview?download=excel');
+      if (!res.ok) throw new Error('gagal download laporan');
+
+      const blob  = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'laporan-stock.xlsx';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (err) {
+      toastRef.current?.showToast('99', 'terjadi kesalahan saat mendownload laporan');
+    }
+  };
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -89,8 +107,13 @@ const LaporanStock = () => {
     : dataLaporan;
 
   // ✅ bikin dummy handleDownload biar gak error
-  const handleDownload = () => {
-    toastRef.current?.showToast('00', 'Download laporan belum diimplementasi');
+  // const handleDownload = () => {
+  //   toastRef.current?.showToast('00', 'Download laporan belum diimplementasi');
+  // };
+
+  const handleDelete = (row) => {
+    setDataLaporan((prev) => prev.filter(item => item.KODE !== row.KODE || item.GUDANG !== row.GUDANG));
+    toastRef.current?.showToast('00', `Data ${row.NAMA} di ${row.GUDANG} dihapus dari preview`);
   };
 
   return (
@@ -116,26 +139,44 @@ const LaporanStock = () => {
         <Column field="NAMA" header="Nama Produk" />
         <Column field="GUDANG" header="Gudang" />
         <Column field="BARCODE" header="Barcode" />
-        <Column field="SISA" header="Sisa Stock" />
+        <Column field="QTY" header="Sisa Stock" />
         <Column field="SATUAN" header="Satuan" />
       </DataTable>
 
       {/* dialog preview */}
-      <Dialog
-        header="Preview Laporan Stok"
-        visible={previewVisible}
-        style={{ width: '80vw' }}
-        onHide={() => setPreviewVisible(false)}  
-      >
-        <DataTable value={dataLaporan} loading={loading} stripedRows paginator rows={10}>
-          <Column field="KODE" header="Kode Produk" />
-          <Column field="NAMA" header="Nama Produk" />
-          <Column field="GUDANG" header="Gudang" />
-          <Column field="BARCODE" header="Barcode" />
-          <Column field="SISA" header="Sisa Stock" />
-          <Column field="SATUAN" header="Satuan" />
-        </DataTable>
-      </Dialog>
+<Dialog
+  header="Preview Laporan Stok"
+  visible={previewVisible}
+  style={{ width: '80vw' }}
+  onHide={() => setPreviewVisible(false)}  
+>
+  <DataTable value={dataLaporan} loading={loading} stripedRows paginator rows={10}>
+    <Column field="KODE" header="Kode Produk" />
+    <Column field="NAMA" header="Nama Produk" />
+    <Column field="GUDANG" header="Gudang" />
+    <Column field="BARCODE" header="Barcode" />
+    <Column field="QTY" header="Sisa Stock" />
+    <Column field="SATUAN" header="Satuan" />
+
+    {/* ✅ Kolom Aksi */}
+    <Column
+      header="Aksi"
+      body={(rowData) => (
+        <Button
+          icon="pi pi-trash"
+          className="p-button-rounded p-button-danger p-button-sm"
+          onClick={() => handleDelete(rowData)}
+        />
+      )}
+      style={{ width: '100px', textAlign: 'center' }}
+    />
+  </DataTable>
+
+  <div className="flex justify-end mt-4">
+    <Button label="Download Laporan" icon="pi pi-download" onClick={handleDownload} />
+  </div>
+</Dialog>
+
 
       <ToastNotifier ref={toastRef} />
     </div>

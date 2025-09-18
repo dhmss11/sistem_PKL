@@ -122,7 +122,6 @@ const LaporanStock = () => {
       <div className="flex items-center gap-3 mb-3">
         <Button label="Refresh" icon="pi pi-refresh" onClick={fetchData} />
         <Button label="Preview Laporan" icon="pi pi-eye" onClick={fetchPreview} />
-        <Button label="Download Laporan" icon="pi pi-download" onClick={handleDownload} />
         <Dropdown
           value={selectedGudang}
           options={listGudang}
@@ -164,7 +163,7 @@ const LaporanStock = () => {
       body={(rowData) => (
         <Button
           icon="pi pi-trash"
-          className="p-button-rounded p-button-danger p-button-sm"
+          className=" p-button-danger p-button-sm"
           onClick={() => handleDelete(rowData)}
         />
       )}

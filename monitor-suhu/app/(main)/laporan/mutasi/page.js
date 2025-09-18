@@ -8,8 +8,8 @@ import { Dialog } from 'primereact/dialog';
 import { confirmDialog } from 'primereact/confirmdialog';
 import { ConfirmDialog } from 'primereact/confirmdialog';
 import ToastNotifier from '@/app/components/ToastNotifier';
-// // import * as XLSX from 'xlsx';
-// import { saveAs } from 'file-saver';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
 
 const LaporanMutasiGudang = () => {
   const toastRef = useRef(null);

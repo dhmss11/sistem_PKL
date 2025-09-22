@@ -45,7 +45,8 @@ const StockContent = () => {
     rak: [],
     satuan: [],
     gudang: [],
-    golongan: []
+    golongan: [],
+    toko: []
   });
   const [dialogMode, setDialogMode] = useState(null);
   const [selectedStock, setSelectedStock] = useState(null);
@@ -141,10 +142,11 @@ const StockContent = () => {
 
   useEffect(() => {
     const loadInitialData = async () => {
-      const [rakData, satuanData, golonganData, gudangData] = await Promise.all([
+      const [rakData, satuanData, golonganData, tokoData, gudangData  ] = await Promise.all([
         fetchDropdownData('rak'),
         fetchDropdownData('satuan'),
         fetchDropdownData('golonganstock'),
+        fetchDropdownData('toko'),
         fetchGudang(),
         fetchStock()
       ]);
@@ -153,7 +155,8 @@ const StockContent = () => {
         rak: rakData,
         satuan: satuanData,
         golongan: golonganData,
-        gudang: gudangData
+        gudang: gudangData,
+        toko: tokoData
       });
     };
 
@@ -359,8 +362,24 @@ const StockContent = () => {
             showClear
           />
         </div>
+        <div className="mb-3">
+          <label htmlFor="KODE_TOKO">KODE TOKO</label>
+          <Dropdown
+            id="KODE_TOKO"
+            name="KODE_TOKO"
+            value={form.KODE_TOKO}
+            options={options.toko}
+            onChange={(e) => handleDropdownChange('KODE_TOKO', e.value)}
+            placeholder="Pilih Kode"
+            className="w-full mt-2"
+            optionLabel="label"
+            optionValue="value"
+            showClear
+          />
+        </div>
+        
 
-        {['KODE', 'KODE_TOKO', 'NAMA', 'JENIS'].map((field) => (
+        {['KODE', 'NAMA', 'JENIS'].map((field) => (
           <div key={field} className="mb-3">
             <label htmlFor={field}>{field.replace(/_/g, ' ')}</label>
             <InputText

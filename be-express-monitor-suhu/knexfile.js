@@ -1,4 +1,5 @@
 import { config } from "dotenv";
+import { extensions } from "sequelize/lib/utils/validator-extras";
 
 config();
 
@@ -33,7 +34,7 @@ const knexConfig = {
     },
     migrations: {
       directory: "./src/migrations",
-      extension: "js",
+      extension: "js"
     },
   },
 };

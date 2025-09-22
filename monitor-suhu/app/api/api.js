@@ -24,6 +24,12 @@ export const API_ENDPOINTS = {
   DELETE_SATUAN: (kode) => `${API_URL}/satuan/delete/${kode}`,
   GET_PRODUK_BY_SATUAN: (kode) => `${API_URL}/satuan/${kode}/produk`,
 
+  GET_ALL_TOKO: `${API_URL}/toko`,
+  ADD_TOKO: `${API_URL}/toko/add`,
+  EDIT_TOKO: (id) =>`${API_URL}/toko/edit/${id}`,
+  DELETE_TOKO: (id) => `${API_URL}/toko/delete/${id}`,
+
+
   GETALLPRODUK: `${API_URL}/master-produk`,
   GETPRODUKBYID: (id) => `${API_URL}/master-produk/${id}`,
   ADDPRODUK: `${API_URL}/master-produk/create`,

@@ -102,8 +102,41 @@ const AppMenu = () => {
                     to: '/kode/golonganstock',
                     roles: ['superadmin']
                 },
+                {
+                    label: "Toko",
+                    icon: "pi pi-building",
+                    to: '/kode/toko'
+                },
             ]
         },
+        {
+          label:"Penjualan",
+          items: [
+            {
+             label: "Master",
+             items: [
+                {
+                 label: "Perubahan Harga",
+                 icon: "pi pi-dollar"
+                },
+                {
+                 label: "Stock Toko",   
+                 icon: "pi pi-box"
+                },
+                {
+                 label: "Tambah Stock Toko",
+                 icon: "pi pi-plus"
+                },
+             ]
+             
+            },
+            {
+            label: "Penjualan Toko",
+            icon: "pi pi-wallet"
+            },
+            ]
+        },
+
         {
             label: 'Master',
             icon: 'pi pi-fw pi-sitemap',

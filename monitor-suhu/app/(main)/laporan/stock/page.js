@@ -120,8 +120,8 @@ const LaporanStock = () => {
     <div className="card">
       <h3 className="text-xl font-semibold mb-4">Laporan Sisa Stok</h3>
       <div className="flex items-center gap-3 mb-3">
-        <Button label="Refresh" icon="pi pi-refresh" onClick={fetchData} />
-        <Button label="Preview Laporan" icon="pi pi-eye" onClick={fetchPreview} />
+        <Button label="Refresh" icon="pi pi-refresh" onClick={fetchData}  className='p-button-outlined'/>
+        <Button label="Preview Laporan" icon="pi pi-eye" onClick={fetchPreview} className='p-button-info' />
         <Dropdown
           value={selectedGudang}
           options={listGudang}

@@ -4,10 +4,10 @@ export const API_URL = process.env.API_URL;
 export const API_ENDPOINTS = {
   GET_ALL_USERS: `${API_URL}/users`,
   GET_USER_BY_ID: (id) => `${API_URL}/users/${id}`,
-  ADD_USER: `${API_URL}/users/create`,
+  ADD_USER: `${API_URL}/users/add`,
   EDIT_USER: (id) => `${API_URL}/users/edit/${id}`,
   DELETE_USER: (id) => `${API_URL}/users/delete/${id}`,
-  UPDATE_USER: `${API_URL}/users/update`, // Tambahan untuk update profile
+  UPDATE_USER: `${API_URL}/users/update`,
   CHANGE_PASSWORD: `${API_URL}/users/change-password`,
 
   GET_ALL_RAK: `${API_URL}/rak`,

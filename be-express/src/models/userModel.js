@@ -2,7 +2,7 @@ import { db } from '../core/config/knex.js';
 
 // Ambil semua user (termasuk profile_image)
 export const getAllUsers = () => {
-  return db('users').select('id', 'email', 'username', 'no_hp', 'role', 'profile_image');
+  return db('users').select('id', 'email', 'name', 'role',);
 };
 
 // Cari user berdasarkan email
@@ -10,9 +10,9 @@ export const getUserByEmail = (email) => {
   return db('users').where({ email }).first();
 };
 
-// Cari user berdasarkan username
-export const getUserByUsername = (username) => {
-  return db('users').where({ username }).first();
+// Cari user berdasarkan name
+export const getUserByName = (name) => {
+  return db('users').where({ name }).first();
 };
 
 // Cari user berdasarkan id
@@ -30,11 +30,11 @@ export const addUser = (data) => {
   return db('users').insert(data).returning('*');
 };
 
-// Cari user by email/username
-export const getUserByEmailOrUsername = (emailOrUsername) => {
+// Cari user by email/name
+export const getUserByEmailOrName = (emailOrName) => {
   return db('users')
-    .where({ email: emailOrUsername })
-    .orWhere({ username: emailOrUsername })
+    .where({ email: emailOrName })
+    .orWhere({ name: emailOrName })
     .first();
 };
 
@@ -48,7 +48,7 @@ export const updatePassword = (id, password) => {
 };
 
 export const updateProfile = (id, data) => {
-  const allowedFields = ['username', 'no_hp', 'profile_image'];
+  const allowedFields = ['name'];
   const updateData = {};
 
   allowedFields.forEach((field) => {

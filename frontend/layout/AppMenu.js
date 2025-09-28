@@ -77,106 +77,29 @@ const AppMenu = () => {
         {
             label: 'Home',
             items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', to: '/' }],
-            roles: ['user', 'admin', 'superadmin'],
+            roles: [ 'admin'],
         },
-        {
-            label: 'Kode',
-            icon: 'pi pi-fw pi-sitemap',
-            roles: ['superadmin'],
-            items: [
-                {
-                    label: 'Rak',
-                    icon: 'pi pi-fw pi-database',
-                    to: '/kode/rak',
-                    roles: ['superadmin']
-                },
-                {   
-                    label: 'Satuan Stock', 
-                    icon: 'pi pi-list', 
-                    to: '/kode/satuanstock',
-                    roles: ['superadmin'] 
-                },
-                {
-                    label: 'Golongan Stock',
-                    icon: 'pi pi-fw pi-th-large',
-                    to: '/kode/golonganstock',
-                    roles: ['superadmin']
-                },
-                {
-                    label: "Toko",
-                    icon: "pi pi-building",
-                    to: '/kode/toko'
-                },
-            ]
-        },
-
+      
         {
             label: 'Master',
             icon: 'pi pi-fw pi-sitemap',
-            roles: ['user', 'admin', 'superadmin'],
+            roles: [ 'admin', ],
             items: [
-                {
-                    label: 'Gudang',
-                    icon: 'pi pi-fw pi-building',
-                    to: '/master/gudang',
-                    roles: ['superadmin']
-                },
-                {
-                    label: 'Stock',
-                    icon: 'pi pi-fw pi-box',
-                    to: '/master/stock',
-                    roles: ['user', 'admin', 'superadmin']
-                },
-                {
-                    label: 'Kirim Barang',
-                    icon: 'pi pi-send',
-                    to: '/master/kirim-barang',
-                    roles: ['user', 'admin', 'superadmin']
-                },
-                {
-                    label: 'Terima Barang',
-                    icon: 'pi pi-inbox',
-                    to: '/master/terima-barang',
-                    roles: ['user', 'admin', 'superadmin']
-                },
                 {
                     label: 'Users', 
                     icon: 'pi pi-users',
                     to: '/master/user',
-                    roles: ['superadmin'] 
+                    roles: ['admin'] 
                 },
                 {
                     label : 'Jenis Role',
                     icon : 'pi pi-shield',
                     to : '/master/jenis-role',
-                    roles : ['superadmin']
+                    roles : ['admin']
                 }
             ]
         },
-        {
-            label: 'Laporan',
-            icon: 'pi pi-fw pi-chart-bar',
-            roles: ['user', 'admin', 'superadmin'],
-            items: [
-                {
-                    label: 'Kartu Stock',
-                    icon: 'pi pi-fw pi-sync',
-                    to: '/laporan/kartustock',
-                    roles: ['user', 'admin', 'superadmin']
-                },
-                {
-                    label: "Laporan Sisa Stock",
-                    icon: 'pi pi-shopping-cart',
-                    to: '/laporan/stock'
-
-                },
-                {
-                    label: "Laporan Mutasi Gudang",
-                    icon: "pi pi-truck",
-                    to: "/laporan/mutasi"
-                }
-            ]
-        }
+        
     ];
 
     if (!mounted || loading) {

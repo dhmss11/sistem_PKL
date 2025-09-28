@@ -86,7 +86,7 @@ async function handlePageRoute(request, pathname) {
         const secret = new TextEncoder().encode(process.env.JWT_SECRET);
         const { payload } = await jwtVerify(token, secret);
 
-        console.log('Token valid untuk user:', payload.username, 'Role:', payload.role);
+        console.log('Token valid untuk user:', payload.name || payload.username || payload.nama, 'Role:', payload.role);
         
         const roleAccess = checkRoleAccess(pathname, payload.role);
         if (!roleAccess.allowed) {
@@ -182,8 +182,8 @@ async function handleApiRoute(request, pathname) {
 function checkRoleAccess(pathname, userRole) {
     try {
         const roleRules = {
-            '/master/user': ['superadmin'], 
-            '/master/users': ['superadmin'], 
+            '/master/user': ['admin'], 
+            '/master/users': ['admin'], 
         };
 
         for (const [route, allowedRoles] of Object.entries(roleRules)) {
@@ -210,7 +210,7 @@ function checkApiRoleAccess(pathname, userRole, method) {
         const writeMethods = ['POST', 'PUT', 'PATCH', 'DELETE'];
         
         const apiRoleRules = {
-            'superadmin': { 
+            'admin': { 
                 patterns: [
                     '/api/users',
                     '/api/master/user',

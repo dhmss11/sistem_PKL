@@ -11,10 +11,9 @@ import ToastNotifier from '@/app/components/ToastNotifier';
 export const dynamic = "force-dynamic";
 
 const defaultForm = {
-  username: '',
+  name: '',
   password: '',
   email: '',
-  no_hp: '',
   role: '',
 };
 
@@ -80,10 +79,18 @@ const fetchUser = async () => {
     if (isSubmitting) return;
     setIsSubmitting(true);
 
-    if (!form.username || !form.email || !form.no_hp || !form.role) {
-      toastRef.current?.showToast('99', 'Semua field wajib diisi');
-      setIsSubmitting(false);
-      return;
+    if (dialogMode === 'add') {
+      if (!form.name || !form.email || !form.password || !form.role) {
+        toastRef.current?.showToast('99', 'Semua field wajib diisi');
+        setIsSubmitting(false);
+        return;
+      }
+    } else if (dialogMode === 'edit') {
+      if (!form.name || !form.email || !form.role) {
+        toastRef.current?.showToast('99', 'Name, email, dan role wajib diisi');
+        setIsSubmitting(false);
+        return;
+      }
     }
 
     try {
@@ -97,9 +104,8 @@ const fetchUser = async () => {
         });
       } else if (dialogMode === 'edit' && selectedUser) {
         const payload = {
-          username: form.username,
+          name: form.name,
           email: form.email,
-          no_hp: form.no_hp,
           role: form.role,
         };
 
@@ -138,7 +144,7 @@ const fetchUser = async () => {
   };
 
   const handleDelete = async (user) => {
-    if (!confirm(`Hapus user "${user.username}"?`)) return;
+    if (!confirm(`Hapus user "${user.name}"?`)) return;
 
     try {
       const res = await fetch(`/api/users/${user.id}`, {
@@ -190,14 +196,10 @@ const fetchUser = async () => {
         loading={isLoading}
         scrollable
       >
-
-          <Column field="username" header="Username" filter />
+          <Column field="name" header="name" filter />
           <Column field="email" header="Email" />
-       {/* kalau mau tampilkan, hati-hati sensitif */}
-          <Column field="no_hp" header="No HP" />
           <Column field="role" header="Role" />
-          
-                <Column
+          <Column
           header="Aksi"
           body={(row) => (
             <div className="flex gap-2">
@@ -209,10 +211,9 @@ const fetchUser = async () => {
                   setDialogMode('edit');
                   setSelectedUser(row);
                   setForm({
-                    username: row.username,
+                    name: row.name,
                     email: row.email,
                     password: '',
-                    no_hp: row.no_hp,
                     role: row.role,
                   });
                 }}
@@ -245,11 +246,11 @@ const fetchUser = async () => {
           }}
         >
           <div className="mb-3">
-            <label htmlFor="username">Username</label>
+            <label htmlFor="name">name</label>
             <InputText
-              id="username"
-              name="username"
-              value={form.username}
+              id="name"
+              name="name"
+              value={form.name}
               onChange={handleChange}
               type="text"
               className="w-full mt-3"
@@ -279,23 +280,9 @@ const fetchUser = async () => {
               onChange={handleChange}
               type="password"
               className="w-full mt-3"
-              placeholder='pasword'
+              placeholder='Password'
             />
           </div>
-
-          <div className="mb-3">
-            <label htmlFor="no_hp">Nomor HP</label>
-            <InputText
-              id="no_hp"
-              name="no_hp"
-              value={form.no_hp}
-              onChange={handleChange}
-              type="text"
-              className="w-full mt-3"
-              placeholder="No HP"
-            />
-          </div>
-
           <div className="mb-3">
             <label htmlFor="role">Role</label>
             <Dropdown

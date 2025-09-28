@@ -26,10 +26,9 @@ export async function GET() {
       user: {
         id: decoded.id,
         email: decoded.email,
-        username: decoded.username,
+        name: decoded.name ,
         role: decoded.role,
-        no_hp: decoded.no_hp ,
-        profile_image: decoded.profile_image
+  
       },
     });
   } catch (error) {

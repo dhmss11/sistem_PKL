@@ -3,7 +3,7 @@ import bcrypt from 'bcrypt';
 import jwt, { decode } from 'jsonwebtoken';
 import { 
   getUserByEmail, 
-  getUserByUsername, 
+  getUserByName, 
   addUser, 
   getUserById,
   updateProfile as updateProfileModel,
@@ -14,53 +14,53 @@ import {
 
 const generateToken = (user) => {
   return jwt.sign(
-    { id: user.id, email: user.email, username: user.username, role: user.role, no_hp: user.no_hp},
+    { id: user.id, email: user.email, name: user.name, role: user.role, },
     process.env.JWT_SECRET,
   );
 };
 
 export const register = async (req, res) => {
   try {
-    const { email, username, password, no_hp, role = 'user' } = req.body;
-    
+    const { email, name, password, role = 'user' } = req.body;
+
     console.log('Register request body:', req.body);
-    
-    if (!email || !username || !password) {
-      return res.status(400).json({ 
-        message: 'Email, username dan password wajib diisi',
-        received: { email: !!email, username: !!username, password: !!password }
+
+    if (!email || !name || !password) {
+      return res.status(400).json({
+        message: 'Email, name dan password wajib diisi',
+        received: { email: !!email, name: !!name, password: !!password }
       });
     }
 
     const trimmedEmail = email.trim();
-    const trimmedUsername = username.trim();
+    const trimmedName = name.trim();
 
     const existingUser = await getUserByEmail(trimmedEmail);
     if (existingUser) {
       return res.status(409).json({ message: 'Email sudah terdaftar' });
     }
 
-    const existingUsername = await getUserByUsername(trimmedUsername);
-    if (existingUsername) {
-      return res.status(409).json({ message: 'Username sudah terdaftar' });
+    const existingName = await getUserByName(trimmedName);
+    if (existingName) {
+      return res.status(409).json({ message: 'Name sudah terdaftar' });
     }
 
     const hash = await bcrypt.hash(password, 10);
-    
-    const newUser = await addUser({ 
-      email: trimmedEmail, 
-      username: trimmedUsername,
-      password: hash, 
-      no_hp: no_hp || null,
+
+    const newUser = await addUser({
+      email: trimmedEmail,
+      name: trimmedName,
+      password: hash,
+
       role
     });
 
-    res.status(201).json({ 
+    res.status(201).json({
       message: 'Registrasi berhasil',
-      user: { 
-        id: newUser[0].id, 
-        email: newUser[0].email, 
-        username: newUser[0].username,
+      user: {
+        id: newUser[0].id,
+        email: newUser[0].email,
+        name: newUser[0].name,
         role: newUser[0].role
       }
     });
@@ -72,59 +72,59 @@ export const register = async (req, res) => {
 
 export const login = async (req, res) => {
   try {
-    const { emailOrUsername, password, email, username } = req.body;
-    
+    const { emailOrUsername, password } = req.body;
+
     console.log('Login request body:', JSON.stringify(req.body, null, 2));
-    
-    const loginIdentifier = emailOrUsername || email || username;
-    
-    if (!loginIdentifier || !password) {
-      return res.status(400).json({ 
+
+    if (!emailOrUsername || !password) {
+      return res.status(400).json({
         message: 'Email/Username dan password wajib diisi',
         debug: {
           received_fields: Object.keys(req.body),
           received_values: {
             emailOrUsername: emailOrUsername || 'not provided',
-            email: email || 'not provided', 
-            username: username || 'not provided',
             password: password ? 'provided' : 'not provided'
           }
         }
       });
     }
 
-    const trimmedIdentifier = loginIdentifier.trim();
+    const trimmedIdentifier = emailOrUsername.trim();
 
     let user;
     if (trimmedIdentifier.includes('@')) {
       user = await getUserByEmail(trimmedIdentifier);
     } else {
-      user = await getUserByUsername(trimmedIdentifier);
+      user = await getUserByName(trimmedIdentifier);
     }
 
     if (!user) {
-      return res.status(401).json({ message: 'Email/Username atau Password Salah' });
+      return res.status(401).json({ message: 'Email/Name atau Password Salah' });
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      return res.status(401).json({ message: 'Email/Username atau Password Salah' });
+      return res.status(401).json({ message: 'Email/Name atau Password Salah' });
     }
 
     const token = generateToken(user);
 
-    res.json({ 
-      message: 'Login Sukses', 
-      user: { 
-        id: user.id, 
-        email: user.email, 
-        username: user.username,
-        role: user.role,
-        no_hp: user.no_hp,
-        profile_image: user.profile_image
-      },
-      token: token 
-    });
+    res
+      .cookie('token', token, {
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production',
+      })
+      .json({
+        message: 'Login Sukses',
+        user: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          role: user.role,
+        },
+        token,
+      });
   } catch (err) {
     console.error('Login error:', err);
     res.status(500).json({ message: 'Error Server', error: err.message });
@@ -156,10 +156,9 @@ export const verify = async (req, res) => {
       user: {
         id: decoded.id,
         email: decoded.email,
-        username: decoded.username,
+        name: decoded.name ,
         role: decoded.role,
-        no_hp: decoded.no_hp,
-        profile_image: decoded.profile_image
+       
       },
     });
   } catch (error) {
@@ -172,21 +171,21 @@ export const verify = async (req, res) => {
 
 export const updateProfile = async (req, res) => {
   try {
-    const { username, no_hp, profile_image } = req.body;
+    const { name, } = req.body;
     const userId = req.user.id;
 
-    if (!username) {
-      return res.status(400).json({ message: 'Username wajib diisi' });
+    if (!name) {
+      return res.status(400).json({ message: 'Name wajib diisi' });
     }
 
-    const trimmedUsername = username.trim();
+    const trimmedName = name.trim();
 
-    const existingUser = await getUserByUsername(trimmedUsername);
+    const existingUser = await getUserByName(trimmedName);
     if (existingUser && existingUser.id !== userId) {
-      return res.status(409).json({ message: 'Username sudah digunakan' });
+      return res.status(409).json({ message: 'Name sudah digunakan' });
     }
 
-    const updateData = { username: trimmedUsername };
+    const updateData = { name: trimmedName };
     if (no_hp !== undefined) {
       updateData.no_hp = no_hp;
     }
@@ -203,10 +202,9 @@ export const updateProfile = async (req, res) => {
       user: {
         id: updatedUser.id,
         email: updatedUser.email,
-        username: updatedUser.username,
-        no_hp: updatedUser.no_hp,
+        name: updatedUser.name,
         role: updatedUser.role,
-        profile_image: updateData.profile_image
+      
       }
     });
   } catch (err) {

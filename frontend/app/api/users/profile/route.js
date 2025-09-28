@@ -38,11 +38,6 @@ const isValidEmail = (email) => {
   return emailRegex.test(email);
 };
 
-const isValidPhone = (phone) => {
-  const phoneRegex = /^(\+62|62|0)[0-9]{9,13}$/;
-  return phoneRegex.test(phone);
-};
-
 export const GET = async (request) => {
   try {
     const { userId, error } = await getUserIdFromCookie();
@@ -99,7 +94,7 @@ export const PUT = async (req) => {
     }
 
     const body = await req.json();
-    const { username, email, no_hp, role, profile_image } = body;
+    const { username, email, role, } = body;
 
     if (!username || !email) {
       return NextResponse.json({

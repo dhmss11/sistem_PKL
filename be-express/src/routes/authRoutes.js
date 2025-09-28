@@ -19,7 +19,6 @@ router.get('/profile', authMiddleware, (req, res) => {
 
 router.put('/profile', authMiddleware, authController.updateProfile);
 router.put('/change-password', authMiddleware, authController.changePassword);
-
 router.get('/users', authMiddleware, roleMiddleware(['admin']), authController.getAllUsers);
 router.delete('/users/:id', authMiddleware, roleMiddleware(['admin']), authController.deleteUser);
 

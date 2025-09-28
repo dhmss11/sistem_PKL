@@ -1,7 +1,7 @@
 import React from 'react';
 
 export const metadata = {
-    title: 'Auth | Monitor Suhu',
+    title: 'Auth | Sistem Magang',
     description: 'Silahkan login terlebih dahulu'
 };
 

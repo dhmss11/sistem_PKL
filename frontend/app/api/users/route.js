@@ -18,9 +18,9 @@ export const GET = async () => {
 export const POST = async (req) => {
   try {
     const body = await req.json();
-    const { username, password, email, no_hp, role } = body;
+    const { name, password, email, role } = body;
 
-    if (!username || !password || !email || !no_hp || !role) {
+    if (!name || !password || !email || !role) {
       return NextResponse.json(
         {
           status: '99',

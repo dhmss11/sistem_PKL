@@ -37,7 +37,6 @@ const Dashboard = () => {
     const [totalStockColumns, setTotalStockColumns] = useState(null);
     const [totalGudangColumns, setTotalGudangColumns] = useState(null);
     const toast = useRef(null);
-    
     const { user, loading, initialized, logout } = useAuth(); 
     
 
@@ -137,7 +136,7 @@ const Dashboard = () => {
                     <small className="text-500">
                         Initialized: {initialized ? 'Yes' : 'No'} | 
                         Loading: {loading ? 'Yes' : 'No'} | 
-                        User: {user?.username || 'None'}
+                        Name: {user?.name || 'None'}
                     </small>
                 </div>
             </div>
@@ -163,7 +162,7 @@ const Dashboard = () => {
                 <div className="card">
                     <div className="flex justify-content-between align-items-center">
                         <div>
-                            <h5>Selamat datang, {user.username}!</h5>
+                            <h5>Selamat datang, {user.name}!</h5>
                         </div>
                     </div>
                         

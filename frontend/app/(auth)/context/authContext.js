@@ -85,7 +85,7 @@ export const AuthProvider = ({ children }) => {
 
             if (response.ok) {
                 const data = await response.json();
-                console.log('AuthContext: Login successful', data.user?.username);
+                console.log('AuthContext: Login successful', data.user?.name);
                 setUser(data.user);
                 return { success: true, user: data.user };
             } else {
@@ -110,10 +110,10 @@ export const AuthProvider = ({ children }) => {
 
     useEffect(() => {
         console.log(' AuthContext state:', {
-            hasUser: !!user,
+          hasUser: !!user,
             loading,
             initialized,
-            username: user?.username
+            user: user?.name
         });
     }, [user, loading, initialized]);
 

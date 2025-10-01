@@ -7,25 +7,10 @@ import dotenv from 'dotenv';
 import { setResponseHeader } from './middleware/set-headers.js';
 import usersRoutes from './routes/usersRoutes.js';
 import authRoutes from './routes/authRoutes.js';
-import masterProdukRouters from './routes/masterProdukRoutes.js';
-import masterGudang from './routes/masterGudang.js';
-import stockRoutes from './routes/stockRoutes.js';
-import satuanStockRoutes from './routes/satuanStockRoutes.js';
-import rakRoutes from './routes/rakRoutes.js';
-import kartuStockRoutes from './routes/kartuStockRoutes.js';
-import golonganstock from './routes/golonganstock.js';
-import jenisGudangRoutes from './routes/jenisGudangRoutes.js';
-import kirimBarang from './routes/kirimBarangRoutes.js';
-import terimaBarang from './routes/terimaBarangRoutes.js';
-import mutasiGudangRoutes from "./routes/mutasiGudangRoutes.js";
-import jenisRoleRoutes from './routes/jenisRoleRoute.js'; 
-import laporanRoutes from './routes/laporanRoutes.js';
-import tokoRoutes from './routes/tokoRoutes.js';
 import dudiRoutes from './routes/dudiRoutes.js';
 
 dotenv.config();
 
-import { addJenisGudang } from './controllers/jenisGudangController.js';
 
 dotenv.config();
 
@@ -72,23 +57,6 @@ app.use((req, res, next) => {
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', usersRoutes);
-app.use('/api/master-produk', masterProdukRouters);
-app.use('/api/nama-gudang', masterGudang);
-app.use('/api/stock', stockRoutes);
-app.use('/api/rak', rakRoutes);
-app.use('/api/satuan', satuanStockRoutes);
-app.use('/api/kartustock', kartuStockRoutes);
-app.use('/api/golonganstock',golonganstock);
-app.use('/api/jenis-gudang',jenisGudangRoutes);
-app.use('/api/kirimbarang', kirimBarang)
-app.use('/api/terimabarang', terimaBarang)
-app.use('/api/jenis-role', jenisRoleRoutes);
-app.use('/api/golonganstock', golonganstock);
-app.use('/api/kirimbarang', kirimBarang);
-app.use('/api/terimabarang', terimaBarang);
-app.use("/api/mutasi", mutasiGudangRoutes);
-app.use("/api/laporan", laporanRoutes);
-app.use("/api/toko", tokoRoutes);
 app.use("/api/dudi", dudiRoutes);
 
 app.get('/', [setResponseHeader], (req, res) => {

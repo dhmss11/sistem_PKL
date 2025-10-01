@@ -86,6 +86,13 @@ const AppMenu = () => {
             roles: [ 'admin', ],
             items: [
                 {
+                    label: 'DUDI',
+                    icon: 'pi pi-home',
+                    to: '/master/dudi',
+                    roles: ['admin']
+
+                },
+                {
                     label: 'Users', 
                     icon: 'pi pi-users',
                     to: '/master/user',
@@ -95,6 +102,12 @@ const AppMenu = () => {
                     label : 'Jenis Role',
                     icon : 'pi pi-shield',
                     to : '/master/jenis-role',
+                    roles : ['admin']
+                },
+                {
+                    label : 'pengaturan',
+                    icon : 'pi pi-cog',
+                    to : '/master/pengaturan',
                     roles : ['admin']
                 }
             ]

@@ -21,9 +21,9 @@ const AppTopbar = forwardRef((props, ref) => {
             <Link href="/" className="layout-topbar-logo flex items-center gap-2">
                 <img src="/layout/images/cnc.png" width="47.22px" height="35px" alt="logo" />
                 <div className="leading-tight">
-                    <div className="text-lg font-semibold">PERGUDANGAN</div>
-                    <div className="text-sm text-gray-500 uppercase">SAKTI</div>
-                    <div className="text-sm text-blue-500 uppercase">MULTIUSAHA</div>
+                    <div className="text-lg font-semibold">SISTEM</div>
+                    <div className="text-sm text-gray-500 uppercase">MONITORING</div>
+                    <div className="text-sm text-blue-500 uppercase">MAGANG</div>
                 </div>
             </Link>
 

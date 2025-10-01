@@ -133,5 +133,13 @@ export const API_ENDPOINTS = {
     GET_LAPORAN_SISASTOCK: `${API_URL}/laporan/stock`,
     GET_LAPORAN_MUTASI: `${API_URL}/laporan/mutasi`,
     
+
+  GET_ALL_DUDI: `${API_URL}/dudi`,
+  GET_DUDI_BY_ID: (id) => `${API_URL}/dudi/${id}`,
+  ADD_DUDI: `${API_URL}/dudi/create`,
+  EDIT_DUDI: (id) => `${API_URL}/dudi/edit/${id}`,
+  DELETE_DUDI: (id) => `${API_URL}/dudi/delete/${id}`,
+  DUDI_STATS: `${API_URL}/dudi/stats`,
+
   };
 

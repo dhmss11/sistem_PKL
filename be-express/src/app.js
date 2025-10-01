@@ -21,7 +21,7 @@ import mutasiGudangRoutes from "./routes/mutasiGudangRoutes.js";
 import jenisRoleRoutes from './routes/jenisRoleRoute.js'; 
 import laporanRoutes from './routes/laporanRoutes.js';
 import tokoRoutes from './routes/tokoRoutes.js';
-
+import dudiRoutes from './routes/dudiRoutes.js';
 
 dotenv.config();
 
@@ -89,6 +89,7 @@ app.use('/api/terimabarang', terimaBarang);
 app.use("/api/mutasi", mutasiGudangRoutes);
 app.use("/api/laporan", laporanRoutes);
 app.use("/api/toko", tokoRoutes);
+app.use("/api/dudi", dudiRoutes);
 
 app.get('/', [setResponseHeader], (req, res) => {
   return res.status(200).json({

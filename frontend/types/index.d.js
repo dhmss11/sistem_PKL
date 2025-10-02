@@ -1,5 +1,7 @@
-import React, { ReactNode } from 'react';
-import {
+// Type definitions for the application
+// This file contains type exports for TypeScript usage
+
+export {
     Page,
     AppBreadcrumbProps,
     Breadcrumb,
@@ -10,7 +12,6 @@ import {
     LayoutConfig,
     LayoutState,
     AppBreadcrumbState,
-    Breadcrumb,
     LayoutContextProps,
     MailContextProps,
     MenuContextProps,
@@ -23,32 +24,8 @@ import {
     AppMenuItemProps,
     AppMenuItem
 } from './layout';
-import { Demo, LayoutType, SortOrderType, CustomEvent, ChartDataState, ChartOptionsState, AppMailSidebarItem, AppMailReplyProps, AppMailProps } from './demo.d';
 
-type ChildContainerProps = {
-    children: ReactNode;
-};
-
-export type {
-    Page,
-    AppBreadcrumbProps,
-    Breadcrumb,
-    BreadcrumbItem,
-    MenuProps,
-    MenuModel,
-    LayoutConfig,
-    LayoutState,
-    Breadcrumb,
-    LayoutContextProps,
-    MailContextProps,
-    MenuContextProps,
-    ChatContextProps,
-    TaskContextProps,
-    AppConfigProps,
-    NodeRef,
-    AppTopbarRef,
-    AppMenuItemProps,
-    ChildContainerProps,
+export {
     Demo,
     LayoutType,
     SortOrderType,
@@ -57,6 +34,10 @@ export type {
     ChartOptionsState,
     AppMailSidebarItem,
     AppMailReplyProps,
-    AppMailProps,
-    AppMenuItem
+    AppMailProps
+} from './demo.d';
+
+// Child container props type
+export const ChildContainerProps = {
+    children: null // ReactNode placeholder
 };

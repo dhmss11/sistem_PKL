@@ -141,5 +141,10 @@ export const API_ENDPOINTS = {
   DELETE_DUDI: (id) => `${API_URL}/dudi/delete/${id}`,
   DUDI_STATS: `${API_URL}/dudi/stats`,
 
+  // School Settings
+  GET_SCHOOL_SETTINGS: `${API_URL}/school/settings`,
+  UPDATE_SCHOOL_SETTINGS: `${API_URL}/school/settings`,
+  UPLOAD_SCHOOL_LOGO: `${API_URL}/school/upload-logo`,
+
   };
 

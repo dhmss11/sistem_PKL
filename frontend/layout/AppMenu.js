@@ -105,9 +105,9 @@ const AppMenu = () => {
                     roles : ['admin']
                 },
                 {
-                    label : 'pengaturan',
+                    label : 'Pengaturan Sekolah',
                     icon : 'pi pi-cog',
-                    to : '/master/pengaturan',
+                    to : '/master/pengaturan-sekolah',
                     roles : ['admin']
                 }
             ]

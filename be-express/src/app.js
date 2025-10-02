@@ -8,6 +8,7 @@ import { setResponseHeader } from './middleware/set-headers.js';
 import usersRoutes from './routes/usersRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import dudiRoutes from './routes/dudiRoutes.js';
+import schoolRoutes from './routes/schoolRoutes.js';
 
 dotenv.config();
 
@@ -58,6 +59,7 @@ app.use((req, res, next) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/users', usersRoutes);
 app.use("/api/dudi", dudiRoutes);
+app.use("/api/school", schoolRoutes);
 
 app.get('/', [setResponseHeader], (req, res) => {
   return res.status(200).json({

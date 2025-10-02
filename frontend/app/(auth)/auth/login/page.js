@@ -18,7 +18,6 @@ const LoginPage = () => {
   const router = useRouter();
   const { user, checkAuth } = useAuth();
 
-  // Reset form setiap kali halaman render pertama kali
   useEffect(() => {
     setEmailOrUsername('');
     setPassword('');

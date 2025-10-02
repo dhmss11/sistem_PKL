@@ -63,12 +63,6 @@ const AppTopbar = forwardRef((props, ref) => {
                     </button>
                 </Link>
                 
-                <Link href="/documentation">
-                    <button type="button" className="p-link layout-topbar-button">
-                        <i className="pi pi-cog"></i>
-                        <span>Settings</span>
-                    </button>
-                </Link>
             </div>
         </div>
     );

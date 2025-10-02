@@ -116,19 +116,19 @@ const fetchDashboardSummary = async () => {
             <div className="flex flex-wrap gap-4 mb-6">
                 <div className="flex-1 min-w-[200px] p-4 rounded-2xl shadow bg-white">
                     <p className="text-gray-500">Total DUDI</p>
-                    <h3 className="text-2xl font-bold">{summary.total}</h3>
+                    <h3 className="text-2xl font-bold">20</h3>
                 </div>
                 <div className="flex-1 min-w-[200px] p-4 rounded-2xl shadow bg-white">
                     <p className="text-gray-500">DUDI Aktif</p>
-                    <h3 className="text-2xl font-bold text-green-600">{summary.aktif}</h3>
+                    <h3 className="text-2xl font-bold text-green-600">15</h3>
                 </div>
                 <div className="flex-1 min-w-[200px] p-4 rounded-2xl shadow bg-white">
                     <p className="text-gray-500">DUDI Tidak Aktif</p>
-                    <h3 className="text-2xl font-bold text-red-500">{summary.tidak}</h3>
+                    <h3 className="text-2xl font-bold text-red-500">5</h3>
                 </div>
                 <div className="flex-1 min-w-[200px] p-4 rounded-2xl shadow bg-white">
                     <p className="text-gray-500">Total Siswa Magang</p>
-                    <h3 className="text-2xl font-bold text-blue-600">{summary.siswa}</h3>
+                    <h3 className="text-2xl font-bold text-blue-600">120</h3>
                 </div>
             </div>
 

@@ -10,6 +10,7 @@ import AppTopbar from './AppTopbar';
 import { LayoutContext } from './context/layoutcontext';
 import { PrimeReactContext } from 'primereact/api';
 import { usePathname } from 'next/navigation';
+import { SchoolProvider } from '../app/context/schoolContext';
 
 const Layout = ({ children }) => {
     const { layoutConfig, layoutState, setLayoutState } = useContext(LayoutContext);
@@ -127,18 +128,20 @@ const Layout = ({ children }) => {
 
     return (
         <React.Fragment>
-            <div className={containerClass}>
-                <AppTopbar ref={topbarRef} />
-                <div ref={sidebarRef} className="layout-sidebar">
-                    <AppSidebar />
+            <SchoolProvider>
+                <div className={containerClass}>
+                    <AppTopbar ref={topbarRef} />
+                    <div ref={sidebarRef} className="layout-sidebar">
+                        <AppSidebar />
+                    </div>
+                    <div className="layout-main-container">
+                        <div className="layout-main">{children}</div>
+                        <AppFooter />
+                    </div>
+                    {/* <AppConfig /> */}
+                    <div className="layout-mask"></div>
                 </div>
-                <div className="layout-main-container">
-                    <div className="layout-main">{children}</div>
-                    <AppFooter />
-                </div>
-                {/* <AppConfig /> */}
-                <div className="layout-mask"></div>
-            </div>
+            </SchoolProvider>
         </React.Fragment>
     );
 };

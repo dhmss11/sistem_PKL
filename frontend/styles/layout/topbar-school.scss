@@ -1,0 +1,37 @@
+// School name display in topbar
+.layout-topbar-school-name {
+    margin-left: auto;
+    margin-right: 1rem;
+    padding: 0.5rem 1rem;
+    
+    @media (max-width: 768px) {
+        display: none !important;
+    }
+    
+    .text-base {
+        font-size: 1rem;
+        line-height: 1.25;
+        max-width: 300px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    
+    .text-xs {
+        font-size: 0.75rem;
+        line-height: 1;
+    }
+}
+
+// Responsive adjustments
+@media (max-width: 1024px) {
+    .layout-topbar-school-name .text-base {
+        max-width: 200px;
+    }
+}
+
+@media (max-width: 768px) {
+    .layout-topbar-school-name {
+        display: none;
+    }
+}

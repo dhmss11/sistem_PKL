@@ -3,9 +3,11 @@ import Link from 'next/link';
 import { classNames } from 'primereact/utils';
 import React, { forwardRef, useContext, useImperativeHandle, useRef } from 'react';
 import { LayoutContext } from './context/layoutcontext';
+import { useSchool } from '../app/context/schoolContext';
 
 const AppTopbar = forwardRef((props, ref) => {
     const { layoutConfig, layoutState, onMenuToggle, showProfileSidebar } = useContext(LayoutContext);
+    const { schoolSettings, loading } = useSchool();
     const menubuttonRef = useRef(null);
     const topbarmenuRef = useRef(null);
     const topbarmenubuttonRef = useRef(null);
@@ -19,13 +21,31 @@ const AppTopbar = forwardRef((props, ref) => {
     return (
         <div className="layout-topbar">
             <Link href="/" className="layout-topbar-logo flex items-center gap-2">
-                <img src="/layout/images/cnc.png" width="47.22px" height="35px" alt="logo" />
+                {schoolSettings.school_logo_url ? (
+                    <img src={schoolSettings.school_logo_url} width="47.22px" height="35px" alt="logo" />
+                ) : (
+                    <img src="/layout/images/cnc.png" width="47.22px" height="35px" alt="logo" />
+                )}
                 <div className="leading-tight">
-                    <div className="text-lg font-semibold">SISTEM</div>
+                    <div className="text-lg font-semibold">
+                        {loading ? 'SISTEM' : (schoolSettings.school_abbreviation || 'SISTEM')}
+                    </div>
                     <div className="text-sm text-gray-500 uppercase">MONITORING</div>
                     <div className="text-sm text-blue-500 uppercase">MAGANG</div>
                 </div>
             </Link>
+
+            {/* School Name Display */}
+            <div className="layout-topbar-school-name hidden md:flex items-center">
+                <div className="text-right">
+                    <div className="text-base font-semibold text-gray-800">
+                        {loading ? 'Loading...' : (schoolSettings.school_name || 'Sistem Monitoring Magang')}
+                    </div>
+                    <div className="text-xs text-gray-500">
+                        Sistem Informasi Magang
+                    </div>
+                </div>
+            </div>
 
             <button 
                 ref={menubuttonRef} 

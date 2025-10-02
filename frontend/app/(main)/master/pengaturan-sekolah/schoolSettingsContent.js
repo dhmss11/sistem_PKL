@@ -10,6 +10,7 @@ import { FileUpload } from 'primereact/fileupload';
 import { Image } from 'primereact/image';
 import { Panel } from 'primereact/panel';
 import ToastNotifier from '@/app/components/ToastNotifier';
+import { useSchool } from '@/app/context/schoolContext';
 
 export const dynamic = "force-dynamic";
 
@@ -28,6 +29,7 @@ const defaultForm = {
 const SchoolSettingsContent = () => {
   const toastRef = useRef(null);
   const fileUploadRef = useRef(null);
+  const { updateSchoolSettings } = useSchool();
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -95,6 +97,10 @@ const SchoolSettingsContent = () => {
         toastRef.current?.showToast('00', json.message || 'Pengaturan sekolah berhasil diperbarui');
         setOriginalData(form);
         setIsEditing(false);
+        
+        // Update global school context
+        updateSchoolSettings(form);
+        
         await fetchSchoolSettings();
       } else if (res.status === 401) {
         toastRef.current?.showToast('99', 'Sesi Anda telah berakhir. Silakan login kembali.');

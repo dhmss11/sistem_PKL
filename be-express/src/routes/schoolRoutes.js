@@ -4,18 +4,14 @@ import {
   updateSchoolSettings, 
   uploadSchoolLogo 
 } from '../controllers/schoolController.js';
-import { authenticate } from '../middleware/authMiddleware.js';
-import { adminOnly } from '../middleware/roleMiddleware.js';
+
 
 const router = express.Router();
 
-// Get school settings (accessible to all authenticated users)
-router.get('/settings', authenticate, getSchoolSettings);
+router.get('/settings', getSchoolSettings);
 
-// Update school settings (admin only)
-router.put('/settings', authenticate, adminOnly, updateSchoolSettings);
+router.put('/settings', updateSchoolSettings);
 
-// Upload school logo (admin only)
-router.post('/upload-logo', authenticate, adminOnly, uploadSchoolLogo);
+router.post('/upload-logo', uploadSchoolLogo);
 
 export default router;
